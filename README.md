@@ -86,29 +86,29 @@ end
 
 subgraph Authenticate_Interlock_Access_NFT
 
-profferwallet(proffer wallet at UI) --- isauthenticating(is wallet currently<br>authenticating NFT?)
-isauthenticating --- |yes|stillneedsxfr(notify holder still needs<br>to transfer micropayment)
-isauthenticating --- |no|checknft(check for non authenticated<br>NFT in holder's collection)
-checknft --- ispresent(is non authenticated<br>NFT present?)
-ispresent --- |yes| sendholdermicropayment(send micropayment<br>to holder's wallet and enter<br>micropayment amount indatabase)
-ispresent --- |no|nonft(nft not present or<br>already authenticated)
-nonft --- authforotherwallet(is NFT authenticated<br>for different wallet?)
-authforotherwallet --- |yes|revokeaccess(revoke access<br>of previous owner)
-authforotherwallet --- |no|needtobuy(wallet holder needs to<br>purchase an access NFT)
-revokeaccess --- sendholdermicropayment
-stillneedsxfr --- awaitxfr(await micropayment return<br>transfer from wallet holder)
-sendholdermicropayment --- awaitxfr
-awaitxfr --- receivedmicropayment(received micropayment<br>transfer?)
-receivedmicropayment --- |no| timedout(timedout waiting for<br>micropayment transfer)
-timedout -.- databasekeepstrackofwallet(database keeps<br>track of wallet)
-receivedmicropayment --- |yes| micropaymentauthenticationcomplete(micropayment authentication<br>complete)
-micropaymentauthenticationcomplete --- setauthenticated(execute set_authenticated<br>isauthenticated=TRUE)
-setauthenticated --- clearauthenticatingstatus(wallet is not longer<br>authenticating)
-clearauthenticatingstatus --- grantaccess(grant access designated<br>by the access NFT)
+profferwallet(proffer wallet at UI) --> isauthenticating(is wallet currently<br>authenticating NFT?)
+isauthenticating --> |yes|stillneedsxfr(notify holder still needs<br>to transfer micropayment)
+isauthenticating --> |no|checknft(check for non authenticated<br>NFT in holder's collection)
+checknft --> ispresent(is non authenticated<br>NFT present?)
+ispresent --> |yes| sendholdermicropayment(send micropayment<br>to holder's wallet and enter<br>micropayment amount indatabase)
+ispresent --> |no|nonft(nft not present or<br>already authenticated)
+nonft --> authforotherwallet(is NFT authenticated<br>for different wallet?)
+authforotherwallet --> |yes|revokeaccess(revoke access<br>of previous owner)
+authforotherwallet --> |no|needtobuy(wallet holder needs to<br>purchase an access NFT)
+revokeaccess --> sendholdermicropayment
+stillneedsxfr --> awaitxfr(await micropayment return<br>transfer from wallet holder)
+sendholdermicropayment --> awaitxfr
+awaitxfr --> receivedmicropayment(received micropayment<br>transfer?)
+receivedmicropayment --> |no| timedout(timedout waiting for<br>micropayment transfer)
+timedout -.-> databasekeepstrackofwallet(database keeps<br>track of wallet)
+receivedmicropayment --> |yes| micropaymentauthenticationcomplete(micropayment authentication<br>complete)
+micropaymentauthenticationcomplete --> setauthenticated(execute set_authenticated<br>isauthenticated=TRUE)
+setauthenticated --> clearauthenticatingstatus(wallet is not longer<br>authenticating)
+clearauthenticatingstatus --> grantaccess(grant access designated<br>by the access NFT)
 
-transfernft(on NFT transfer or sale) --- setnotauthenticated(isauthenticated=FALSE)
-setnotauthenticated --- reauthenticate(repeat authentication<br>process)
-reauthenticate -...- accessexpiration(on transfer, access expires<br>when NFT is reauthenticated)
+transfernft(on NFT transfer or sale) --> setnotauthenticated(isauthenticated=FALSE)
+setnotauthenticated --> reauthenticate(repeat authentication<br>process)
+reauthenticate -...-> accessexpiration(on transfer, access expires<br>when NFT is reauthenticated)
 end
 
 style profferwallet fill:#490ec7,stroke:#490ec7,stroke-width:4px,color:#fff
