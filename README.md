@@ -5,6 +5,19 @@
 
 The Interlock Access NFT is a scheme for licensing and managing access permissions via ownership of a novel NFT. This project is sponsored by the [Aleph Zero](https://alephzero.org) Grant Program and is intended to provide this licensing/access scheme as a general framework to the Aleph Zero community at large. The NFT used in this project is compatible with the [Art Zero](https://artzero.io) marketplace.
 
+## In this repository
+
+You will find the following:
+1) modified ink!4 openbrush3 PSP34 access NFT contract
+2) suite of node.js authentication scripts
+3) basic script integration into a SQLite database
+
+As this is a _general_ framework, it will be up to you to create your own UI frontend. To see a bare bones implmentation, visit the `CLIdemo` directory. Interlock Network will add additional UI implementations as we go on implmenting various forms of this Interlock Access NFT in our own work.
+
+## Getting started
+
+Visit the [CLIdemo](./CLIdemo) directory to jump straight to tinkering with the barebones access NFT scheme implementation.
+
 ## How it works
 
 A standard PSP34 NFT smart contract is repurposed by reimplementing the `transfer` method, adding the `set_authorized` and `set_not_authorized` methods, and creating a new storage space and method for tracking the _collection_ held by a particular wallet holder (`access_collection`)
@@ -34,17 +47,3 @@ If at any point an NFT holder wishes to sell or transfer their access NFT to a d
 Because the access NFT uses attributes to track authentication status, the `set_authenticated` and `set_not_authenticated` may seem redundant. These are deliberately included for logic injection points for access management that may otherwise be inappropriate for the `set_attribute` method. The contract is fully upgradable via the `set_code_hash` ink! method.
 
 Finally, the `access_collection` feature is added to make bringing up a wallet holder's collection and iterating over those NFTs easier.
-
-## In this repository
-
-You will find the following:
-1) modified ink!4 openbrush3 PSP34 access NFT contract
-2) suite of node.js authentication scripts
-3) basic script integration into a SQLite database
-
-As this is a _general_ framework, it will be up to you to create your own UI frontend. To see a bare bones implmentation, visit the `CLIdemo` directory. Interlock Network will add additional UI implementations as we go on implmenting various forms of this Interlock Access NFT in our own work.
-
-## Getting started
-
-Visit the [CLIdemo](./CLIdemo) directory to get started tinkering with the barebones access NFT scheme implementation.
-
