@@ -9,6 +9,10 @@ As this is an ink!4 smart contract, we must do a couple things to get set up pro
 <br>
 <br>
 
+# Setup
+
+## cargo
+
 If you haven't already, instally `cargo-dylint`:
 ```
 cargo install cargo-dylint dylint-link
@@ -18,7 +22,40 @@ Then, even if you have the cargo nightly tool chain installed for ink!3, you wil
 cargo install cargo-contract --version 2.0.0-beta
 ```
 
-Now that we are set up for compiling our smartcontract, let's get set up for `node.js`.
+## database
+
+#### For Ubuntu-style OS:
+```
+sudo apt update
+sudo apt install sqlite3
+```
+
+#### Verify install:
+```
+sqlite --version
+```
+
+#### Create database:
+```
+sqlite3 access.db
+```
+
+When the SQL prompt appears create new table:
+```
+CREATE TABLE access(nftid integer, wallet text, authamount integer, waiting integer)
+```
+
+## node.js
+
+#### Database:
+```
+npm install sqlite3
+```
+#### Polkadot:
+```
+npm install @polkadot/api
+npm install @polkadot/api-contract
+```
 
 .
 
