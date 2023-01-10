@@ -35,14 +35,15 @@ sudo apt install sqlite3
 sqlite --version
 ```
 
-#### Create database:
+#### Create database in memory:
 ```
 sqlite3 access.db
 ```
 
-When the SQL prompt appears create new table:
+When the `sqlite>` prompt appears create new table and initialize with empty query:
 ```
 CREATE TABLE access(nftid integer, wallet text, authamount integer, waiting integer)
+;
 ```
 
 ## node.js
