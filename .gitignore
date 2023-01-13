@@ -1,0 +1,38 @@
+# ignore stuff
+
+build
+node_modules
+.idea
+.arcconfig
+*.iml
+bin
+*.bin
+*.abi
+/mutagen.sh
+venv
+.env
+.mnemonic*
+bigtable-admin.json
+bigtable-writer.json
+*.db
+
+
+# rust stuff
+target
+*.lock
+
+# misc stuff
+migrations
+build
+test
+truffle-config.js
+test-ledger
+~\$*
+*.swp
+*.swo
+*.swn
+*.swm
+.vscode/*
+
+# system stuff
+.DS_STORE
