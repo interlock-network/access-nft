@@ -57,7 +57,12 @@ npm install sqlite3
 npm install @polkadot/api
 npm install @polkadot/api-contract
 ```
-
+#### Other:
+```
+npm install node-ipc
+npm install path
+npm install child_process
+```
 .
 
 .

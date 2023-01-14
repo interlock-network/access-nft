@@ -15,6 +15,7 @@ venv
 bigtable-admin.json
 bigtable-writer.json
 *.db
+package*
 
 
 # rust stuff
