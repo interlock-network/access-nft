@@ -6,14 +6,15 @@
 // imports
 const { ApiPromise, WsProvider, Keyring } = require('@polkadot/api');
 const { ContractPromise, CodePromise } = require('@polkadot/api-contract');
+const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const fork = require('child_process').fork;
+require('dotenv').config();
 
 // constants
 const access_metadata = require('./access_metadata.json');
-const access_contract = '5EVdCVKBs3X3NHd33f6KZkmpkw2qeKqMHUVjzdD7me5m2JCS';
-const OWNER_MNEMONIC = require('./.mnemonic.json');
-const OWNER_mnemonic = OWNER_MNEMONIC.mnemonic;
+const access_contract = process.env.CONTRACT_ADDRESS;
+const OWNER_mnemonic = process.env.OWNER_MNEMONIC;
 const TRUE = '0x74727565';
 const FALSE = '0x66616c7365';
 const ISAUTHENTICATED = '0x697361757468656e74696361746564';
@@ -22,6 +23,7 @@ async function main(message) {
 
   try {
     // setup session
+		let database = new sqlite3.Database('./access.db');
     const wsProvider = new WsProvider('wss://ws.test.azero.dev');
     const keyring = new Keyring({type: 'sr25519'});
     const api = await ApiPromise.create({ provider: wsProvider });
@@ -55,7 +57,8 @@ async function main(message) {
 
       // not nfts to authenticate
       if (notAuthenticated == false) {
-        process.send('nfts already authenticated')
+        process.send('all nfts already authenticated')
+				database.close();
         process.exit();
 
       // or authenticate one of the unauthenticated nfts
@@ -67,7 +70,7 @@ async function main(message) {
         listenChild.send({amount: message.amount, wallet: message.wallet});
         listenChild.on('message', message => {
           console.log('status:', message);
-          if (message == 'wallet authenticated') {
+          if (message == 'wallet verified') {
             const set = path.resolve('setAuthenticated.js');
             const setChild = fork(set);
             setChild.send({id: notAuthenticatedId});
@@ -79,6 +82,7 @@ async function main(message) {
                   wallet: message.wallet,
                   id: notAuthenticatedId
                 });
+								database.close();
                 process.exit();
               };
             });
@@ -92,6 +96,7 @@ async function main(message) {
 
     console.log(error);
     process.send('no nfts present');
+		database.close();
     process.exit();
   }
 }
@@ -99,6 +104,7 @@ async function main(message) {
 process.on('message', message => {
   main(message).catch((error) => {
     console.error(error);
+		database.close();
     process.exit(-1);
   });
 });

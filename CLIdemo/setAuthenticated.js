@@ -4,14 +4,15 @@
 //
 
 // imports
+const colors = require('colors');
 const { ApiPromise, WsProvider, Keyring } = require('@polkadot/api');
 const { ContractPromise, CodePromise } = require('@polkadot/api-contract');
+require('dotenv').config();
 
 // constants
 const access_metadata = require('./access_metadata.json');
-const access_contract = '5EVdCVKBs3X3NHd33f6KZkmpkw2qeKqMHUVjzdD7me5m2JCS';
-const OWNER_MNEMONIC = require('./.mnemonic.json');
-const OWNER_mnemonic = OWNER_MNEMONIC.mnemonic;
+const access_contract = process.env.CONTRACT_ADDRESS;
+const OWNER_mnemonic = process.env.OWNER_MNEMONIC;
 
 // constants
 const MEG = 1000000;

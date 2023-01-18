@@ -24,7 +24,7 @@
 // const prompt = require('prompt-sync')({sigint: true});
 
 
-
+const colors = require('colors');
 
 const ipc = require('node-ipc').default;
 const path = require('path');
@@ -35,7 +35,7 @@ const getCredentials = path.resolve('getCredentials.js');
 // setup server for app to connect to
 ipc.config.id = 'authenticateWallet';
 ipc.config.retry = 500;
-// ipc.config.silent = true;
+ipc.config.silent = true;
 
 // message to expect from CLIapp { type: string = 'authenticate wallet', wallet: string}
 ipc.serve(() => ipc.server.on('authenticate wallet', message => {
@@ -43,14 +43,14 @@ ipc.serve(() => ipc.server.on('authenticate wallet', message => {
 	// QUESTION: will this spin up only one child process at a time?
 	// 					 ...or will is be in parallel as intended?
 
-  console.log(`ACCESSNFT: beginning auth process for wallet = ${message.wallet}`);
+  console.log(`ACCESSNFT: beginning auth process for wallet ${message.wallet}`);
 
 	const verifyWalletChild = fork(verifyWallet);
 	verifyWalletChild.send({wallet: message.wallet});
 
 	verifyWalletChild.on('message', childMessage => {
   	
-		console.log(`ACCESSNFT: ${childMessage.type} for wallet = ${message.wallet}`);
+		console.log(`ACCESSNFT:`.green.bold + ` ${childMessage.type} for wallet = ${message.wallet}`);
   	if (message.type == "authentication complete") {
 
     	//////////////////////////////////
@@ -63,7 +63,10 @@ ipc.serve(() => ipc.server.on('authenticate wallet', message => {
   	};
 	});
 }));
-ipc.server.start();
+ipc.server.start()
+
+console.log(`ACCESSNFT:`.green.bold + ` core access authentication service initialized`);
+console.log(`           ! please initialize or connect NFT access application`);
 
 // testing purposes only
 // const amount = 1;

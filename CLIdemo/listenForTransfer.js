@@ -4,12 +4,14 @@
 //
 
 // imports
+const colors = require('colors');
 const { ApiPromise, WsProvider, Keyring } = require('@polkadot/api');
 const { ContractPromise, CodePromise } = require('@polkadot/api-contract');
+require('dotenv').config();
 
 // constants
-const OWNER_MNEMONIC = require('./.mnemonic.json');
-const OWNER_mnemonic = OWNER_MNEMONIC.mnemonic;
+const OWNER_mnemonic = process.env.OWNER_MNEMONIC;
+const OWNER_address = process.env.OWNER_ADDRESS;
 const metadata = require('./access_metadata.json');
 
 async function main(message) {
@@ -38,16 +40,17 @@ async function main(message) {
         // check for verification transfers
 	//
 	// from Interlock
-        if ( event.data[0] == '5HYyQHZQ92iGTaWyxeJajvxk6ZGBYdYGQWdJHrU7cH9eBGxC' &&
+        if ( event.data[0] == OWNER_address &&
           event.data[1] == message.wallet) {
-          process.send('authentication transfer complete');
-          process.send('waiting on verification transfer');
+          console.log(`ACCESSNFT:`.green.bold + ' authentication transfer complete');
+          console.log(`ACCESSNFT:`.yellow.bold + ' waiting on returning verification transfer');
         //
         // from wallet holder
         } else if ( event.data[0] == message.wallet &&
-          event.data[1] == '5HYyQHZQ92iGTaWyxeJajvxk6ZGBYdYGQWdJHrU7cH9eBGxC'){
-          process.send('verification transfer complete');
-          process.send('wallet authenticated');
+          event.data[1] == OWNER_address){
+          console.log(`ACCESSNFT:`.green.bold + ' verification transfer complete');
+          console.log(`ACCESSNFT:`.green.bold + ' wallet verified');
+          process.send('wallet verified');
           process.exit();
         }
       }
@@ -59,7 +62,8 @@ async function main(message) {
 
   // Sign and send the transaction using our account
   const hash = await transfer.signAndSend(OWNER_pair);
-  console.log(`Authentication transfer sent with hash: ${hash.toHex()}\n`);
+
+  console.log(`ACCESSNFT:`.yellow.bold + `authentication transfer sent: ${hash.toHex()}`);
 }
 
 process.on('message', message => {
