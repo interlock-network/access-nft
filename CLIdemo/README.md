@@ -42,7 +42,7 @@ sqlite3 access.db
 
 When the `sqlite>` prompt appears create new table and initialize with empty query:
 ```
-CREATE TABLE access(nftid integer, wallet text, authamount integer, waiting integer)
+CREATE TABLE access(NFTid integer, Wallet text, AuthAmount integer, Waiting integer)
 ;
 ```
 

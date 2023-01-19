@@ -3,6 +3,11 @@
 // PSP34 ACCESS NFT AUTHENTICATION
 //
 
+//
+// database table:
+// access(NFTid integer, Wallet text, AuthAmount integer, Waiting integer)
+//
+
 // imports
 const { ApiPromise, WsProvider, Keyring } = require('@polkadot/api');
 const { ContractPromise, CodePromise } = require('@polkadot/api-contract');
@@ -22,17 +27,62 @@ const ISAUTHENTICATED = '0x697361757468656e74696361746564';
 async function main(message) {
 
   try {
+
     // setup session
-		let database = new sqlite3.Database('./access.db');
+		let database = new sqlite3.Database('./access.db', sqlite3.OPEN_READWRITE);
     const wsProvider = new WsProvider('wss://ws.test.azero.dev');
     const keyring = new Keyring({type: 'sr25519'});
     const api = await ApiPromise.create({ provider: wsProvider });
     const contract = new ContractPromise(api, access_metadata, access_contract);
     const OWNER_pair = keyring.addFromUri(OWNER_mnemonic);
 
+		let queryWaiting = `SELECT Wallet wallet,
+															 Waiting waiting,
+           							FROM access
+           							WHERE Wallet  = ?`;
+
     let notAuthenticated = false;
     let notAuthenticatedId;
 
+		db.serialize(() => {
+  		db.get(queryWaiting, [message.wallet], (err, row) => {
+    		if (err) {
+      		console.error(err.message);
+    		}
+  			if (row) {
+					if (row.waiting == 1) {
+
+						console.log(`ACCESSNFT:`.red.bold + ` waiting for wallet to return validation transfer`);
+		        const listen = path.resolve('keepListeningForTransfer.js');
+    		    const listenChild = fork(listen);
+
+       			listenChild.send({amount: message.amount, wallet: message.wallet});
+
+        		listenChild.on('message', message => {
+          		if (message == 'wallet verified') {
+            		const set = path.resolve('setAuthenticated.js');
+            		const setChild = fork(set);
+            		setChild.send({id: notAuthenticatedId});
+            
+            		setChild.on('message', message => {
+              		if (message == 'nft authenticated') {
+                		process.send({
+                  		type: "authentication complete",
+                  		wallet: message.wallet,
+                  		id: notAuthenticatedId
+                		});
+										database.close();
+                		process.exit();
+              		}
+								});
+          		}
+        		});
+					}
+				} else {
+    			console.log(`ACCESSNFT:`.green.bold + ` wallet clear, checking for available NFTs`);
+				}
+
+});
     // get NFT collection for wallet
     let { gasRequired, storageDeposit, result, output } =
       await contract.query['ilockerCollection'](
@@ -68,8 +118,8 @@ async function main(message) {
         const listenChild = fork(listen);
 
         listenChild.send({amount: message.amount, wallet: message.wallet});
+
         listenChild.on('message', message => {
-          console.log('status:', message);
           if (message == 'wallet verified') {
             const set = path.resolve('setAuthenticated.js');
             const setChild = fork(set);
@@ -86,7 +136,6 @@ async function main(message) {
                 process.exit();
               };
             });
-
           };
         });
       }

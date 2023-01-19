@@ -5,6 +5,7 @@
 
 // imports
 const colors = require('colors');
+var io = require('socket.io-client');
 const { ApiPromise, WsProvider, Keyring } = require('@polkadot/api');
 const { ContractPromise, CodePromise } = require('@polkadot/api-contract');
 require('dotenv').config();
@@ -29,28 +30,27 @@ async function main(message) {
     const api = await ApiPromise.create({ provider: wsProvider });
     const contract = new ContractPromise(api, access_metadata, access_contract);
     const OWNER_pair = keyring.addFromUri(OWNER_mnemonic);
+		var socket = io.connect('http://localhost:3000', {reconnect: true});
 
     // perform dry run to check for errors
     const { gasRequired, storageDeposit, result, output } =
       await contract.query['setAuthenticated']
-	(OWNER_pair.address, {}, {u64: message.id});
+				(OWNER_pair.address, {}, {u64: message.id});
 
     // too much gas required?
     if (gasRequired > gasLimit) {
       console.log('tx aborted, gas required is greater than the acceptable gas limit.');
-      process.exit();
-    }
-
-    // too much storage required?
-    if (storageDeposit > storageDepositLimit) {
-      console.log('tx aborted, storage required is greater than the acceptable storage limit.');
+      socket.emit('setauthenticated-failure');
+			socket.disconnect();
       process.exit();
     }
 
     // did the contract revert due to any errors?
     if (result.toHuman().Ok.flags == 'Revert') {
       let error = output.toHuman().Err;
-      console.log(`Transaction reverts due to error: ${error}`);
+      console.log(`ACCESSNFT:`.red.bold + ` setAuthenticated TX reverted due to: ${error}`);
+      socket.emit('setauthenticated-failure');
+			socket.disconnect();
       process.exit();
     }
 
@@ -61,7 +61,8 @@ async function main(message) {
         if (result.status.isInBlock) {
           console.log('in a block');
         } else if (result.status.isFinalized) {
-          process.send('nft authenticated');
+          socket.emit('nft-authenticated');
+					socket.disconnect();
           process.exit();
         }
       });

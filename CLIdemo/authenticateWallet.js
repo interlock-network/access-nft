@@ -37,13 +37,24 @@ ipc.config.id = 'authenticateWallet';
 ipc.config.retry = 500;
 ipc.config.silent = true;
 
+
+
+// connect to database
+let database = new sqlite3.Database('./access.db', (err) => {
+	if (err) {
+  	console.error(err.message);
+  }
+  console.log('Connected to the access database.');
+});
+
+
 // message to expect from CLIapp { type: string = 'authenticate wallet', wallet: string}
 ipc.serve(() => ipc.server.on('authenticate wallet', message => {
 
 	// QUESTION: will this spin up only one child process at a time?
 	// 					 ...or will is be in parallel as intended?
 
-  console.log(`ACCESSNFT: beginning auth process for wallet ${message.wallet}`);
+  console.log(`ACCESSNFT:`.green.bold + ` beginning auth process for wallet ${message.wallet}`);
 
 	const verifyWalletChild = fork(verifyWallet);
 	verifyWalletChild.send({wallet: message.wallet});
