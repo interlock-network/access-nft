@@ -31,23 +31,23 @@ async function setWaiting(message) {
     const contract = new ContractPromise(api, access_metadata, access_contract);
     const OWNER_pair = keyring.addFromUri(OWNER_mnemonic);
 
-		// setup socket connection with autheticateWallet script
-		var socket = io.connect('http://localhost:3000', {reconnect: true});
-		socket.on('connect', (socket) => {
-			console.log(`ACCESSNFT:`.blue.bold + ` setWaiting socket connected`);
-		});
+    // setup socket connection with autheticateWallet script
+    var socket = io.connect('http://localhost:3000', {reconnect: true});
+    socket.on('connect', (socket) => {
+      console.log(`ACCESSNFT:`.blue.bold + ` setWaiting socket connected`);
+    });
 
     // perform dry run to check for errors
     const { gasRequired, storageDeposit, result, output } =
       await contract.query['setWaiting']
-				(OWNER_pair.address, {}, {u64: message.id});
+        (OWNER_pair.address, {}, {u64: message.id});
 
     // too much gas required?
     if (gasRequired > gasLimit) {
       console.log('tx aborted, gas required is greater than the acceptable gas limit.');
       socket.emit('setwaiting-failure', message.id, message.wallet);
-			socket.disconnect();
-			console.log(`ACCESSNFT:`.blue.bold + ` setWaiting socket disconnected`);
+      socket.disconnect();
+      console.log(`ACCESSNFT:`.blue.bold + ` setWaiting socket disconnected`);
       process.exit();
     }
 
@@ -56,24 +56,24 @@ async function setWaiting(message) {
       let error = output.toHuman().Err;
       console.log(`ACCESSNFT:`.red.bold + ` setWaiting TX reverted due to: ${error}`);
       socket.emit('setwaiting-failure', message.id, message.wallet);
-			socket.disconnect();
-			console.log(`ACCESSNFT:`.blue.bold + ` setWaiting socket disconnected`);
+      socket.disconnect();
+      console.log(`ACCESSNFT:`.blue.bold + ` setWaiting socket disconnected`);
       process.exit();
     }
 
     // submit doer tx
     let extrinsic = await contract.tx['setWaiting']
       ({ storageDepositLimit, gasLimit }, {u64: message.id})
-      .signAndSend(OWNER_pair, result => {
-        if (result.status.isInBlock) {
-          console.log('in a block');
-        } else if (result.status.isFinalized) {
-          socket.emit('awaiting-transfer', message.id, message.wallet);
-					socket.disconnect();
-					console.log(`ACCESSNFT:`.blue.bold + ` setWaiting socket disconnected`);
-          process.exit();
-        }
-      });
+        .signAndSend(OWNER_pair, result => {
+      if (result.status.isInBlock) {
+        console.log('in a block');
+      } else if (result.status.isFinalized) {
+        socket.emit('awaiting-transfer', message.id, message.wallet);
+        socket.disconnect();
+        console.log(`ACCESSNFT:`.blue.bold + ` setWaiting socket disconnected`);
+        process.exit();
+      }
+    });
 
   } catch(error) {
 

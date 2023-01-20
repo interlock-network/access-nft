@@ -33,6 +33,9 @@ async function verify(message) {
 
   try {
 
+    console.log(`ACCESSNFT:`.green.bold +
+      ` initiating authentication process for wallet ` + `${message.wallet}`.magenta.bold);
+
     // setup session constants
     const wsProvider = new WsProvider(WEB_SOCKET);
     const keyring = new Keyring({type: 'sr25519'});
@@ -56,8 +59,8 @@ async function verify(message) {
 
     // get NFT collection for wallet
     let { gasRequired, storageDeposit, result, output } =
-      await contract.query['ilockerCollection'](
-        OWNER_PAIR.address, {}, message.wallet);
+      await contract.query['ilockerCollection']
+        (OWNER_PAIR.address, {}, message.wallet);
 
     // check if the call was successful
     if (result.isOk) {
@@ -68,8 +71,8 @@ async function verify(message) {
 
         // get attribute isathenticated state
         let { gasRequired, storageDeposit, result, output } =
-          await contract.query['psp34Metadata::getAttribute'](
-            OWNER_PAIR.address, {}, {u64: collection.ok[nft].u64}, ISAUTHENTICATED);
+          await contract.query['psp34Metadata::getAttribute']
+	    (OWNER_PAIR.address, {}, {u64: collection.ok[nft].u64}, ISAUTHENTICATED);
         let authenticated = JSON.parse(JSON.stringify(output));
 
         // record nft id of one that has not yet been authenticated
@@ -80,8 +83,8 @@ async function verify(message) {
 
         // get attribute iswaiting state
         let { gasRequired, storageDeposit, result, output } =
-          await contract.query['psp34Metadata::getAttribute'](
-            OWNER_PAIR.address, {}, {u64: collection.ok[nft].u64}, ISWAITING);
+          await contract.query['psp34Metadata::getAttribute']
+	    (OWNER_PAIR.address, {}, {u64: collection.ok[nft].u64}, ISWAITING);
         let waiting = JSON.parse(JSON.stringify(output));
         
         // if any one of wallet's nfts are waiting, they must resolve this first
