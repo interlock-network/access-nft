@@ -40,14 +40,23 @@ const AMOUNT = 1;
 async function listen(message) {
 
   // establish connection with blockchain
-  console.log('');
   const wsProvider = new WsProvider(WEB_SOCKET);
   const api = await ApiPromise.create({ provider: wsProvider });
-  console.log('');
+  console.log(`ACCESSNFT:`.blue.bold +
+		` established websocket connection with Aleph Zero blockchain ` + `${WEB_SOCKET}`.magenta.bold);
+	
+	// successful authenticateWallet initialization
+	console.log(`ACCESSNFT:`.green.bold +
+		` core access authentication service initialized`.bold);
+	console.log('');
+	console.log(`           ! please initialize or connect NFT access application`.bold);
+	console.log('');
 
   // create signing keypair
   const keyring = new Keyring({type: 'sr25519'});
   const OWNER_pair = keyring.addFromUri(OWNER_MNEMONIC);
+
+	let notAuthenticatedId;
 
   // subscribe to system events via storage
   api.query.system.events((events) => {
@@ -61,6 +70,7 @@ async function listen(message) {
 			// listen for Transfer events
       if (event.method == 'Transfer') {
 
+						//console.log(event)
         // check for verification transfers
 				//
 				// from Interlock
@@ -79,11 +89,37 @@ async function listen(message) {
           console.log(`ACCESSNFT:`.green.bold +
 						` verification transfer complete from wallet ` + `${event.data[0]}`.magenta.bold);
           console.log(`ACCESSNFT:`.green.bold +
-						` wallet ` +	`${event.data[0]}`.magenta.bold + ` is  verified`);
+						` wallet ` +	`${event.data[0]}`.magenta.bold + ` is verified`);
 
-					// change contract state to indicate nft is authenticated
-          const setAuthenticatedChild = fork(setAuthenticated);
-          setAuthenticatedChild.send({id: notAuthenticatedId, wallet: event.data[0]});
+    			// get NFT collection for wallet
+    			let { gasRequired, storageDeposit, result, output } =
+      			await contract.query['ilockerCollection']
+						(OWNER_PAIR.address, {}, event.data[0]);
+
+    			// check if the call was successful
+    			if (result.isOk) {
+
+      			// find the waiting nft to authenticate
+      			const collection = JSON.parse(JSON.stringify(output));
+      			for (nft in collection.ok) {
+
+        			// get attribute iswaiting state
+        			let { gasRequired, storageDeposit, result, output } =
+          			await contract.query['psp34Metadata::getAttribute']
+								(OWNER_PAIR.address, {}, {u64: collection.ok[nft].u64}, ISWAITING);
+        			let waiting = JSON.parse(JSON.stringify(output));
+
+        			// record nft id of one that is waiting and ready to authenticate
+        			if (waiting == TRUE) {
+
+          			notAuthenticatedId = collection.ok[nft].u64;
+
+								// change contract state to indicate nft is authenticated
+          			const setAuthenticatedChild = fork(setAuthenticated);
+          			setAuthenticatedChild.send({id: notAuthenticatedId, wallet: event.data[0]});
+        			}
+        		}
+      		}
         }
       }
     });
@@ -139,7 +175,8 @@ io.on('connection', (socket) => {
 
 // fire up http server
 http.listen(PORT, () => {
-  console.log('listening on *:' + PORT);
+  console.log(`ACCESSNFT:`.blue.bold +
+		` listening on ` + `*:`.magenta.bold + `${PORT}`.magenta.bold);
 });
 
 // initiate async function that listens for transfer events
@@ -148,7 +185,4 @@ listen().catch((error) => {
 	process.exit(-1);
 });
 
-// successful authenticateWallet initialization
-console.log(`ACCESSNFT:`.green.bold + ` core access authentication service initialized`);
-console.log(`           ! please initialize or connect NFT access application`);
 
