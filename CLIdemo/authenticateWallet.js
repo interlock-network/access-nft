@@ -12,75 +12,143 @@
 // script to gather credentials in the case of authentication success.
 //
 
-//
-// CREATE TABLE access(nftid integer, wallet text, waiting integer, complete integer)
-// 
-
-
-
-
-
-// testing purposes only
-// const prompt = require('prompt-sync')({sigint: true});
-
-
 const colors = require('colors');
-
-const ipc = require('node-ipc').default;
+const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const fork = require('child_process').fork;
 const verifyWallet = path.resolve('verifyWallet.js');
 const getCredentials = path.resolve('getCredentials.js');
+const setAuthenticated = path.resolve('setAuthenticated.js');
+const { ApiPromise, WsProvider, Keyring } = require('@polkadot/api');
+const { ContractPromise, CodePromise } = require('@polkadot/api-contract');
+require('dotenv').config();
 
-// setup server for app to connect to
-ipc.config.id = 'authenticateWallet';
-ipc.config.retry = 500;
-ipc.config.silent = true;
+// server
+var app = require('express')();
+var http = require('http').Server(app);
+var io = require('socket.io')(http);
+const PORT = 3000;
+
+// constants
+const OWNER_MNEMONIC = process.env.OWNER_MNEMONIC;
+const OWNER_ADDRESS = process.env.OWNER_ADDRESS;
+const WEB_SOCKET = process.env.WEB_SOCKET;
+const metadata = require('./access_metadata.json');
+const AMOUNT = 1;
 
 
+async function listen(message) {
 
-// connect to database
-let database = new sqlite3.Database('./access.db', (err) => {
-	if (err) {
-  	console.error(err.message);
-  }
-  console.log('Connected to the access database.');
+  // establish connection with blockchain
+  console.log('');
+  const wsProvider = new WsProvider(WEB_SOCKET);
+  const api = await ApiPromise.create({ provider: wsProvider });
+  console.log('');
+
+  // create signing keypair
+  const keyring = new Keyring({type: 'sr25519'});
+  const OWNER_pair = keyring.addFromUri(OWNER_MNEMONIC);
+
+  // subscribe to system events via storage
+  api.query.system.events((events) => {
+
+    // loop through the Vec<EventRecord>
+    events.forEach((record) => {
+
+      // get data from the event record
+      const { event, phase } = record;
+
+			// listen for Transfer events
+      if (event.method == 'Transfer') {
+
+        // check for verification transfers
+				//
+				// from Interlock
+        if ( event.data[0] == OWNER_ADDRESS &&
+          event.data[2] == AMOUNT) {
+
+          console.log(`ACCESSNFT:`.green.bold +
+						` authentication transfer complete to wallet ` + `${event.data[1]}`.magenta.bold);
+          console.log(`ACCESSNFT:`.yellow.bold +
+						` waiting on returning verification transfer to wallet ` + `${event.data[1]}`.magenta.bold);
+        //
+        // from wallet holder
+        } else if (event.data[1] == OWNER_ADDRESS &&
+					event.data[2] == AMOUNT) {
+
+          console.log(`ACCESSNFT:`.green.bold +
+						` verification transfer complete from wallet ` + `${event.data[0]}`.magenta.bold);
+          console.log(`ACCESSNFT:`.green.bold +
+						` wallet ` +	`${event.data[0]}`.magenta.bold + ` is  verified`);
+
+					// change contract state to indicate nft is authenticated
+          const setAuthenticatedChild = fork(setAuthenticated);
+          setAuthenticatedChild.send({id: notAuthenticatedId, wallet: event.data[0]});
+        }
+      }
+    });
+  });
+}
+
+
+// interprocess and server client-app messaging
+io.on('connection', (socket) => {
+
+	// initiate authentication process for a wallet
+	socket.on('authenticate-nft', (wallet) => {
+
+  	console.log(`ACCESSNFT:`.green.bold +
+			` initiating authentication process for wallet ` + `${wallet}`.magenta.bold);
+
+		const verifyWalletChild = fork(verifyWallet);
+		verifyWalletChild.send({wallet: wallet});
+	}); 
+
+	// relay authentication success to application
+  socket.on('nft-authenticated', (id) => {
+    console.log(`ACCESSNFT:`.green.bold +
+			` NFT ID ` + `${id}`.magenta.bold + ` successfully authenticated`);
+		socket.emit('authentication-success');
+  });
+
+	// relay still waiting status to application
+  socket.on('still-waiting', (id, wallet) => {
+		socket.emit('still-need-micropayment', id, wallet);
+  });
+
+	// relay waiting status to application
+  socket.on('awaiting-transfer', (id, wallet) => {
+		socket.emit('need-micropayment', id, wallet);
+  });
+
+	// relay all already authenticated status to application
+  socket.on('all-nfts-authenticated', (wallet) => {
+		socket.emit('nfts-already-authenticated', wallet);
+  });
+
+	// relay setAuthentication contract failure to application
+  socket.on('setauthenticated-failure', (id, wallet) => {
+		socket.emit('failed-setauthenticated', id, wallet);
+  });
+
+	// relay setWaiting contract failure to application
+  socket.on('setwaiting-failure', (id, wallet) => {
+		socket.emit('failed-setwaiting', id, wallet);
+  });
 });
 
+// fire up http server
+http.listen(PORT, () => {
+  console.log('listening on *:' + PORT);
+});
 
-// message to expect from CLIapp { type: string = 'authenticate wallet', wallet: string}
-ipc.serve(() => ipc.server.on('authenticate wallet', message => {
+// initiate async function that listens for transfer events
+listen().catch((error) => {
+	console.error(error);
+	process.exit(-1);
+});
 
-	// QUESTION: will this spin up only one child process at a time?
-	// 					 ...or will is be in parallel as intended?
-
-  console.log(`ACCESSNFT:`.green.bold + ` beginning auth process for wallet ${message.wallet}`);
-
-	const verifyWalletChild = fork(verifyWallet);
-	verifyWalletChild.send({wallet: message.wallet});
-
-	verifyWalletChild.on('message', childMessage => {
-  	
-		console.log(`ACCESSNFT:`.green.bold + ` ${childMessage.type} for wallet = ${message.wallet}`);
-  	if (message.type == "authentication complete") {
-
-    	//////////////////////////////////
-    	//
-	  	// CALL CREDENTIAL-GATHERING CHILD SCRIPT
-    	//
-    	//////////////////////////////////
-
-    	verifyWalletChild.close();
-  	};
-	});
-}));
-ipc.server.start()
-
+// successful authenticateWallet initialization
 console.log(`ACCESSNFT:`.green.bold + ` core access authentication service initialized`);
 console.log(`           ! please initialize or connect NFT access application`);
-
-// testing purposes only
-// const amount = 1;
-// const wallet = '5EtTSfiarDaXaDiKfVkQii3eCDnbHtEdwggyGX3Zbe45mXH7';
-
 

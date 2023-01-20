@@ -1,11 +1,11 @@
 //
-// INTERLOCK NETWORK - SET AUTHENTICATED
+// INTERLOCK NETWORK - SET WAITING
 // PSP34 ACCESS NFT AUTHENTICATION
 //
 
 // imports
-const colors = require('colors');
 var io = require('socket.io-client');
+const colors = require('colors');
 const { ApiPromise, WsProvider, Keyring } = require('@polkadot/api');
 const { ContractPromise, CodePromise } = require('@polkadot/api-contract');
 require('dotenv').config();
@@ -20,7 +20,7 @@ const MEG = 1000000;
 const gasLimit = 100000 * MEG;
 const storageDepositLimit = null;
 
-async function setAuthenticated(message) {
+async function setWaiting(message) {
 
   try {
 
@@ -34,43 +34,43 @@ async function setAuthenticated(message) {
 		// setup socket connection with autheticateWallet script
 		var socket = io.connect('http://localhost:3000', {reconnect: true});
 		socket.on('connect', (socket) => {
-			console.log(`ACCESSNFT:`.blue.bold + ` setAuthenticated socket connected`);
+			console.log(`ACCESSNFT:`.blue.bold + ` setWaiting socket connected`);
 		});
 
     // perform dry run to check for errors
     const { gasRequired, storageDeposit, result, output } =
-      await contract.query['setAuthenticated']
+      await contract.query['setWaiting']
 				(OWNER_pair.address, {}, {u64: message.id});
 
     // too much gas required?
     if (gasRequired > gasLimit) {
       console.log('tx aborted, gas required is greater than the acceptable gas limit.');
-      socket.emit('setauthenticated-failure', message.id, message.wallet);
+      socket.emit('setwaiting-failure', message.id, message.wallet);
 			socket.disconnect();
-			console.log(`ACCESSNFT:`.blue.bold + ` setAuthenticated socket disconnected`);
+			console.log(`ACCESSNFT:`.blue.bold + ` setWaiting socket disconnected`);
       process.exit();
     }
 
     // did the contract revert due to any errors?
     if (result.toHuman().Ok.flags == 'Revert') {
       let error = output.toHuman().Err;
-      console.log(`ACCESSNFT:`.red.bold + ` setAuthenticated TX reverted due to: ${error}`);
-      socket.emit('setauthenticated-failure', message.id, );
-			console.log(`ACCESSNFT:`.blue.bold + ` setAuthenticated socket disconnected`);
+      console.log(`ACCESSNFT:`.red.bold + ` setWaiting TX reverted due to: ${error}`);
+      socket.emit('setwaiting-failure', message.id, message.wallet);
 			socket.disconnect();
+			console.log(`ACCESSNFT:`.blue.bold + ` setWaiting socket disconnected`);
       process.exit();
     }
 
     // submit doer tx
-    let extrinsic = await contract.tx['setAuthenticated']
+    let extrinsic = await contract.tx['setWaiting']
       ({ storageDepositLimit, gasLimit }, {u64: message.id})
       .signAndSend(OWNER_pair, result => {
         if (result.status.isInBlock) {
           console.log('in a block');
         } else if (result.status.isFinalized) {
-          socket.emit('nft-authenticated', message.id);
+          socket.emit('awaiting-transfer', message.id, message.wallet);
 					socket.disconnect();
-					console.log(`ACCESSNFT:`.blue.bold + ` setAuthenticated socket disconnected`);
+					console.log(`ACCESSNFT:`.blue.bold + ` setWaiting socket disconnected`);
           process.exit();
         }
       });
@@ -83,7 +83,7 @@ async function setAuthenticated(message) {
 }
 
 process.on('message', message => {
-  setAuthenticated(message).catch((error) => {
+  setWaiting(message).catch((error) => {
     console.error(error);
     process.exit(-1);
   });

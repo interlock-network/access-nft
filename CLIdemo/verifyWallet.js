@@ -5,7 +5,7 @@
 
 //
 // database table:
-// access(NFTid integer, Wallet text, AuthAmount integer, Waiting integer)
+// access(NFTid integer, Wallet text, Waiting integer, )
 //
 
 // imports
@@ -14,79 +14,50 @@ const { ContractPromise, CodePromise } = require('@polkadot/api-contract');
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const fork = require('child_process').fork;
+const setWaiting = path.resolve('setWaiting.js');
 require('dotenv').config();
 
 // constants
-const access_metadata = require('./access_metadata.json');
-const access_contract = process.env.CONTRACT_ADDRESS;
-const OWNER_mnemonic = process.env.OWNER_MNEMONIC;
+const ACCESS_METADATA = require('./ACCESS_METADATA.json');
+const CONTRACT_ADDRESS = process.env.CONTRACT_ADDRESS;
+const OWNER_MNEMONIC = process.env.OWNER_MNEMONIC;
+const APP_PROCESS = process.env.APP_PROCESS;
+const WEB_SOCKET = process.env.WEB_SOCKET;
 const TRUE = '0x74727565';
 const FALSE = '0x66616c7365';
 const ISAUTHENTICATED = '0x697361757468656e74696361746564';
+const ISWAITING = '0x697377616974696e67';
+const AMOUNT = 1;
 
-async function main(message) {
+async function verify(message) {
 
   try {
 
-    // setup session
-		let database = new sqlite3.Database('./access.db', sqlite3.OPEN_READWRITE);
-    const wsProvider = new WsProvider('wss://ws.test.azero.dev');
+		// setup session constants
+		const wsProvider = new WsProvider(WEB_SOCKET);
     const keyring = new Keyring({type: 'sr25519'});
     const api = await ApiPromise.create({ provider: wsProvider });
-    const contract = new ContractPromise(api, access_metadata, access_contract);
-    const OWNER_pair = keyring.addFromUri(OWNER_mnemonic);
+    const contract = new ContractPromise(api, ACCESS_METADATA, CONTRACT_ADDRESS);
+    const OWNER_PAIR = keyring.addFromUri(OWNER_MNEMONIC);
 
-		let queryWaiting = `SELECT Wallet wallet,
-															 Waiting waiting,
-           							FROM access
-           							WHERE Wallet  = ?`;
+		// setup socket connection with autheticateWallet script
+		var socket = io.connect('http://localhost:3000', {reconnect: true});
+		socket.on('connect', (socket) => {
+			console.log(`ACCESSNFT:`.blue.bold + ` verifyWallet socket connected`);
+		});
 
     let notAuthenticated = false;
     let notAuthenticatedId;
 
-		db.serialize(() => {
-  		db.get(queryWaiting, [message.wallet], (err, row) => {
-    		if (err) {
-      		console.error(err.message);
-    		}
-  			if (row) {
-					if (row.waiting == 1) {
+		console.log(`ACCESSNFT:`.yellow.bold +
+			` checking if waiting for micropayment from wallet ` + `${message.wallet}`.magenta.bold);
+		console.log(`ACCESSNFT:`.yellow.bold +
+			` and checking that wallet contains unauthenticated nfts`);
 
-						console.log(`ACCESSNFT:`.red.bold + ` waiting for wallet to return validation transfer`);
-		        const listen = path.resolve('keepListeningForTransfer.js');
-    		    const listenChild = fork(listen);
-
-       			listenChild.send({amount: message.amount, wallet: message.wallet});
-
-        		listenChild.on('message', message => {
-          		if (message == 'wallet verified') {
-            		const set = path.resolve('setAuthenticated.js');
-            		const setChild = fork(set);
-            		setChild.send({id: notAuthenticatedId});
-            
-            		setChild.on('message', message => {
-              		if (message == 'nft authenticated') {
-                		process.send({
-                  		type: "authentication complete",
-                  		wallet: message.wallet,
-                  		id: notAuthenticatedId
-                		});
-										database.close();
-                		process.exit();
-              		}
-								});
-          		}
-        		});
-					}
-				} else {
-    			console.log(`ACCESSNFT:`.green.bold + ` wallet clear, checking for available NFTs`);
-				}
-
-});
     // get NFT collection for wallet
     let { gasRequired, storageDeposit, result, output } =
       await contract.query['ilockerCollection'](
-        OWNER_pair.address, {}, message.wallet);
+        OWNER_PAIR.address, {}, message.wallet);
 
     // check if the call was successful
     if (result.isOk) {
@@ -95,65 +66,92 @@ async function main(message) {
       const collection = JSON.parse(JSON.stringify(output));
       for (nft in collection.ok) {
 
+				// get attribute isathenticated state
         let { gasRequired, storageDeposit, result, output } =
           await contract.query['psp34Metadata::getAttribute'](
-            OWNER_pair.address, {}, {u64: collection.ok[nft].u64}, ISAUTHENTICATED);
+            OWNER_PAIR.address, {}, {u64: collection.ok[nft].u64}, ISAUTHENTICATED);
         let authenticated = JSON.parse(JSON.stringify(output));
-        if (FALSE == authenticated) {
+
+				// record nft id of one that has not yet been authenticated
+        if (authenticated == FALSE) {
           notAuthenticated = true;
           notAuthenticatedId = collection.ok[nft].u64;
         }
+
+				// get attribute iswaiting state
+				let { gasRequired, storageDeposit, result, output } =
+          await contract.query['psp34Metadata::getAttribute'](
+            OWNER_PAIR.address, {}, {u64: collection.ok[nft].u64}, ISWAITING);
+        let waiting = JSON.parse(JSON.stringify(output));
+        
+				// if any one of wallet's nfts are waiting, they must resolve this first
+				if (waiting == TRUE) {
+					console.log(`ACCESSNFT:`.red.bold +
+						` need wallet ` + `${message.wallet}`.magenta.bold + ` to return validation transfer`);
+					socket.emit('still-waiting', notAuthenticatedId, message.wallet);
+					socket.disconnect();
+  				console.log(`ACCESSNFT:`.blue.bold +
+						` verifyWallet socket disconnected`);
+					process.exit();
+        }
       }
 
-      // not nfts to authenticate
+      // if after checking collection there are no nfts to authenticate
       if (notAuthenticated == false) {
-        process.send('all nfts already authenticated')
-				database.close();
+
+				console.log(`ACCESSNFT:`.red.bold +
+					` all nfts in wallet ` + `${message.wallet}`.magenta.bold + ` already authenticated`);
+        socket.emit('all-nfts-authenticated', message.wallet);
+				socket.disconnect();
+  			console.log(`ACCESSNFT:`.blue.bold +
+					` verifyWallet socket disconnected`);
         process.exit();
 
-      // or authenticate one of the unauthenticated nfts
+      // or send micropayment to unauthenticated nft
       } else if (notAuthenticated == true) {
 
-        const listen = path.resolve('listenForTransfer.js');
-        const listenChild = fork(listen);
+    		console.log(`ACCESSNFT:`.green.bold +
+					` wallet contains valid unauthenticated nft: ID ` + `${notAuthenticatedId}`.magenta.bold);
+    		console.log(`ACCESSNFT:`.green.bold +
+					` sending micro payment to wallet ` + `${message.wallet}`.magenta.bold);
 
-        listenChild.send({amount: message.amount, wallet: message.wallet});
+  			// create transfer object
+  			const transfer = api.tx.balances.transfer(message.wallet, AMOUNT);
 
-        listenChild.on('message', message => {
-          if (message == 'wallet verified') {
-            const set = path.resolve('setAuthenticated.js');
-            const setChild = fork(set);
-            setChild.send({id: notAuthenticatedId});
-            
-            setChild.on('message', message => {
-              if (message == 'nft authenticated') {
-                process.send({
-                  type: "authentication complete",
-                  wallet: message.wallet,
-                  id: notAuthenticatedId
-                });
-								database.close();
-                process.exit();
-              };
-            });
-          };
-        });
+  			// Sign and send the transaction using our account
+  			const hash = await transfer.signAndSend(OWNER_PAIR);
+
+  			console.log(`ACCESSNFT:`.yellow.bold +
+					` authentication transfer sent`);
+				console.log(`ACCESSNFT:`.yellow.bold +
+					` for record, transfer hash is ` + `${hash.toHex()}`.magenta.bold);
+				
+				// change contract state to indicate waiting for return micropayment transaction
+        const setWaitingChild = fork(setWaiting);
+        setWaitingChild.send({id: notAuthenticatedId, wallet: message.wallet});
+
+  			console.log(`ACCESSNFT:`.green.bold +
+					` setWaiting successful`);
+				socket.disconnect();
+  			console.log(`ACCESSNFT:`.blue.bold +
+					` verifyWallet socket disconnected`);
+				process.exit();
       }
     }
 
   } catch(error) {
 
+		// if ilockerCollection throws error, then no nfts are present
     console.log(error);
     process.send('no nfts present');
-		database.close();
     process.exit();
   }
 }
 
-process.on('message', message => {
-  main(message).catch((error) => {
+// run main verify()
+process.on('message', (message) => {
+  verify(message).catch((error) => {
     console.error(error);
-		database.close();
     process.exit(-1);
   });
 });
