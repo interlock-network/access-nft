@@ -11,32 +11,34 @@ const { ContractPromise, CodePromise } = require('@polkadot/api-contract');
 require('dotenv').config();
 
 // constants
-const access_metadata = require('./access_metadata.json');
-const access_contract = process.env.CONTRACT_ADDRESS;
-const OWNER_mnemonic = process.env.OWNER_MNEMONIC;
+const ACCESS_METADATA = require('./ACCESS_METADATA.json');
+const ACCESS_CONTRACT = process.env.CONTRACT_ADDRESS;
+const OWNER_MNEMONIC = process.env.OWNER_MNEMONIC;
+const WEB_SOCKET = process.env.WEB_SOCKET;
 
 // constants
 const MEG = 1000000;
 const gasLimit = 100000 * MEG;
 const storageDepositLimit = null;
 
-async function setAuthenticated(message) {
+async function setAuthenticated(message, socket) {
 
   try {
 
     // setup session
-    const wsProvider = new WsProvider('wss://ws.test.azero.dev');
+    console.log('');
+    console.log(`ACCESSNFT:`.blue.bold +
+      ` establishing connection with Aleph Zero blockchain...`);
+    const wsProvider = new WsProvider(WEB_SOCKET);
     const keyring = new Keyring({type: 'sr25519'});
     const api = await ApiPromise.create({ provider: wsProvider });
-    const contract = new ContractPromise(api, access_metadata, access_contract);
-    const OWNER_pair = keyring.addFromUri(OWNER_mnemonic);
+    console.log(`ACCESSNFT:`.blue.bold +
+      ` established websocket connection with Aleph Zero blockchain ` + `${WEB_SOCKET}`.cyan.bold);
+    console.log('');
 
-    // setup socket connection with autheticateWallet script
-    var socket = io.connect('http://localhost:3000', {reconnect: true});
-    socket.on('connect', (socket) => {
-      console.log(`ACCESSNFT:`.blue.bold +
-	` setAuthenticated socket connected`);
-    });
+    const contract = new ContractPromise(api, ACCESS_METADATA, ACCESS_CONTRACT);
+    const OWNER_PAIR = keyring.addFromUri(OWNER_MNEMONIC);
+
 
     // get NFT collection for wallet
     let { gasRequired, storageDeposit, result, output } =
@@ -64,14 +66,16 @@ async function setAuthenticated(message) {
           // perform dry run to check for errors
           const { gasRequired, storageDeposit, result, output } =
             await contract.query['setAuthenticated']
-              (OWNER_pair.address, {}, {u64: notAuthenticatedId});
+              (OWNER_PAIR.address, {}, {u64: notAuthenticatedId});
 
           // too much gas required?
           if (gasRequired > gasLimit) {
-            console.log('tx aborted, gas required is greater than the acceptable gas limit.');
+            console.log(`ACCESSNFT:`.red.bold +
+              'tx aborted, gas required is greater than the acceptable gas limit.');
             socket.emit('setauthenticated-failure', notAuthenticatedId, message.wallet);
             socket.disconnect();
-            console.log(`ACCESSNFT:`.blue.bold + ` setAuthenticated socket disconnected`);
+            console.log(`ACCESSNFT:`.blue.bold +
+              ` setAuthenticated socket disconnecting, ID ` + `${socket.id}`.cyan.bold);
             process.exit();
           }
 
@@ -80,7 +84,8 @@ async function setAuthenticated(message) {
             let error = output.toHuman().Err;
             console.log(`ACCESSNFT:`.red.bold + ` setAuthenticated TX reverted due to: ${error}`);
             socket.emit('setauthenticated-failure', notAuthenticatedId, message.wallet);
-            console.log(`ACCESSNFT:`.blue.bold + ` setAuthenticated socket disconnected`);
+            console.log(`ACCESSNFT:`.blue.bold +
+              ` setAuthenticated socket disconnecting, ID ` + `${socket.id}`.cyan.bold);
             socket.disconnect();
             process.exit();
           }
@@ -88,7 +93,7 @@ async function setAuthenticated(message) {
           // submit doer tx
           let extrinsic = await contract.tx['setAuthenticated']
             ({ storageDepositLimit, gasLimit }, {u64: notAuthenticatedId})
-              .signAndSend(OWNER_pair, result => {
+              .signAndSend(OWNER_PAIR, result => {
             if (result.status.isInBlock) {
               console.log('in a block');
             } else if (result.status.isFinalized) {
@@ -97,24 +102,46 @@ async function setAuthenticated(message) {
 		` successfully authenticated for wallet ` + `${message.wallet}`.magenta.bold);
               socket.emit('nft-authenticated', notAuthenticatedId, messsage.wallet);
               socket.disconnect();
-              console.log(`ACCESSNFT:`.blue.bold + ` setAuthenticated socket disconnected`);
+              console.log(`ACCESSNFT:`.blue.bold +
+                ` setAuthenticated socket disconnecting, ID ` + `${socket.id}`.cyan.bold);
               process.exit();
             }
           });
         }
       }
+    } else {
+
+      // no nfts present
+      console.log(`ACCESSNFT:`.red.bold +
+        ` no nfts present for wallet ` + `${message.wallet}`.magenta.bold);
+      socket.emit('no-nfts', message.wallet);
+      console.log(`ACCESSNFT:`.blue.bold +
+        ` setAuthenticated socket disconnecting, ID ` + `${socket.id}`.cyan.bold);
+      socket.disconnect();
+      process.exit();
     }
 
   } catch(error) {
 
-    console.log(error);
+    console.log(`ACCESSNFT:`.red.bold + error);
+    console.log(`ACCESSNFT:`.blue.bold +
+      ` setAuthenticated socket disconnecting, ID ` + `${socket.id}`.cyan.bold);
+    socket.disconnect();
     process.exit();
   }
 }
 
 process.on('message', message => {
-  setAuthenticated(message).catch((error) => {
-    console.error(error);
-    process.exit(-1);
+
+  // setup socket connection with autheticateWallet script
+  var socket = io.connect('http://localhost:3000', {reconnect: true});
+  socket.on('connect', () => {
+    console.log(`ACCESSNFT:`.blue.bold +
+      ` setAuthenticated socket connected, ID ` + `${socket.id}`.cyan.bold);
+    
+    setAuthenticated(message, socket).catch((error) => {
+      console.error(error);
+      process.exit(-1);
+    });
   });
 });

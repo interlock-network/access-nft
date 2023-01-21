@@ -37,7 +37,7 @@ const metadata = require('./access_metadata.json');
 const AMOUNT = 1;
 
 
-async function listen(message) {
+async function listen(message, socket) {
 
   // establish connection with blockchain
   const wsProvider = new WsProvider(WEB_SOCKET);
@@ -107,9 +107,6 @@ io.on('connection', (socket) => {
   // initiate authentication process for a wallet
   socket.on('authenticate-nft', (wallet) => {
 
-    console.log(`ACCESSNFT:`.green.bold +
-      ` initiating authentication process for wallet ` + `${wallet}`.magenta.bold);
-
     const verifyWalletChild = fork(verifyWallet);
     verifyWalletChild.send({wallet: wallet});
   }); 
@@ -142,6 +139,11 @@ io.on('connection', (socket) => {
   // relay setWaiting contract failure to application
   socket.on('setwaiting-failure', (id, wallet) => {
     socket.emit('failed-setwaiting', id, wallet);
+  });
+
+  // relay setWaiting contract failure to application
+  socket.on('no-nfts', (wallet) => {
+    socket.emit('mistaken-transfer', wallet);
   });
 });
 
