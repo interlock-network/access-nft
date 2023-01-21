@@ -71,7 +71,7 @@ async function setAuthenticated(message, socket) {
           // too much gas required?
           if (gasRequired > gasLimit) {
             console.log(`ACCESSNFT:`.red.bold +
-              'tx aborted, gas required is greater than the acceptable gas limit.');
+              ' tx aborted, gas required is greater than the acceptable gas limit.');
             socket.emit('setauthenticated-failure', notAuthenticatedId, message.wallet);
             socket.disconnect();
             console.log(`ACCESSNFT:`.blue.bold +
@@ -82,7 +82,8 @@ async function setAuthenticated(message, socket) {
           // did the contract revert due to any errors?
           if (result.toHuman().Ok.flags == 'Revert') {
             let error = output.toHuman().Err;
-            console.log(`ACCESSNFT:`.red.bold + ` setAuthenticated TX reverted due to: ${error}`);
+            console.log(`ACCESSNFT:`.red.bold +
+              ` setAuthenticated TX reverted due to: ${error}`);
             socket.emit('setauthenticated-failure', notAuthenticatedId, message.wallet);
             console.log(`ACCESSNFT:`.blue.bold +
               ` setAuthenticated socket disconnecting, ID ` + `${socket.id}`.cyan.bold);
@@ -123,7 +124,7 @@ async function setAuthenticated(message, socket) {
 
   } catch(error) {
 
-    console.log(`ACCESSNFT:`.red.bold + error);
+    console.log(`ACCESSNFT: `.red.bold + error);
     console.log(`ACCESSNFT:`.blue.bold +
       ` setAuthenticated socket disconnecting, ID ` + `${socket.id}`.cyan.bold);
     socket.disconnect();

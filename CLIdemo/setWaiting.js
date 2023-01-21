@@ -20,7 +20,7 @@ const MEG = 1000000;
 const gasLimit = 100000 * MEG;
 const storageDepositLimit = null;
 
-async function setWaiting(message) {
+async function setWaiting(message, socket) {
 
   try {
 
@@ -38,20 +38,24 @@ async function setWaiting(message) {
 
     // too much gas required?
     if (gasRequired > gasLimit) {
-      console.log('tx aborted, gas required is greater than the acceptable gas limit.');
+      console.log(`ACCESSNFT:`.red.bold +
+        ' tx aborted, gas required is greater than the acceptable gas limit.');
       socket.emit('setwaiting-failure', message.id, message.wallet);
       socket.disconnect();
-      console.log(`ACCESSNFT:`.blue.bold + ` setWaiting socket disconnected`);
+      console.log(`ACCESSNFT:`.blue.bold +
+        ` setAuthenticated socket disconnecting, ID ` + `${socket.id}`.cyan.bold);
       process.exit();
     }
 
     // did the contract revert due to any errors?
     if (result.toHuman().Ok.flags == 'Revert') {
       let error = output.toHuman().Err;
-      console.log(`ACCESSNFT:`.red.bold + ` setWaiting TX reverted due to: ${error}`);
+      console.log(`ACCESSNFT:`.red.bold +
+        ` setWaiting TX reverted due to: ${error}`);
       socket.emit('setwaiting-failure', message.id, message.wallet);
       socket.disconnect();
-      console.log(`ACCESSNFT:`.blue.bold + ` setWaiting socket disconnected`);
+      console.log(`ACCESSNFT:`.blue.bold +
+        ` setAuthenticated socket disconnecting, ID ` + `${socket.id}`.cyan.bold);
       process.exit();
     }
 
@@ -64,14 +68,18 @@ async function setWaiting(message) {
       } else if (result.status.isFinalized) {
         socket.emit('awaiting-transfer', message.id, message.wallet);
         socket.disconnect();
-        console.log(`ACCESSNFT:`.blue.bold + ` setWaiting socket disconnected`);
+        console.log(`ACCESSNFT:`.blue.bold +
+          ` setAuthenticated socket disconnecting, ID ` + `${socket.id}`.cyan.bold);
         process.exit();
       }
     });
 
   } catch(error) {
 
-    console.log(error);
+    console.log(`ACCESSNFT: `.red.bold + error);
+    console.log(`ACCESSNFT:`.blue.bold +
+      ` setAuthenticated socket disconnecting, ID ` + `${socket.id}`.cyan.bold);
+    socket.disconnect();
     process.exit();
   }
 }
