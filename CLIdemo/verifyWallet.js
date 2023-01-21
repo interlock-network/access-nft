@@ -29,18 +29,25 @@ const ISAUTHENTICATED = '0x697361757468656e74696361746564';
 const ISWAITING = '0x697377616974696e67';
 const AMOUNT = 1;
 
-async function verify(message) {
+async function verifyWallet(message, socket) {
 
   try {
 
     console.log(`ACCESSNFT:`.green.bold +
       ` initiating authentication process for wallet ` + `${message.wallet}`.magenta.bold);
 
-    // setup session constants
+    // setup session
+    console.log('');
+    console.log(`ACCESSNFT:`.blue.bold +
+      ` establishing connection with Aleph Zero blockchain...`);
     const wsProvider = new WsProvider(WEB_SOCKET);
     const keyring = new Keyring({type: 'sr25519'});
     const api = await ApiPromise.create({ provider: wsProvider });
-    const contract = new ContractPromise(api, ACCESS_METADATA, CONTRACT_ADDRESS);
+    console.log(`ACCESSNFT:`.blue.bold +
+      ` established websocket connection with Aleph Zero blockchain ` + `${WEB_SOCKET}`.cyan.bold);
+    console.log('');
+
+    const contract = new ContractPromise(api, ACCESS_METADATA, ACCESS_CONTRACT);
     const OWNER_PAIR = keyring.addFromUri(OWNER_MNEMONIC);
 
     // setup socket connection with autheticateWallet script
@@ -92,9 +99,9 @@ async function verify(message) {
           console.log(`ACCESSNFT:`.red.bold +
             ` need wallet ` + `${message.wallet}`.magenta.bold + ` to return validation transfer`);
           socket.emit('still-waiting', notAuthenticatedId, message.wallet);
-          socket.disconnect();
           console.log(`ACCESSNFT:`.blue.bold +
-            ` verifyWallet socket disconnected`);
+            ` setAuthenticated socket disconnecting, ID ` + `${socket.id}`.cyan.bold);
+          socket.disconnect();
           process.exit();
         }
       }
@@ -105,9 +112,9 @@ async function verify(message) {
         console.log(`ACCESSNFT:`.red.bold +
           ` all nfts in wallet ` + `${message.wallet}`.magenta.bold + ` already authenticated`);
         socket.emit('all-nfts-authenticated', message.wallet);
-        socket.disconnect();
         console.log(`ACCESSNFT:`.blue.bold +
-          ` verifyWallet socket disconnected`);
+          ` setAuthenticated socket disconnecting, ID ` + `${socket.id}`.cyan.bold);
+        socket.disconnect();
         process.exit();
 
       // or send micropayment to unauthenticated nft
@@ -135,26 +142,34 @@ async function verify(message) {
 
         console.log(`ACCESSNFT:`.green.bold +
           ` setWaiting successful`);
-        socket.disconnect();
         console.log(`ACCESSNFT:`.blue.bold +
-          ` verifyWallet socket disconnected`);
+          ` setAuthenticated socket disconnecting, ID ` + `${socket.id}`.cyan.bold);
+        socket.disconnect();
         process.exit();
       }
     }
 
   } catch(error) {
 
-    // if ilockerCollection throws error, then no nfts are present
-    console.log(error);
-    process.send('no nfts present');
+    console.log(`ACCESSNFT:`.red.bold + error);
+    console.log(`ACCESSNFT:`.blue.bold +
+      ` setAuthenticated socket disconnecting, ID ` + `${socket.id}`.cyan.bold);
+    socket.disconnect();
     process.exit();
   }
 }
 
-// run main verify()
-process.on('message', (message) => {
-  verify(message).catch((error) => {
-    console.error(error);
-    process.exit(-1);
+process.on('message', message => {
+
+  // setup socket connection with autheticateWallet script
+  var socket = io.connect('http://localhost:3000', {reconnect: true});
+  socket.on('connect', () => {
+    console.log(`ACCESSNFT:`.blue.bold +
+      ` verifyWallet socket connected, ID ` + `${socket.id}`.cyan.bold);
+    
+    verifyWallet(message, socket).catch((error) => {
+      console.error(error);
+      process.exit(-1);
+    });
   });
 });
