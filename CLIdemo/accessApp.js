@@ -11,8 +11,11 @@ async function accessApp(socket, wallet) {
 
   try {
 
-  socket.emit('authenticate-nft', wallet);
-
+    socket.emit('authenticate-nft', wallet);
+    socket.on('disconnect', (socket) => {
+      console.log(`ACCESSNFT:`.blue.bold +
+        ` authenticateWallet socket disconnected, ID ` + `${socket.id}`.cyan.bold);
+    });
   } catch(error) {
 
     console.log(`ACCESSNFT:`.red.bold + error);
