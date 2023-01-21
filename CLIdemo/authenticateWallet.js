@@ -13,14 +13,12 @@
 //
 
 const colors = require('colors');
-const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const fork = require('child_process').fork;
 const verifyWallet = path.resolve('verifyWallet.js');
 const getCredentials = path.resolve('getCredentials.js');
 const setAuthenticated = path.resolve('setAuthenticated.js');
 const { ApiPromise, WsProvider, Keyring } = require('@polkadot/api');
-const { ContractPromise, CodePromise } = require('@polkadot/api-contract');
 require('dotenv').config();
 
 // server
@@ -30,14 +28,10 @@ var io = require('socket.io')(http);
 const PORT = 3000;
 
 // constants
-const OWNER_MNEMONIC = process.env.OWNER_MNEMONIC;
-const OWNER_ADDRESS = process.env.OWNER_ADDRESS;
 const WEB_SOCKET = process.env.WEB_SOCKET;
-const metadata = require('./access_metadata.json');
 const AMOUNT = 1;
 
-
-async function listen(message, socket) {
+async function authenticateWallet(message, socket) {
 
   // establish connection with blockchain
   const wsProvider = new WsProvider(WEB_SOCKET);
@@ -51,10 +45,6 @@ async function listen(message, socket) {
   console.log('');
   console.log(`           ! please initialize or connect NFT access application`.bold);
   console.log('');
-
-  // create signing keypair
-  const keyring = new Keyring({type: 'sr25519'});
-  const OWNER_pair = keyring.addFromUri(OWNER_MNEMONIC);
 
   let notAuthenticatedId;
 
@@ -108,7 +98,7 @@ io.on('connection', (socket) => {
   socket.on('authenticate-nft', (wallet) => {
 
     const verifyWalletChild = fork(verifyWallet);
-    verifyWalletChild.send({wallet: wallet});
+    verifyWalletChild.send(wallet);
   }); 
 
   // relay authentication success to application
@@ -154,7 +144,7 @@ http.listen(PORT, () => {
 });
 
 // initiate async function that listens for transfer events
-listen().catch((error) => {
+authenticateWallet().catch((error) => {
   console.error(error);
   process.exit(-1);
 });

@@ -11,7 +11,8 @@
 // imports
 const { ApiPromise, WsProvider, Keyring } = require('@polkadot/api');
 const { ContractPromise, CodePromise } = require('@polkadot/api-contract');
-const sqlite3 = require('sqlite3').verbose();
+var io = require('socket.io-client');
+const colors = require('colors');
 const path = require('path');
 const fork = require('child_process').fork;
 const setWaiting = path.resolve('setWaiting.js');
@@ -19,7 +20,7 @@ require('dotenv').config();
 
 // constants
 const ACCESS_METADATA = require('./ACCESS_METADATA.json');
-const CONTRACT_ADDRESS = process.env.CONTRACT_ADDRESS;
+const ACCESS_CONTRACT = process.env.ACCESS_CONTRACT;
 const OWNER_MNEMONIC = process.env.OWNER_MNEMONIC;
 const APP_PROCESS = process.env.APP_PROCESS;
 const WEB_SOCKET = process.env.WEB_SOCKET;
@@ -65,7 +66,7 @@ async function verifyWallet(message, socket) {
       ` and checking that wallet contains unauthenticated nfts`);
 
     // get NFT collection for wallet
-    let { gasRequired, storageDeposit, result, output } =
+    var { gasRequired, storageDeposit, result, output } =
       await contract.query['ilockerCollection']
         (OWNER_PAIR.address, {}, message.wallet);
 
@@ -77,7 +78,7 @@ async function verifyWallet(message, socket) {
       for (nft in collection.ok) {
 
         // get attribute isathenticated state
-        let { gasRequired, storageDeposit, result, output } =
+        var { gasRequired, storageDeposit, result, output } =
           await contract.query['psp34Metadata::getAttribute']
 	    (OWNER_PAIR.address, {}, {u64: collection.ok[nft].u64}, ISAUTHENTICATED);
         let authenticated = JSON.parse(JSON.stringify(output));
@@ -89,7 +90,7 @@ async function verifyWallet(message, socket) {
         }
 
         // get attribute iswaiting state
-        let { gasRequired, storageDeposit, result, output } =
+        var { gasRequired, storageDeposit, result, output } =
           await contract.query['psp34Metadata::getAttribute']
 	    (OWNER_PAIR.address, {}, {u64: collection.ok[nft].u64}, ISWAITING);
         let waiting = JSON.parse(JSON.stringify(output));
@@ -151,7 +152,7 @@ async function verifyWallet(message, socket) {
 
   } catch(error) {
 
-    console.log(`ACCESSNFT:`.red.bold + error);
+    console.log(`ACCESSNFT: `.red.bold + error);
     console.log(`ACCESSNFT:`.blue.bold +
       ` setAuthenticated socket disconnecting, ID ` + `${socket.id}`.cyan.bold);
     socket.disconnect();

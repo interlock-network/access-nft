@@ -11,9 +11,9 @@ const { ContractPromise, CodePromise } = require('@polkadot/api-contract');
 require('dotenv').config();
 
 // constants
-const access_metadata = require('./access_metadata.json');
-const access_contract = process.env.CONTRACT_ADDRESS;
-const OWNER_mnemonic = process.env.OWNER_MNEMONIC;
+const ACCESS_METADATA = require('./access_metadata.json');
+const ACCESS_CONTRACT = process.env.ACCESS_CONTRACT;
+const OWNER_MNEMONIC = process.env.OWNER_MNEMONIC;
 
 // constants
 const MEG = 1000000;
@@ -28,14 +28,8 @@ async function setWaiting(message) {
     const wsProvider = new WsProvider('wss://ws.test.azero.dev');
     const keyring = new Keyring({type: 'sr25519'});
     const api = await ApiPromise.create({ provider: wsProvider });
-    const contract = new ContractPromise(api, access_metadata, access_contract);
-    const OWNER_pair = keyring.addFromUri(OWNER_mnemonic);
-
-    // setup socket connection with autheticateWallet script
-    var socket = io.connect('http://localhost:3000', {reconnect: true});
-    socket.on('connect', (socket) => {
-      console.log(`ACCESSNFT:`.blue.bold + ` setWaiting socket connected`);
-    });
+    const contract = new ContractPromise(api, ACCESS_METADATA, ACCESS_CONTRACT);
+    const OWNER_pair = keyring.addFromUri(OWNER_MNEMONIC);
 
     // perform dry run to check for errors
     const { gasRequired, storageDeposit, result, output } =
@@ -83,8 +77,16 @@ async function setWaiting(message) {
 }
 
 process.on('message', message => {
-  setWaiting(message).catch((error) => {
-    console.error(error);
-    process.exit(-1);
+
+  // setup socket connection with autheticateWallet script
+  var socket = io.connect('http://localhost:3000', {reconnect: true});
+  socket.on('connect', () => {
+    console.log(`ACCESSNFT:`.blue.bold +
+      ` setWaiting socket connected, ID ` + `${socket.id}`.cyan.bold);
+    
+    setWaiting(message, socket).catch((error) => {
+      console.error(error);
+      process.exit(-1);
+    });
   });
 });

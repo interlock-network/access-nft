@@ -12,7 +12,7 @@ require('dotenv').config();
 
 // constants
 const ACCESS_METADATA = require('./ACCESS_METADATA.json');
-const ACCESS_CONTRACT = process.env.CONTRACT_ADDRESS;
+const ACCESS_CONTRACT = process.env.ACCESS_CONTRACT;
 const OWNER_MNEMONIC = process.env.OWNER_MNEMONIC;
 const WEB_SOCKET = process.env.WEB_SOCKET;
 
