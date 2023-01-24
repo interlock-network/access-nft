@@ -16,10 +16,23 @@ const colors = require('colors');
 const path = require('path');
 const fork = require('child_process').fork;
 const setWaiting = path.resolve('setWaiting.js');
+const { BN } = require('@polkadot/util');
+const WeightV2 = require('@polkadot/types/interfaces');
 require('dotenv').config();
 
+// specify color formatting
+const color = require('cli-color');
+const red = color.red.bold;
+const green = color.green.bold;
+const blue = color.blue.bold;
+const cyan = color.cyan.bold;
+const yellow = color.yellow.bold;
+const magenta = color.magenta.bold;
+
+
+
 // constants
-const ACCESS_METADATA = require('./ACCESS_METADATA.json');
+const ACCESS_METADATA = require('./access/target/ink/metadata.json');
 const ACCESS_CONTRACT = process.env.ACCESS_CONTRACT;
 const OWNER_MNEMONIC = process.env.OWNER_MNEMONIC;
 const APP_PROCESS = process.env.APP_PROCESS;
@@ -34,18 +47,19 @@ async function verifyWallet(wallet, socket) {
 
   try {
 
-    console.log(`ACCESSNFT:`.green.bold +
-      ` initiating authentication process for wallet ` + `${wallet}`.magenta.bold);
+    console.log(green(`ACCESSNFT:`) +
+      ` initiating authentication process for wallet ` + magenta(`${wallet}`));
 
     // setup session
     console.log('');
-    console.log(`ACCESSNFT:`.blue.bold +
-      ` establishing connection with Aleph Zero blockchain...`);
+    console.log(blue(`ACCESSNFT:`) +
+      ` establishing verifyWallet websocket connection with Aleph Zero blockchain...`);
     const wsProvider = new WsProvider(WEB_SOCKET);
     const keyring = new Keyring({type: 'sr25519'});
     const api = await ApiPromise.create({ provider: wsProvider });
-    console.log(`ACCESSNFT:`.blue.bold +
-      ` established websocket connection with Aleph Zero blockchain ` + `${WEB_SOCKET}`.cyan.bold);
+    console.log(blue(`ACCESSNFT:`) +
+      ` established verifyWallet websocket connection with Aleph Zero blockchain ` +
+      cyan(`${WEB_SOCKET}`));
     console.log('');
 
     const contract = new ContractPromise(api, ACCESS_METADATA, ACCESS_CONTRACT);
@@ -54,48 +68,59 @@ async function verifyWallet(wallet, socket) {
     let notAuthenticated = false;
     let notAuthenticatedId;
 
-    console.log(`ACCESSNFT:`.yellow.bold +
-      ` checking if waiting for micropayment from wallet ` + `${wallet}`.magenta.bold);
-    console.log(`ACCESSNFT:`.yellow.bold +
+    console.log(yellow(`ACCESSNFT:`) +
+      ` checking if waiting for micropayment from wallet ` + magenta(`${wallet}`));
+    console.log(yellow(`ACCESSNFT:`) +
       ` and checking that wallet contains unauthenticated nfts`);
+
+    // define special type for gas weights
+    type WeightV2 = InstanceType<typeof WeightV2>;
+    const gasLimit = api.registry.createType('WeightV2', {
+      refTime: 2**53 - 1,
+      proofSize: 2**53 - 1,
+    }) as WeightV2;
 
     // get NFT collection for wallet
     var { gasRequired, storageDeposit, result, output } =
-      await contract.query['ilockerCollection']
-        (OWNER_PAIR.address, {}, wallet);
+      await contract.query['ilockerCollection'](
+        OWNER_PAIR.address, {gasLimit}, wallet);
 
     // check if the call was successful
     if (result.isOk) {
 
       // find nft to authenticate
       const collection = JSON.parse(JSON.stringify(output));
-      for (nft in collection.ok) {
+      const array = Array.from(collection.ok.ok);
+      let nft: any;
+      for (nft of array) {
 
         // get attribute isathenticated state
         var { gasRequired, storageDeposit, result, output } =
           await contract.query['psp34Metadata::getAttribute']
-	    (OWNER_PAIR.address, {}, {u64: collection.ok[nft].u64}, ISAUTHENTICATED);
+	    (OWNER_PAIR.address, {gasLimit}, {u64: nft.u64}, ISAUTHENTICATED);
         let authenticated = JSON.parse(JSON.stringify(output));
 
+	console.log(authenticated.ok)
+
         // record nft id of one that has not yet been authenticated
-        if (authenticated == FALSE) {
+        if (authenticated.ok == FALSE) {
           notAuthenticated = true;
-          notAuthenticatedId = collection.ok[nft].u64;
+          notAuthenticatedId = nft.u64;
         }
 
         // get attribute iswaiting state
         var { gasRequired, storageDeposit, result, output } =
           await contract.query['psp34Metadata::getAttribute']
-	    (OWNER_PAIR.address, {}, {u64: collection.ok[nft].u64}, ISWAITING);
+	    (OWNER_PAIR.address, {gasLimit}, {u64: nft.u64}, ISWAITING);
         let waiting = JSON.parse(JSON.stringify(output));
         
         // if any one of wallet's nfts are waiting, they must resolve this first
-        if (waiting == TRUE) {
-          console.log(`ACCESSNFT:`.red.bold +
-            ` need wallet ` + `${wallet}`.magenta.bold + ` to return validation transfer`);
+        if (waiting.ok == TRUE) {
+          console.log(red(`ACCESSNFT:`) +
+            ` need wallet ` + magenta(`${wallet}`) + ` to return validation transfer`);
           socket.emit('still-waiting', notAuthenticatedId, wallet);
-          console.log(`ACCESSNFT:`.blue.bold +
-            ` setAuthenticated socket disconnecting, ID ` + `${socket.id}`.cyan.bold);
+          console.log(blue(`ACCESSNFT:`) +
+            ` verifyWallet socket disconnecting, ID ` + cyan(`${socket.id}`));
           socket.disconnect();
           process.exit();
         }
@@ -103,11 +128,11 @@ async function verifyWallet(wallet, socket) {
     } else {
 
       // no nfts present
-      console.log(`ACCESSNFT:`.red.bold +
-        ` no nfts present for wallet ` + `${wallet}`.magenta.bold);
+      console.log(red(`ACCESSNFT:`) +
+        ` no nfts present for wallet ` + magenta(`${wallet}`));
       socket.emit('no-nfts', wallet);
-      console.log(`ACCESSNFT:`.blue.bold +
-        ` setAuthenticated socket disconnecting, ID ` + `${socket.id}`.cyan.bold);
+      console.log(blue(`ACCESSNFT:`) +
+        ` verifyWallet socket disconnecting, ID ` + magenta(`${socket.id}`));
       socket.disconnect();
       process.exit();
     }
@@ -115,21 +140,21 @@ async function verifyWallet(wallet, socket) {
     // if after checking collection there are no nfts to authenticate
     if (notAuthenticated == false) {
 
-      console.log(`ACCESSNFT:`.red.bold +
-        ` all nfts in wallet ` + `${wallet}`.magenta.bold + ` already authenticated`);
+      console.log(red(`ACCESSNFT:`) +
+        ` all nfts in wallet ` + magenta(`${wallet}`) + ` already authenticated`);
       socket.emit('all-nfts-authenticated', wallet);
-      console.log(`ACCESSNFT:`.blue.bold +
-        ` setAuthenticated socket disconnecting, ID ` + `${socket.id}`.cyan.bold);
+      console.log(blue(`ACCESSNFT:`) +
+        ` verifyWallet socket disconnecting, ID ` + cyan(`${socket.id}`));
       socket.disconnect();
       process.exit();
 
     // or send micropayment to unauthenticated nft
     } else if (notAuthenticated == true) {
 
-      console.log(`ACCESSNFT:`.green.bold +
-        ` wallet contains valid unauthenticated nft: ID ` + `${notAuthenticatedId}`.magenta.bold);
-      console.log(`ACCESSNFT:`.green.bold +
-        ` sending micro payment to wallet ` + `${wallet}`.magenta.bold);
+      console.log(green(`ACCESSNFT:`) +
+        ` wallet contains valid unauthenticated nft: ID ` + magenta(`${notAuthenticatedId}`));
+      console.log(green(`ACCESSNFT:`) +
+        ` sending micro payment to wallet ` + magenta(`${wallet}`));
 
       // create transfer object
       const transfer = api.tx.balances.transfer(wallet, AMOUNT);
@@ -137,28 +162,26 @@ async function verifyWallet(wallet, socket) {
       // Sign and send the transaction using our account
       const hash = await transfer.signAndSend(OWNER_PAIR);
 
-      console.log(`ACCESSNFT:`.yellow.bold +
+      console.log(green(`ACCESSNFT:`) +
         ` authentication transfer sent`);
-      console.log(`ACCESSNFT:`.yellow.bold +
-        ` for record, transfer hash is ` + `${hash.toHex()}`.magenta.bold);
+      console.log(green(`ACCESSNFT:`) +
+        ` for record, transfer hash is ` + magenta(`${hash.toHex()}`));
         
       // change contract state to indicate waiting for return micropayment transaction
       const setWaitingChild = fork(setWaiting);
       setWaitingChild.send({id: notAuthenticatedId, wallet: wallet});
 
-      console.log(`ACCESSNFT:`.green.bold +
-        ` setWaiting successful`);
-      console.log(`ACCESSNFT:`.blue.bold +
-        ` setAuthenticated socket disconnecting, ID ` + `${socket.id}`.cyan.bold);
+      console.log(blue(`ACCESSNFT:`) +
+        ` verifyWallet socket disconnecting, ID ` + cyan(`${socket.id}`));
       socket.disconnect();
       process.exit();
     }
 
   } catch(error) {
 
-    console.log(`ACCESSNFT: `.red.bold + error);
-    console.log(`ACCESSNFT:`.blue.bold +
-      ` setAuthenticated socket disconnecting, ID ` + `${socket.id}`.cyan.bold);
+    console.log(red(`ACCESSNFT: `) + error);
+    console.log(blue(`ACCESSNFT:`) +
+      ` verifyWallet socket disconnecting, ID ` + cyan(`${socket.id}`));
     socket.disconnect();
     process.exit();
   }
@@ -169,8 +192,8 @@ process.on('message', wallet => {
   // setup socket connection with autheticateWallet script
   var socket = io.connect('http://localhost:3000', {reconnect: true});
   socket.on('connect', () => {
-    console.log(`ACCESSNFT:`.blue.bold +
-      ` verifyWallet socket connected, ID ` + `${socket.id}`.cyan.bold);
+    console.log(blue(`ACCESSNFT:`) +
+      ` verifyWallet socket connected, ID ` + cyan(`${socket.id}`));
     
     verifyWallet(wallet, socket).catch((error) => {
       console.error(error);

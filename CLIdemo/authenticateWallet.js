@@ -28,16 +28,23 @@ var io = require('socket.io')(http);
 const PORT = 3000;
 
 // constants
+const OWNER_ADDRESS = process.env.OWNER_ADDRESS;
 const WEB_SOCKET = process.env.WEB_SOCKET;
 const AMOUNT = 1;
 
 async function authenticateWallet(message, socket) {
 
-  // establish connection with blockchain
+  // setup session
+  console.log('');
+  console.log(`ACCESSNFT:`.blue.bold +
+    ` establishing setWaiting websocket connection with Aleph Zero blockchain...`);
   const wsProvider = new WsProvider(WEB_SOCKET);
+  const keyring = new Keyring({type: 'sr25519'});
   const api = await ApiPromise.create({ provider: wsProvider });
   console.log(`ACCESSNFT:`.blue.bold +
-    ` established websocket connection with Aleph Zero blockchain ` + `${WEB_SOCKET}`.magenta.bold);
+    ` established setWaiting websocket connection with Aleph Zero blockchain ` +
+    `${WEB_SOCKET}`.cyan.bold);
+  console.log('');
   
   // successful authenticateWallet initialization
   console.log(`ACCESSNFT:`.green.bold +
@@ -45,7 +52,6 @@ async function authenticateWallet(message, socket) {
   console.log('');
   console.log(`           ! please initialize or connect NFT access application`.bold);
   console.log('');
-
   let notAuthenticatedId;
 
   // subscribe to system events via storage

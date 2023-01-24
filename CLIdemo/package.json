@@ -1,0 +1,28 @@
+{
+  "name": "accessnft",
+  "version": "1.0.0",
+  "description": "a generalized access NFT implementation including authentication and credential management",
+  "main": "authenticateWallet.js",
+  "scripts": {
+    "test": "auth"
+  },
+  "repository": {
+    "type": "git",
+    "url": "none"
+  },
+  "author": "Blair Munro",
+  "license": "GPL-3.0-or-later",
+  "dependencies": {
+    "@polkadot/api": "^9.12.1",
+    "@polkadot/api-contract": "^9.12.1",
+    "@polkadot/util": "^10.2.6",
+    "child_process": "^1.0.2",
+    "cli-color": "^2.0.3",
+    "colors": "^1.4.0",
+    "dotenv": "^16.0.3",
+    "path": "^0.12.7",
+    "socket.io": "^4.5.4",
+    "socket.io-client": "^4.5.4",
+    "typescript": "^4.9.4"
+  }
+}

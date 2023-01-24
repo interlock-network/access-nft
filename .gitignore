@@ -15,7 +15,9 @@ venv
 bigtable-admin.json
 bigtable-writer.json
 *.db
-package*
+package-lock*
+*.js
+
 
 
 # rust stuff

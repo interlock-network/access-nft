@@ -11,7 +11,7 @@ const { ContractPromise, CodePromise } = require('@polkadot/api-contract');
 require('dotenv').config();
 
 // constants
-const ACCESS_METADATA = require('./ACCESS_METADATA.json');
+const ACCESS_METADATA = require(process.env.ACCESS_METADATA);
 const ACCESS_CONTRACT = process.env.ACCESS_CONTRACT;
 const OWNER_MNEMONIC = process.env.OWNER_MNEMONIC;
 const WEB_SOCKET = process.env.WEB_SOCKET;
@@ -28,12 +28,13 @@ async function setAuthenticated(message, socket) {
     // setup session
     console.log('');
     console.log(`ACCESSNFT:`.blue.bold +
-      ` establishing connection with Aleph Zero blockchain...`);
+      ` establishing setAuthenticated websocket connection with Aleph Zero blockchain...`);
     const wsProvider = new WsProvider(WEB_SOCKET);
     const keyring = new Keyring({type: 'sr25519'});
     const api = await ApiPromise.create({ provider: wsProvider });
     console.log(`ACCESSNFT:`.blue.bold +
-      ` established websocket connection with Aleph Zero blockchain ` + `${WEB_SOCKET}`.cyan.bold);
+      ` established setAuthenticated websocket connection with Aleph Zero blockchain ` +
+      `${WEB_SOCKET}`.cyan.bold);
     console.log('');
 
     const contract = new ContractPromise(api, ACCESS_METADATA, ACCESS_CONTRACT);
@@ -44,7 +45,7 @@ async function setAuthenticated(message, socket) {
     let { gasRequired, storageDeposit, result, output } =
       await contract.query['ilockerCollection']
         (OWNER_PAIR.address, {}, message.wallet);
-
+console.log(result);
     // check if the call was successful
     if (result.isOk) {
 

@@ -11,7 +11,7 @@ const { ContractPromise, CodePromise } = require('@polkadot/api-contract');
 require('dotenv').config();
 
 // constants
-const ACCESS_METADATA = require('./access_metadata.json');
+const ACCESS_METADATA = require(process.env.ACCESS_METADATA);
 const ACCESS_CONTRACT = process.env.ACCESS_CONTRACT;
 const OWNER_MNEMONIC = process.env.OWNER_MNEMONIC;
 
@@ -25,9 +25,17 @@ async function setWaiting(message, socket) {
   try {
 
     // setup session
-    const wsProvider = new WsProvider('wss://ws.test.azero.dev');
+    console.log('');
+    console.log(`ACCESSNFT:`.blue.bold +
+      ` establishing setWaiting websocket connection with Aleph Zero blockchain...`);
+    const wsProvider = new WsProvider(WEB_SOCKET);
     const keyring = new Keyring({type: 'sr25519'});
     const api = await ApiPromise.create({ provider: wsProvider });
+    console.log(`ACCESSNFT:`.blue.bold +
+      ` established setWaiting websocket connection with Aleph Zero blockchain ` +
+      `${WEB_SOCKET}`.cyan.bold);
+    console.log('');
+
     const contract = new ContractPromise(api, ACCESS_METADATA, ACCESS_CONTRACT);
     const OWNER_pair = keyring.addFromUri(OWNER_MNEMONIC);
 
@@ -43,7 +51,7 @@ async function setWaiting(message, socket) {
       socket.emit('setwaiting-failure', message.id, message.wallet);
       socket.disconnect();
       console.log(`ACCESSNFT:`.blue.bold +
-        ` setAuthenticated socket disconnecting, ID ` + `${socket.id}`.cyan.bold);
+        ` setWaiting socket disconnecting, ID ` + `${socket.id}`.cyan.bold);
       process.exit();
     }
 
@@ -55,7 +63,7 @@ async function setWaiting(message, socket) {
       socket.emit('setwaiting-failure', message.id, message.wallet);
       socket.disconnect();
       console.log(`ACCESSNFT:`.blue.bold +
-        ` setAuthenticated socket disconnecting, ID ` + `${socket.id}`.cyan.bold);
+        ` setWaiting socket disconnecting, ID ` + `${socket.id}`.cyan.bold);
       process.exit();
     }
 
@@ -66,10 +74,12 @@ async function setWaiting(message, socket) {
       if (result.status.isInBlock) {
         console.log('in a block');
       } else if (result.status.isFinalized) {
+        console.log(green(`ACCESSNFT:`) +
+          ` setWaiting successful`);
         socket.emit('awaiting-transfer', message.id, message.wallet);
         socket.disconnect();
         console.log(`ACCESSNFT:`.blue.bold +
-          ` setAuthenticated socket disconnecting, ID ` + `${socket.id}`.cyan.bold);
+          ` setWaiting socket disconnecting, ID ` + `${socket.id}`.cyan.bold);
         process.exit();
       }
     });
