@@ -8,6 +8,8 @@ const colors = require('colors');
 var io = require('socket.io-client');
 const { ApiPromise, WsProvider, Keyring } = require('@polkadot/api');
 const { ContractPromise, CodePromise } = require('@polkadot/api-contract');
+const { BN } = require('@polkadot/util');
+const WeightV2 = require('@polkadot/types/interfaces');
 require('dotenv').config();
 
 // specify color formatting
@@ -24,6 +26,7 @@ const ACCESS_METADATA = require(process.env.ACCESS_METADATA);
 const ACCESS_CONTRACT = process.env.ACCESS_CONTRACT;
 const OWNER_MNEMONIC = process.env.OWNER_MNEMONIC;
 const WEB_SOCKET = process.env.WEB_SOCKET;
+const ISWAITING = '0x697377616974696e67';
 
 // constants
 const MEG = 1000000;
@@ -49,34 +52,44 @@ async function setAuthenticated(message, socket) {
     const contract = new ContractPromise(api, ACCESS_METADATA, ACCESS_CONTRACT);
     const OWNER_PAIR = keyring.addFromUri(OWNER_MNEMONIC);
 
+    // define special type for gas weights
+    type WeightV2 = InstanceType<typeof WeightV2>;
+    const gasLimit = api.registry.createType('WeightV2', {
+      refTime: 2**53 - 1,
+      proofSize: 2**53 - 1,
+    }) as WeightV2;
 
     // get NFT collection for wallet
     let { gasRequired, storageDeposit, result, output } =
       await contract.query['ilockerCollection']
-        (OWNER_PAIR.address, {}, message.wallet);
-console.log(result);
+        (OWNER_PAIR.address, {gasLimit}, message.wallet);
+
+     let notAuthenticatedId;
+
     // check if the call was successful
     if (result.isOk) {
 
-      // find the waiting nft to authenticate
+      // find nft to authenticate
       const collection = JSON.parse(JSON.stringify(output));
-      for (nft in collection.ok) {
+      const array = Array.from(collection.ok.ok);
+      let nft: any;
+      for (nft of array) {
 
         // get attribute iswaiting state
         let { gasRequired, storageDeposit, result, output } =
           await contract.query['psp34Metadata::getAttribute']
-            (OWNER_PAIR.address, {}, {u64: collection.ok[nft].u64}, ISWAITING);
+            (OWNER_PAIR.address, {gasLimit}, {u64: nft.u64}, ISWAITING);
         let waiting = JSON.parse(JSON.stringify(output));
 
         // record nft id of one that is waiting and ready to authenticate
         if (waiting == TRUE) {
 
-          notAuthenticatedId = collection.ok[nft].u64;
+          notAuthenticatedId = nft.u64;
 
           // perform dry run to check for errors
           const { gasRequired, storageDeposit, result, output } =
             await contract.query['setAuthenticated']
-              (OWNER_PAIR.address, {}, {u64: notAuthenticatedId});
+              (OWNER_PAIR.address, {gasLimit}, {u64: notAuthenticatedId});
 
           // too much gas required?
           if (gasRequired > gasLimit) {
@@ -109,7 +122,7 @@ console.log(result);
               console.log('in a block');
             } else if (result.status.isFinalized) {
               console.log(green(`ACCESSNFT:`) +
-                ` NFT ID ` + `${id}`.magenta.bold +
+                ` NFT ID ` + magenta(`${id}`) +
 		` successfully authenticated for wallet ` + magenta(`${message.wallet}`));
               socket.emit('nft-authenticated', notAuthenticatedId, messsage.wallet);
               socket.disconnect();
@@ -124,7 +137,7 @@ console.log(result);
 
       // no nfts present
       console.log(red(`ACCESSNFT:`) +
-        ` no nfts present for wallet ` + `${message.wallet}`.magenta.bold);
+        ` no nfts present for wallet ` + magenta(`${message.wallet}`));
       socket.emit('no-nfts', message.wallet);
       console.log(blue(`ACCESSNFT:`) +
         ` setAuthenticated socket disconnecting, ID ` + cyan(`${socket.id}`));
