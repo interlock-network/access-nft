@@ -29,8 +29,6 @@ const cyan = color.cyan.bold;
 const yellow = color.yellow.bold;
 const magenta = color.magenta.bold;
 
-
-
 // constants
 const ACCESS_METADATA = require('./access/target/ink/metadata.json');
 const ACCESS_CONTRACT = process.env.ACCESS_CONTRACT;
