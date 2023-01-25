@@ -21,6 +21,16 @@ const setAuthenticated = path.resolve('setAuthenticated.js');
 const { ApiPromise, WsProvider, Keyring } = require('@polkadot/api');
 require('dotenv').config();
 
+
+// specify color formatting
+const color = require('cli-color');
+const red = color.red.bold;
+const green = color.green.bold;
+const blue = color.blue.bold;
+const cyan = color.cyan.bold;
+const yellow = color.yellow.bold;
+const magenta = color.magenta.bold;
+
 // server
 var app = require('express')();
 var http = require('http').Server(app);
@@ -32,25 +42,25 @@ const OWNER_ADDRESS = process.env.OWNER_ADDRESS;
 const WEB_SOCKET = process.env.WEB_SOCKET;
 const AMOUNT = 1;
 
-async function authenticateWallet(message, socket) {
+async function authenticateWallet() {
 
   // setup session
   console.log('');
-  console.log(`ACCESSNFT:`.blue.bold +
+  console.log(blue(`ACCESSNFT:`) +
     ` establishing setWaiting websocket connection with Aleph Zero blockchain...`);
   const wsProvider = new WsProvider(WEB_SOCKET);
   const keyring = new Keyring({type: 'sr25519'});
   const api = await ApiPromise.create({ provider: wsProvider });
-  console.log(`ACCESSNFT:`.blue.bold +
+  console.log(blue(`ACCESSNFT:`) +
     ` established setWaiting websocket connection with Aleph Zero blockchain ` +
-    `${WEB_SOCKET}`.cyan.bold);
+    cyan(`${WEB_SOCKET}`));
   console.log('');
   
   // successful authenticateWallet initialization
-  console.log(`ACCESSNFT:`.green.bold +
-    ` core access authentication service initialized`.bold);
+  console.log(green(`ACCESSNFT:`) +
+    color.bold(` core access authentication service initialized`));
   console.log('');
-  console.log(`           ! please initialize or connect NFT access application`.bold);
+  console.log(color.bold(`           ! please initialize or connect NFT access application`));
   console.log('');
   let notAuthenticatedId;
 
@@ -73,19 +83,19 @@ async function authenticateWallet(message, socket) {
         if ( event.data[0] == OWNER_ADDRESS &&
           event.data[2] == AMOUNT) {
 
-          console.log(`ACCESSNFT:`.green.bold +
-            ` authentication transfer complete to wallet ` + `${event.data[1]}`.magenta.bold);
-          console.log(`ACCESSNFT:`.yellow.bold +
-            ` waiting on returning verification transfer to wallet ` + `${event.data[1]}`.magenta.bold);
+          console.log(green(`ACCESSNFT:`) +
+            ` authentication transfer complete to wallet ` + magenta(`${event.data[1]}`));
+          console.log(yellow(`ACCESSNFT:`) +
+            ` waiting on returning verification transfer to wallet ` + magenta(`${event.data[1]}`));
         //
         // from wallet holder
         } else if (event.data[1] == OWNER_ADDRESS &&
           event.data[2] == AMOUNT) {
 
-          console.log(`ACCESSNFT:`.green.bold +
-            ` verification transfer complete from wallet ` + `${event.data[0]}`.magenta.bold);
-          console.log(`ACCESSNFT:`.green.bold +
-            ` wallet ` +  `${event.data[0]}`.magenta.bold + ` is verified`);
+          console.log(green(`ACCESSNFT:`) +
+            ` verification transfer complete from wallet ` + magenta(`${event.data[0]}`));
+          console.log(green(`ACCESSNFT:`) +
+            ` wallet ` +  magenta(`${event.data[0]}`) + ` is verified`);
 
           // change contract state to indicate nft is authenticated
           const setAuthenticatedChild = fork(setAuthenticated);
@@ -145,8 +155,8 @@ io.on('connection', (socket) => {
 
 // fire up http server
 http.listen(PORT, () => {
-  console.log(`ACCESSNFT:`.blue.bold +
-    ` listening on ` + `*:`.magenta.bold + `${PORT}`.magenta.bold);
+  console.log(blue(`ACCESSNFT:`) +
+    ` listening on ` + cyan(`*:`) + cyan(`${PORT}`));
 });
 
 // initiate async function that listens for transfer events
