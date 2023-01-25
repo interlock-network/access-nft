@@ -8,6 +8,8 @@ var io = require('socket.io-client');
 const colors = require('colors');
 const { ApiPromise, WsProvider, Keyring } = require('@polkadot/api');
 const { ContractPromise, CodePromise } = require('@polkadot/api-contract');
+const { BN } = require('@polkadot/util');
+const WeightV2 = require('@polkadot/types/interfaces');
 require('dotenv').config();
 
 // specify color formatting
@@ -48,6 +50,13 @@ async function setWaiting(message, socket) {
 
     const contract = new ContractPromise(api, ACCESS_METADATA, ACCESS_CONTRACT);
     const OWNER_pair = keyring.addFromUri(OWNER_MNEMONIC);
+
+    // define special type for gas weights
+    type WeightV2 = InstanceType<typeof WeightV2>;
+    const gasLimit = api.registry.createType('WeightV2', {
+      refTime: 2**53 - 1,
+      proofSize: 2**53 - 1,
+    }) as WeightV2;
 
     // perform dry run to check for errors
     const { gasRequired, storageDeposit, result, output } =
