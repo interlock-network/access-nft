@@ -83,11 +83,38 @@ async function verifyWallet(wallet, socket) {
       await contract.query['ilockerCollection'](
         OWNER_PAIR.address, {gasLimit}, wallet);
 
+    const collection = JSON.parse(JSON.stringify(output));
+
     // check if the call was successful
     if (result.isOk) {
+      
+      // check if OK result is reverted contract that returned error
+      const RESULT = JSON.parse(JSON.stringify(result));
+      if (RESULT.ok.flags == 'Revert') {
+       console.log('chirp') 
+        if (collection.ok.err.hasOwnProperty('custom')) {
+
+          // print custom error
+          let error = collection.ok.err.custom.toString().replace(/0x/, '')
+          console.log(red(`ACCESSNFT:`) +
+            ` ${hexToString(error)}`);
+        } else {
+          
+          // print Error enum type
+          console.log(red(`ACCESSNFT:`) +
+            ` ${collection.ok.err}`);
+        }
+
+        // send message to App relay, and terminated process
+        socket.emit('still-waiting', notAuthenticatedId, wallet);
+        console.log(blue(`ACCESSNFT:`) +
+          ` verifyWallet socket disconnecting, ID ` + cyan(`${socket.id}`));
+        socket.disconnect();
+        process.exit();
+      }
 
       // find nft to authenticate
-      const collection = JSON.parse(JSON.stringify(output));
+      //const collection = JSON.parse(JSON.stringify(output));
       const array = Array.from(collection.ok.ok);
       let nft: any;
       for (nft of array) {
@@ -95,7 +122,7 @@ async function verifyWallet(wallet, socket) {
         // get attribute isathenticated state
         var { gasRequired, storageDeposit, result, output } =
           await contract.query['psp34Metadata::getAttribute']
-	    (OWNER_PAIR.address, {gasLimit}, {u64: nft.u64}, ISAUTHENTICATED);
+            (OWNER_PAIR.address, {gasLimit}, {u64: nft.u64}, ISAUTHENTICATED);
         let authenticated = JSON.parse(JSON.stringify(output));
 
         // record nft id of one that has not yet been authenticated
@@ -107,7 +134,7 @@ async function verifyWallet(wallet, socket) {
         // get attribute iswaiting state
         var { gasRequired, storageDeposit, result, output } =
           await contract.query['psp34Metadata::getAttribute']
-	    (OWNER_PAIR.address, {gasLimit}, {u64: nft.u64}, ISWAITING);
+            (OWNER_PAIR.address, {gasLimit}, {u64: nft.u64}, ISWAITING);
         let waiting = JSON.parse(JSON.stringify(output));
         
         // if any one of wallet's nfts are waiting, they must resolve this first
@@ -123,10 +150,10 @@ async function verifyWallet(wallet, socket) {
       }
     } else {
 
-      // no nfts present
+      // error calling or executing contract, no reversion
       console.log(red(`ACCESSNFT:`) +
-        ` no nfts present for wallet ` + magenta(`${wallet}`));
-      socket.emit('no-nfts', wallet);
+        ` ${result.asErr.toHuman()}`);
+      socket.emit('calling-error', result.asErr.toHuman());
       console.log(blue(`ACCESSNFT:`) +
         ` verifyWallet socket disconnecting, ID ` + magenta(`${socket.id}`));
       socket.disconnect();
@@ -176,6 +203,7 @@ async function verifyWallet(wallet, socket) {
   } catch(error) {
 
     console.log(red(`ACCESSNFT: `) + error);
+    socket.emit('process-error', error)
     console.log(blue(`ACCESSNFT:`) +
       ` verifyWallet socket disconnecting, ID ` + cyan(`${socket.id}`));
     socket.disconnect();
@@ -197,3 +225,17 @@ process.on('message', wallet => {
     });
   });
 });
+
+
+
+function hexToString(hex: String) {
+
+  var str = '';
+  for (var i = 0; i < hex.length; i += 2) {
+    str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+  }
+  return str;
+}
+
+
+
