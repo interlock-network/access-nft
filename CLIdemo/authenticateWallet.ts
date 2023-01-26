@@ -84,7 +84,7 @@ async function authenticateWallet() {
           event.data[2] == AMOUNT) {
 
           console.log(green(`ACCESSNFT:`) +
-            ` authentication transfer complete to wallet ` + magenta(`${event.data[1]}`));
+            color.bold(` authentication transfer complete to wallet `) + magenta(`${event.data[1]}`));
           console.log(yellow(`ACCESSNFT:`) +
             ` waiting on returning verification transfer to wallet ` + magenta(`${event.data[1]}`));
         //
@@ -93,7 +93,7 @@ async function authenticateWallet() {
           event.data[2] == AMOUNT) {
 
           console.log(green(`ACCESSNFT:`) +
-            ` verification transfer complete from wallet ` + magenta(`${event.data[0]}`));
+            color.bold(` verification transfer complete from wallet `) + magenta(`${event.data[0]}`));
           console.log(green(`ACCESSNFT:`) +
             ` wallet ` +  magenta(`${event.data[0]}`) + ` is verified`);
 

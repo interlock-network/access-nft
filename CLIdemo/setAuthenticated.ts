@@ -27,10 +27,12 @@ const ACCESS_CONTRACT = process.env.ACCESS_CONTRACT;
 const OWNER_MNEMONIC = process.env.OWNER_MNEMONIC;
 const WEB_SOCKET = process.env.WEB_SOCKET;
 const ISWAITING = '0x697377616974696e67';
+const TRUE = '0x74727565';
+const FALSE = '0x66616c7365';
 
-// constants
-const MEG = 1000000;
-const gasLimit = 100000 * MEG;
+// these are derived from contracts-ui, plus extra factor for buffer
+const refTime = 8000000000;
+const proofSize = 180000;
 const storageDepositLimit = null;
 
 async function setAuthenticated(message, socket) {
@@ -55,8 +57,8 @@ async function setAuthenticated(message, socket) {
     // define special type for gas weights
     type WeightV2 = InstanceType<typeof WeightV2>;
     const gasLimit = api.registry.createType('WeightV2', {
-      refTime: 2**53 - 1,
-      proofSize: 2**53 - 1,
+      refTime: refTime,
+      proofSize: proofSize,
     }) as WeightV2;
 
     // get NFT collection for wallet
@@ -69,7 +71,7 @@ async function setAuthenticated(message, socket) {
     // check if the call was successful
     if (result.isOk) {
 
-      // find nft to authenticate
+      // find nft to authenticated
       const collection = JSON.parse(JSON.stringify(output));
       const array = Array.from(collection.ok.ok);
       let nft: any;
@@ -82,7 +84,7 @@ async function setAuthenticated(message, socket) {
         let waiting = JSON.parse(JSON.stringify(output));
 
         // record nft id of one that is waiting and ready to authenticate
-        if (waiting == TRUE) {
+        if (waiting.ok == TRUE) {
 
           notAuthenticatedId = nft.u64;
 
@@ -116,15 +118,15 @@ async function setAuthenticated(message, socket) {
 
           // submit doer tx
           let extrinsic = await contract.tx['setAuthenticated']
-            ({ storageDepositLimit, gasLimit }, {u64: notAuthenticatedId})
+            ({storageDepositLimit, gasLimit}, {u64: notAuthenticatedId})
               .signAndSend(OWNER_PAIR, result => {
             if (result.status.isInBlock) {
-              console.log('in a block');
+              console.log(green(`ACCESSNFT:`) + ' setAuthenticated in a block');
             } else if (result.status.isFinalized) {
               console.log(green(`ACCESSNFT:`) +
-                ` NFT ID ` + magenta(`${id}`) +
-		` successfully authenticated for wallet ` + magenta(`${message.wallet}`));
-              socket.emit('nft-authenticated', notAuthenticatedId, messsage.wallet);
+                color.bold(` NFT `) + magenta(`ID ${notAuthenticatedId}`) +
+		color.bold(` successfully authenticated for wallet `) + magenta(`${message.wallet}`));
+              socket.emit('nft-authenticated', notAuthenticatedId, message.wallet);
               socket.disconnect();
               console.log(blue(`ACCESSNFT:`) +
                 ` setAuthenticated socket disconnecting, ID ` + cyan(`${socket.id}`));

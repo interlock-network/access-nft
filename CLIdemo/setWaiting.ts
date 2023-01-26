@@ -31,6 +31,7 @@ const WEB_SOCKET = process.env.WEB_SOCKET;
 const MEG = 1000000;
 const gasLimit = 100000 * MEG;
 const storageDepositLimit = null;
+const fudgeFactor = 100000
 
 async function setWaiting(message, socket) {
 
@@ -54,14 +55,14 @@ async function setWaiting(message, socket) {
     // define special type for gas weights
     type WeightV2 = InstanceType<typeof WeightV2>;
     const gasLimit = api.registry.createType('WeightV2', {
-      refTime: 2**53 - 1,
+      refTime: 6029312000 + fudgeFactor,
       proofSize: 2**53 - 1,
     }) as WeightV2;
 
     // perform dry run to check for errors
     const { gasRequired, storageDeposit, result, output } =
       await contract.query['setWaiting']
-        (OWNER_pair.address, {}, {u64: message.id});
+        (OWNER_pair.address, {gasLimit}, {u64: message.id});
 
     // too much gas required?
     if (gasRequired > gasLimit) {
@@ -91,10 +92,10 @@ async function setWaiting(message, socket) {
       ({ storageDepositLimit, gasLimit }, {u64: message.id})
         .signAndSend(OWNER_pair, result => {
       if (result.status.isInBlock) {
-        console.log('in a block');
+        console.log(green(`ACCESSNFT:`) + ' setWaiting in a block');
       } else if (result.status.isFinalized) {
         console.log(green(`ACCESSNFT:`) +
-          ` setWaiting successful`);
+          color.bold(` setWaiting successful`));
         socket.emit('awaiting-transfer', message.id, message.wallet);
         socket.disconnect();
         console.log(blue(`ACCESSNFT:`) +
@@ -107,7 +108,7 @@ async function setWaiting(message, socket) {
 
     console.log(red(`ACCESSNFT: `) + error);
     console.log(blue(`ACCESSNFT:`) +
-      ` setAuthenticated socket disconnecting, ID ` + cyan(`${socket.id}`));
+      ` setWaiting socket disconnecting, ID ` + cyan(`${socket.id}`));
     socket.disconnect();
     process.exit();
   }

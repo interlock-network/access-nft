@@ -98,8 +98,6 @@ async function verifyWallet(wallet, socket) {
 	    (OWNER_PAIR.address, {gasLimit}, {u64: nft.u64}, ISAUTHENTICATED);
         let authenticated = JSON.parse(JSON.stringify(output));
 
-	console.log(authenticated.ok)
-
         // record nft id of one that has not yet been authenticated
         if (authenticated.ok == FALSE) {
           notAuthenticated = true;
@@ -150,7 +148,7 @@ async function verifyWallet(wallet, socket) {
     } else if (notAuthenticated == true) {
 
       console.log(green(`ACCESSNFT:`) +
-        ` wallet contains valid unauthenticated nft: ID ` + magenta(`${notAuthenticatedId}`));
+        color.bold(` wallet contains valid unauthenticated nft: `) + magenta(`ID ${notAuthenticatedId}`));
       console.log(green(`ACCESSNFT:`) +
         ` sending micro payment to wallet ` + magenta(`${wallet}`));
 
@@ -161,7 +159,7 @@ async function verifyWallet(wallet, socket) {
       const hash = await transfer.signAndSend(OWNER_PAIR);
 
       console.log(green(`ACCESSNFT:`) +
-        ` authentication transfer sent`);
+        color.bold(` authentication transfer sent`));
       console.log(green(`ACCESSNFT:`) +
         ` for record, transfer hash is ` + magenta(`${hash.toHex()}`));
         
