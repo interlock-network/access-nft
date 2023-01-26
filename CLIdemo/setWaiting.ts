@@ -64,6 +64,8 @@ async function setWaiting(message, socket) {
       await contract.query['setWaiting']
         (OWNER_pair.address, {gasLimit}, {u64: message.id});
 
+    const dryrun = JSON.parse(JSON.stringify(output));
+
     // too much gas required?
     if (gasRequired > gasLimit) {
       console.log(red(`ACCESSNFT:`) +
@@ -75,15 +77,28 @@ async function setWaiting(message, socket) {
       process.exit();
     }
 
-    // did the contract revert due to any errors?
-    if (result.toHuman().Ok.flags == 'Revert') {
-      let error = output.toHuman().Err;
-      console.log(red(`ACCESSNFT:`) +
-        ` setWaiting TX reverted due to: ${error}`);
-      socket.emit('setwaiting-failure', message.id, message.wallet);
-      socket.disconnect();
+    // check if OK result is reverted contract that returned error
+    const RESULT = JSON.parse(JSON.stringify(result));
+    if (RESULT.ok.flags == 'Revert') {
+        
+      if (dryrun.ok.err.hasOwnProperty('custom')) {
+
+        // print custom error
+        let error = dryrun.ok.err.custom.toString().replace(/0x/, '')
+        console.log(red(`ACCESSNFT:`) +
+          ` ${hexToString(error)}`);
+      } else {
+          
+        // print Error enum type
+        console.log(red(`ACCESSNFT:`) +
+          ` ${dryrun.ok.err}`);
+      }
+
+      // send message to App relay, and terminated process
+      socket.emit('contract-error', message.id, message.wallet);
       console.log(blue(`ACCESSNFT:`) +
-        ` setWaiting socket disconnecting, ID ` + cyan(`${socket.id}`));
+        ` verifyWallet socket disconnecting, ID ` + cyan(`${socket.id}`));
+      socket.disconnect();
       process.exit();
     }
 
@@ -91,9 +106,13 @@ async function setWaiting(message, socket) {
     let extrinsic = await contract.tx['setWaiting']
       ({ storageDepositLimit, gasLimit }, {u64: message.id})
         .signAndSend(OWNER_pair, result => {
+
       if (result.status.isInBlock) {
+
         console.log(green(`ACCESSNFT:`) + ' setWaiting in a block');
+
       } else if (result.status.isFinalized) {
+
         console.log(green(`ACCESSNFT:`) +
           color.bold(` setWaiting successful`));
         socket.emit('awaiting-transfer', message.id, message.wallet);
@@ -107,6 +126,7 @@ async function setWaiting(message, socket) {
   } catch(error) {
 
     console.log(red(`ACCESSNFT: `) + error);
+    socket.emit('process-error', error)
     console.log(blue(`ACCESSNFT:`) +
       ` setWaiting socket disconnecting, ID ` + cyan(`${socket.id}`));
     socket.disconnect();
@@ -128,3 +148,15 @@ process.on('message', message => {
     });
   });
 });
+
+
+
+
+function hexToString(hex: String) {
+
+  var str = '';
+  for (var i = 0; i < hex.length; i += 2) {
+    str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+  }
+  return str;
+}

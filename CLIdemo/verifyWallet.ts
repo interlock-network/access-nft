@@ -91,7 +91,6 @@ async function verifyWallet(wallet, socket) {
       // check if OK result is reverted contract that returned error
       const RESULT = JSON.parse(JSON.stringify(result));
       if (RESULT.ok.flags == 'Revert') {
-       console.log('chirp') 
         if (collection.ok.err.hasOwnProperty('custom')) {
 
           // print custom error
@@ -106,7 +105,7 @@ async function verifyWallet(wallet, socket) {
         }
 
         // send message to App relay, and terminated process
-        socket.emit('still-waiting', notAuthenticatedId, wallet);
+        socket.emit('contract-error', notAuthenticatedId, wallet);
         console.log(blue(`ACCESSNFT:`) +
           ` verifyWallet socket disconnecting, ID ` + cyan(`${socket.id}`));
         socket.disconnect();
