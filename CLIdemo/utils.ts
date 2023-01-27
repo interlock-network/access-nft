@@ -49,6 +49,10 @@ export async function contractGetter(
 	...args: any[]
 ) {
 
+    // create keypair for owner
+    const keyring = new Keyring({type: 'sr25519'});
+    const OWNER_PAIR = keyring.addFromUri(OWNER_MNEMONIC);
+
     // define special type for gas weights
     type WeightV2 = InstanceType<typeof WeightV2>;
     const gasLimit = api.registry.createType('WeightV2', {
@@ -56,15 +60,12 @@ export async function contractGetter(
       proofSize: 2**53 - 1,
     }) as WeightV2;
 
-
-    const keyring = new Keyring({type: 'sr25519'});
-    const OWNER_PAIR = keyring.addFromUri(OWNER_MNEMONIC);
-
-    // get getter OUTPUT
+    // get getter output
     var { gasRequired, storageDeposit, result, output } =
       await contract.query[method](
         OWNER_PAIR.address, {gasLimit}, ...args);
 
+    // convert to JSON format for convenience
     const OUTPUT = JSON.parse(JSON.stringify(output));
     const RESULT = JSON.parse(JSON.stringify(result));
 
@@ -73,15 +74,17 @@ export async function contractGetter(
       
       // check if OK result is reverted contract that returned error
       if (RESULT.ok.flags == 'Revert') {
+        
+        // is this error a custom error?      
         if (OUTPUT.ok.err.hasOwnProperty('custom')) {
 
-          // print custom error
+          // logging custom error
           let error = OUTPUT.ok.err.custom.toString().replace(/0x/, '')
           console.log(red(`ACCESSNFT:`) +
             ` ${hexToString(error)}`);
         } else {
           
-          // print Error enum type
+          // if not custom then print Error enum type
           console.log(red(`ACCESSNFT:`) +
             ` ${OUTPUT.ok.err}`);
         }
@@ -91,13 +94,73 @@ export async function contractGetter(
       }
     } else {
 
-      // error calling or executing contract, no reversion
+      // loggin calling error and terminate
       console.log(red(`ACCESSNFT:`) +
         ` ${result.asErr.toHuman()}`);
       terminateProcess(socket, origin, 'calling-error', result.asErr.toHuman());
     }
 
-  return [ RESULT, OUTPUT ]
+  return [ gasRequired, storageDeposit, RESULT, OUTPUT ]
+}
+
+
+//
+// call smart contract doer
+//
+export async function contractDoer(
+  api: any,
+  socket: any,
+  contract: any,
+  storageMax: any,
+  storageMin: any,
+  refTimeLimit: any,
+  proofSizeLimit: any,
+  gasMin: any,
+  origin: string,
+  method: string,
+  ...args: any[]
+) {
+
+  // create key pair for owner
+  const keyring = new Keyring({type: 'sr25519'});
+  const OWNER_PAIR = keyring.addFromUri(OWNER_MNEMONIC);
+
+    // define special type for gas weights
+    type WeightV2 = InstanceType<typeof WeightV2>;
+    const gasLimit = api.registry.createType('WeightV2', {
+      refTime: refTimeLimit,
+      proofSize: proofSizeLimit,
+    }) as WeightV2;
+
+  // too much gas required?
+  if (gasMin > gasLimit) {
+	
+    // logging and terminate
+    console.log(red(`ACCESSNFT:`) +
+      ' tx aborted, gas required is greater than the acceptable gas limit.');
+    terminateProcess(socket, origin, 'setwaiting-failure', ...args);
+  }
+
+  // submit doer tx
+  let extrinsic = await contract.tx[method](
+    { storageMax, gasLimit }, ...args)
+      .signAndSend(OWNER_PAIR, result => {
+
+    // when tx hits block
+    if (result.status.isInBlock) {
+
+      // logging
+      console.log(green(`ACCESSNFT:`) + ' setWaiting in a block');
+
+    // when tx is finalized in block, tx is successful
+    } else if (result.status.isFinalized) {
+
+      // logging and terminate
+      console.log(green(`ACCESSNFT:`) +
+        color.bold(` setWaiting successful`));
+      terminateProcess(socket, origin, 'awaiting-transfer', ...args);
+    }
+  });
 }
 
 //
@@ -106,17 +169,23 @@ export async function contractGetter(
 export async function setupSession(): Promise< [any, any] > {
   
     // setup session
+    //
+    // logging
     console.log('');
     console.log(blue(`ACCESSNFT:`) +
       ` establishing verifyWallet websocket connection with Aleph Zero blockchain...`);
+
+    // create api object
     const wsProvider = new WsProvider(WEB_SOCKET);
-    const keyring = new Keyring({type: 'sr25519'});
     const API = await ApiPromise.create({ provider: wsProvider });
+
+    // logging
     console.log(blue(`ACCESSNFT:`) +
       ` established verifyWallet websocket connection with Aleph Zero blockchain ` +
       cyan(`${WEB_SOCKET}`));
     console.log('');
 
+    // create contract object
     const CONTRACT = new ContractPromise(API, ACCESS_METADATA, ACCESS_CONTRACT);
 
     return [ API, CONTRACT ]
@@ -130,10 +199,12 @@ export async function sendMicropayment(
   wallet: string,
   id: number
 ) {
-  
+
+    // create keypair for owner
     const keyring = new Keyring({type: 'sr25519'});
     const OWNER_PAIR = keyring.addFromUri(OWNER_MNEMONIC);
 
+    // logging transfer intention
     console.log(green(`ACCESSNFT:`) +
     color.bold(` wallet contains valid unauthenticated nft: `) + magenta(`ID ${id}`));
     console.log(green(`ACCESSNFT:`) +
@@ -145,6 +216,7 @@ export async function sendMicropayment(
     // Sign and send the transaction using our account
     const hash = await transfer.signAndSend(OWNER_PAIR);
 
+    // loggin transfer success
     console.log(green(`ACCESSNFT:`) +
       color.bold(` authentication transfer sent`));
     console.log(green(`ACCESSNFT:`) +
@@ -160,6 +232,8 @@ export function terminateProcess(
   message: string,
   ...values: any
 ) {
+     
+      // emit message to relay then exit after printing to log
       socket.emit(message, ...values);
       console.log(blue(`ACCESSNFT:`) +
         ` ${origin} socket disconnecting, ID ` + cyan(`${socket.id}`));
@@ -172,10 +246,12 @@ export function terminateProcess(
 //
 function hexToString(hex: String) {
 
+  // iterate through hex string taking byte chunks and converting to ASCII characters
   var str = '';
   for (var i = 0; i < hex.length; i += 2) {
     str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
   }
+
   return str;
 }
 

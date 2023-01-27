@@ -12,6 +12,16 @@ const { BN } = require('@polkadot/util');
 const WeightV2 = require('@polkadot/types/interfaces');
 require('dotenv').config();
 
+
+// utility functions
+import {
+  contractGetter,
+  setupSession,
+  sendMicropayment,
+  terminateProcess,
+  contractDoer
+} from "./utils";
+
 // specify color formatting
 const color = require('cli-color');
 const red = color.red.bold;
@@ -28,109 +38,50 @@ const OWNER_MNEMONIC = process.env.OWNER_MNEMONIC;
 const WEB_SOCKET = process.env.WEB_SOCKET;
 
 // constants
-const MEG = 1000000;
-const gasLimit = 100000 * MEG;
+//
+// null === no limit
+// refTime and proofSize determined by contracts-ui estimation plus fudge-factor
+const refTimeLimit = 6050000000;
+const proofSizeLimit = 150000;
 const storageDepositLimit = null;
-const fudgeFactor = 100000
 
 async function setWaiting(message, socket) {
 
   try {
 
-    // setup session
-    console.log('');
-    console.log(blue(`ACCESSNFT:`) +
-      ` establishing setWaiting websocket connection with Aleph Zero blockchain...`);
-    const wsProvider = new WsProvider(WEB_SOCKET);
-    const keyring = new Keyring({type: 'sr25519'});
-    const api = await ApiPromise.create({ provider: wsProvider });
-    console.log(blue(`ACCESSNFT:`) +
-      ` established setWaiting websocket connection with Aleph Zero blockchain ` +
-      cyan(`${WEB_SOCKET}`));
-    console.log('');
+    // establish connection with blockchain
+    const [ api, contract ] = await setupSession();
 
-    const contract = new ContractPromise(api, ACCESS_METADATA, ACCESS_CONTRACT);
-    const OWNER_pair = keyring.addFromUri(OWNER_MNEMONIC);
+    // check setWaiting contract call via dryrun
+    const [ gasRequired, storageDepositRequired, RESULT_dryrun, OUTPUT_dryrun ] =
+    await contractGetter(
+      api,
+      socket,
+      contract,
+      'setWaiting',
+      'setWaiting',
+      {u64: message.id}
+    );
 
-    // define special type for gas weights
-    type WeightV2 = InstanceType<typeof WeightV2>;
-    const gasLimit = api.registry.createType('WeightV2', {
-      refTime: 6029312000 + fudgeFactor,
-      proofSize: 2**53 - 1,
-    }) as WeightV2;
-
-    // perform dry run to check for errors
-    const { gasRequired, storageDeposit, result, output } =
-      await contract.query['setWaiting']
-        (OWNER_pair.address, {gasLimit}, {u64: message.id});
-
-    const dryrun = JSON.parse(JSON.stringify(output));
-
-    // too much gas required?
-    if (gasRequired > gasLimit) {
-      console.log(red(`ACCESSNFT:`) +
-        ' tx aborted, gas required is greater than the acceptable gas limit.');
-      socket.emit('setwaiting-failure', message.id, message.wallet);
-      socket.disconnect();
-      console.log(blue(`ACCESSNFT:`) +
-        ` setWaiting socket disconnecting, ID ` + cyan(`${socket.id}`));
-      process.exit();
-    }
-
-    // check if OK result is reverted contract that returned error
-    const RESULT = JSON.parse(JSON.stringify(result));
-    if (RESULT.ok.flags == 'Revert') {
-        
-      if (dryrun.ok.err.hasOwnProperty('custom')) {
-
-        // print custom error
-        let error = dryrun.ok.err.custom.toString().replace(/0x/, '')
-        console.log(red(`ACCESSNFT:`) +
-          ` ${hexToString(error)}`);
-      } else {
-          
-        // print Error enum type
-        console.log(red(`ACCESSNFT:`) +
-          ` ${dryrun.ok.err}`);
-      }
-
-      // send message to App relay, and terminated process
-      socket.emit('contract-error', message.id, message.wallet);
-      console.log(blue(`ACCESSNFT:`) +
-        ` verifyWallet socket disconnecting, ID ` + cyan(`${socket.id}`));
-      socket.disconnect();
-      process.exit();
-    }
-
-    // submit doer tx
-    let extrinsic = await contract.tx['setWaiting']
-      ({ storageDepositLimit, gasLimit }, {u64: message.id})
-        .signAndSend(OWNER_pair, result => {
-
-      if (result.status.isInBlock) {
-
-        console.log(green(`ACCESSNFT:`) + ' setWaiting in a block');
-
-      } else if (result.status.isFinalized) {
-
-        console.log(green(`ACCESSNFT:`) +
-          color.bold(` setWaiting successful`));
-        socket.emit('awaiting-transfer', message.id, message.wallet);
-        socket.disconnect();
-        console.log(blue(`ACCESSNFT:`) +
-          ` setWaiting socket disconnecting, ID ` + cyan(`${socket.id}`));
-        process.exit();
-      }
-    });
+    // call doer transaction
+    await contractDoer(
+      api,
+      socket,
+      contract,
+      storageDepositLimit,
+      storageDepositRequired,
+      refTimeLimit,
+      proofSizeLimit,
+      gasRequired,
+      'setWaiting',
+      'setWaiting',
+      {u64: message.id}
+    );
 
   } catch(error) {
 
     console.log(red(`ACCESSNFT: `) + error);
-    socket.emit('process-error', error)
-    console.log(blue(`ACCESSNFT:`) +
-      ` setWaiting socket disconnecting, ID ` + cyan(`${socket.id}`));
-    socket.disconnect();
-    process.exit();
+    terminateProcess(socket, 'verifyWallet', 'process-error', [ message.id, message.wallet ]);
   }
 }
 
