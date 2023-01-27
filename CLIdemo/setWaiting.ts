@@ -36,7 +36,7 @@ async function setWaiting(message, socket) {
     const [ api, contract ] = await setupSession();
 
     // check setWaiting contract call via dryrun
-    const [ gasRequired, storageDepositRequired, RESULT_dryrun, OUTPUT_dryrun ] =
+    const [ gasRequired, storageDeposit, RESULT_dryrun, OUTPUT_dryrun ] =
       await contractGetter(
         api,
         socket,
@@ -52,7 +52,7 @@ async function setWaiting(message, socket) {
       socket,
       contract,
       storageDepositLimit,
-      storageDepositRequired,
+      storageDeposit,
       refTimeLimit,
       proofSizeLimit,
       gasRequired,
@@ -64,7 +64,7 @@ async function setWaiting(message, socket) {
   } catch(error) {
 
     console.log(red(`ACCESSNFT: `) + error);
-    terminateProcess(socket, 'verifyWallet', 'process-error', [ message.id, message.wallet ]);
+    terminateProcess(socket, 'setWaiting', 'process-error', [ message.id, message.wallet ]);
   }
 }
 

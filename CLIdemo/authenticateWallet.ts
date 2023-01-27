@@ -91,7 +91,7 @@ async function authenticateWallet() {
 
           // change contract state to indicate nft is authenticated
           const setAuthenticatedChild = fork(setAuthenticated);
-          setAuthenticatedChild.send({wallet: event.data[0]});
+          setAuthenticatedChild.send(event.data[0]);
         }
       }
     });

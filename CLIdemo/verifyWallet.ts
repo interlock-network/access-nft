@@ -52,7 +52,7 @@ async function verifyWallet(wallet, socket) {
       ` and checking that wallet contains unauthenticated nfts`);
 
     // get nft collection for wallet
-    const [ RESULT_collection, OUTPUT_collection ] =
+    var [ gasRequired, storageDepositRequired, RESULT_collection, OUTPUT_collection ] =
       await contractGetter(
         api,
         socket,
@@ -68,7 +68,7 @@ async function verifyWallet(wallet, socket) {
       for (nft of array) {
 
         // get attribute isathenticated state per nft
-        const [ RESULT_authenticated, OUTPUT_authenticated ] =
+        var [ gasRequired, storageDepositRequired, RESULT_authenticated, OUTPUT_authenticated ] =
           await contractGetter(
             api,
             socket,
@@ -86,7 +86,7 @@ async function verifyWallet(wallet, socket) {
         }
 
         // get attribute isathenticated state
-        const [ RESULT_waiting, OUTPUT_waiting ] =
+        var [ gasRequired, storageDepositRequired, RESULT_waiting, OUTPUT_waiting ] =
           await contractGetter(
             api,
             socket,
