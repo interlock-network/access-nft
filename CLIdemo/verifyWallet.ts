@@ -18,7 +18,6 @@ const cyan = color.cyan.bold;
 const yellow = color.yellow.bold;
 const magenta = color.magenta.bold;
 
-
 // utility functions
 import {
   contractGetter,
@@ -150,6 +149,7 @@ process.on('message', wallet => {
       ` verifyWallet socket connected, ID ` + cyan(`${socket.id}`));
     
     verifyWallet(wallet, socket).catch((error) => {
+
       console.error(error);
       process.exit(-1);
     });

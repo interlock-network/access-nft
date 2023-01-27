@@ -37,14 +37,14 @@ async function setWaiting(message, socket) {
 
     // check setWaiting contract call via dryrun
     const [ gasRequired, storageDepositRequired, RESULT_dryrun, OUTPUT_dryrun ] =
-    await contractGetter(
-      api,
-      socket,
-      contract,
-      'setWaiting',
-      'setWaiting',
-      {u64: message.id}
-    );
+      await contractGetter(
+        api,
+        socket,
+        contract,
+        'setWaiting',
+        'setWaiting',
+        {u64: message.id}
+      );
 
     // call doer transaction
     await contractDoer(
@@ -78,6 +78,7 @@ process.on('message', message => {
       ` setWaiting socket connected, ID ` + cyan(`${socket.id}`));
     
     setWaiting(message, socket).catch((error) => {
+
       console.error(error);
       process.exit(-1);
     });

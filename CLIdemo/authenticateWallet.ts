@@ -12,15 +12,17 @@
 // script to gather credentials in the case of authentication success.
 //
 
-const colors = require('colors');
 const path = require('path');
 const fork = require('child_process').fork;
 const verifyWallet = path.resolve('verifyWallet.js');
 const getCredentials = path.resolve('getCredentials.js');
 const setAuthenticated = path.resolve('setAuthenticated.js');
-const { ApiPromise, WsProvider, Keyring } = require('@polkadot/api');
 require('dotenv').config();
 
+// utility functions
+import {
+  setupSession,
+} from "./utils";
 
 // specify color formatting
 const color = require('cli-color');
@@ -39,22 +41,12 @@ const PORT = 3000;
 
 // constants
 const OWNER_ADDRESS = process.env.OWNER_ADDRESS;
-const WEB_SOCKET = process.env.WEB_SOCKET;
 const AMOUNT = 1;
 
 async function authenticateWallet() {
 
-  // setup session
-  console.log('');
-  console.log(blue(`ACCESSNFT:`) +
-    ` establishing setWaiting websocket connection with Aleph Zero blockchain...`);
-  const wsProvider = new WsProvider(WEB_SOCKET);
-  const keyring = new Keyring({type: 'sr25519'});
-  const api = await ApiPromise.create({ provider: wsProvider });
-  console.log(blue(`ACCESSNFT:`) +
-    ` established setWaiting websocket connection with Aleph Zero blockchain ` +
-    cyan(`${WEB_SOCKET}`));
-  console.log('');
+  // establish connection with blockchain
+  const [ api, contract ] = await setupSession();
   
   // successful authenticateWallet initialization
   console.log(green(`ACCESSNFT:`) +
