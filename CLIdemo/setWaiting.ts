@@ -74,6 +74,7 @@ process.on('message', message => {
   // setup socket connection with autheticateWallet script
   var socket = io.connect('http://localhost:3000', {reconnect: true});
   socket.on('connect', () => {
+
     console.log(blue(`ACCESSNFT:`) +
       ` setWaiting socket connected, ID ` + cyan(`${socket.id}`));
     
