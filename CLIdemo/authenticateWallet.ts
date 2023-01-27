@@ -102,46 +102,19 @@ async function authenticateWallet() {
 // interprocess and server client-app messaging
 io.on('connection', (socket) => {
 
-  // initiate authentication process for a wallet
-  socket.on('authenticate-nft', (wallet) => {
+  // relay all script events to application
+  socket.onAny((message, ...args) => {
 
-    const verifyWalletChild = fork(verifyWallet);
-    verifyWalletChild.send(wallet);
-  }); 
+    if (message == 'authenticate-nft') {
 
-  // relay authentication success to application
-  socket.on('nft-authenticated', (id, wallet) => {
-    socket.emit('authentication-success', id, wallet);
-  });
+      // initiate authentication process for wallet
+      const verifyWalletChild = fork(verifyWallet);
+      verifyWalletChild.send(...args);
+    } else {
 
-  // relay still waiting status to application
-  socket.on('still-waiting', (id, wallet) => {
-    socket.emit('still-need-micropayment', id, wallet);
-  });
-
-  // relay waiting status to application
-  socket.on('awaiting-transfer', (id, wallet) => {
-    socket.emit('need-micropayment', id, wallet);
-  });
-
-  // relay all already authenticated status to application
-  socket.on('all-nfts-authenticated', (wallet) => {
-    socket.emit('nfts-already-authenticated', wallet);
-  });
-
-  // relay setAuthentication contract failure to application
-  socket.on('setauthenticated-failure', (id, wallet) => {
-    socket.emit('failed-setauthenticated', id, wallet);
-  });
-
-  // relay setWaiting contract failure to application
-  socket.on('setwaiting-failure', (id, wallet) => {
-    socket.emit('failed-setwaiting', id, wallet);
-  });
-
-  // relay setWaiting contract failure to application
-  socket.on('no-nfts', (wallet) => {
-    socket.emit('mistaken-transfer', wallet);
+      // relay message to application
+      socket.emit(`apprelay-${message}`, ...args);
+    }
   });
 });
 
