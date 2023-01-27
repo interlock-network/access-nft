@@ -8,7 +8,6 @@ var io = require('socket.io-client');
 const path = require('path');
 const fork = require('child_process').fork;
 const setWaiting = path.resolve('setWaiting.js');
-require('dotenv').config();
 
 // specify color formatting
 const color = require('cli-color');

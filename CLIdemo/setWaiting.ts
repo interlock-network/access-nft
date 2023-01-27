@@ -5,7 +5,6 @@
 
 // imports
 var io = require('socket.io-client');
-require('dotenv').config();
 
 // utility functions
 import {
