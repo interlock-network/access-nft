@@ -158,7 +158,7 @@ export async function contractDoer(
       // logging and terminate
       console.log(green(`ACCESSNFT:`) +
         color.bold(` ${method} successful`));
-      terminateProcess(socket, origin, 'transaction-complete', ...args);
+      terminateProcess(socket, origin, `${method}-complete`, ...args);
     }
   });
 }

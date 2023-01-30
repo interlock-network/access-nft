@@ -113,6 +113,12 @@ io.on('connection', (socket) => {
       const setAuthenticatedChild = fork(setAuthenticated);
       setAuthenticatedChild.send(args[0]);
 
+    } else if (message == 'setAuthenticated-complete') {
+
+      // initiate script that sets credentiails
+      const setCredentialChild = fork(setCredential);
+      setCredentialChild.send();
+      
     } else {
 
       // relay message to application
@@ -138,6 +144,7 @@ socket.on('connect', () => {
     
   // initiate async function above that listens for transfer events
   authenticateWallet(socket).catch((error) => {
+
     console.error(error);
     process.exit(-1);
   });
