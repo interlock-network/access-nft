@@ -138,7 +138,7 @@ export async function contractDoer(
     // logging and terminate
     console.log(red(`ACCESSNFT:`) +
       ' tx aborted, gas required is greater than the acceptable gas limit.');
-    terminateProcess(socket, origin, '${origin}-failure', ...args);
+    terminateProcess(socket, origin, `${origin}-failure`, ...args);
   }
 
   // submit doer tx
@@ -150,7 +150,7 @@ export async function contractDoer(
     if (result.status.isInBlock) {
 
       // logging
-      console.log(green(`ACCESSNFT:`) + ' ${origin} in a block');
+      console.log(yellow(`ACCESSNFT:`) + ` ${origin} in a block`);
 
     // when tx is finalized in block, tx is successful
     } else if (result.status.isFinalized) {
@@ -209,7 +209,7 @@ export async function sendMicropayment(
   // logging transfer intention
   console.log(green(`ACCESSNFT:`) +
     color.bold(` wallet contains valid unauthenticated nft: `) + magenta(`ID ${id}`));
-  console.log(green(`ACCESSNFT:`) +
+  console.log(yellow(`ACCESSNFT:`) +
     ` sending micro payment to wallet ` + magenta(`${wallet}`));
 
   // create transfer object

@@ -63,7 +63,6 @@ async function setAuthenticated(wallet, socket) {
     let nft: any;
     for (nft of array) {
 
-	    console.log('chirp')
       // get attribute iswaiting state
       var [ gasRequired, storageDeposit, RESULT_waiting, OUTPUT_waiting ] =
         await contractGetter(
@@ -112,7 +111,7 @@ async function setAuthenticated(wallet, socket) {
 }
 
 process.on('message', wallet => {
-console.log('setauth')
+
   // setup socket connection with autheticateWallet script
   var socket = io.connect('http://localhost:3000', {reconnect: true});
   socket.on('connect', () => {

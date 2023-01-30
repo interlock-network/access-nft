@@ -17,7 +17,6 @@ const fork = require('child_process').fork;
 const verifyWallet = path.resolve('verifyWallet.js');
 const getCredentials = path.resolve('getCredentials.js');
 const setAuthenticated = path.resolve('setAuthenticated.js');
-var io = require('socket.io-client');
 require('dotenv').config();
 
 // utility functions
@@ -130,6 +129,7 @@ http.listen(PORT, () => {
 
 
 // setup socket connection with autheticateWallet script
+var io = require('socket.io-client');
 var socket = io.connect('http://localhost:3000', {reconnect: true});
 socket.on('connect', () => {
 
