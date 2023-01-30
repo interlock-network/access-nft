@@ -40,7 +40,7 @@ async function verifyWallet(wallet, socket) {
       ` initiating authentication process for wallet ` + magenta(`${wallet}`));
 
     // establish connection with blockchain
-    const [ api, contract ] = await setupSession();
+    const [ api, contract ] = await setupSession('verifyWallet');
 
     // track nfts
     let notAuthenticated = false;
@@ -50,7 +50,7 @@ async function verifyWallet(wallet, socket) {
       ` checking if waiting for micropayment from wallet ` + magenta(`${wallet}`));
     console.log(yellow(`ACCESSNFT:`) +
       ` and checking that wallet contains unauthenticated nfts`);
-
+console.log(wallet)
     // get nft collection for wallet
     var [ gasRequired, storageDepositRequired, RESULT_collection, OUTPUT_collection ] =
       await contractGetter(
@@ -75,7 +75,8 @@ async function verifyWallet(wallet, socket) {
             contract,
             'verifyWallet',
             'psp34Metadata::getAttribute',
-            [ {u64: nft.u64}, ISAUTHENTICATED ],
+            {u64: nft.u64},
+            ISAUTHENTICATED,
           );
         let authenticated = JSON.parse(JSON.stringify(OUTPUT_authenticated));
 
@@ -93,7 +94,8 @@ async function verifyWallet(wallet, socket) {
             contract,
             'verifyWallet',
             'psp34Metadata::getAttribute',
-            [ {u64: nft.u64}, ISWAITING ],
+            {u64: nft.u64},
+            ISWAITING,
           );
         let waiting = JSON.parse(JSON.stringify(OUTPUT_waiting));
         

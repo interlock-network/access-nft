@@ -39,8 +39,9 @@ async function setAuthenticated(wallet, socket) {
 
   try {
 
+	  console.log(wallet)
     // establish connection with blockchain
-    const [ api, contract ] = await setupSession();
+    const [ api, contract ] = await setupSession('setAuthenticated');
 
     var notAuthenticatedId;
 
@@ -50,7 +51,7 @@ async function setAuthenticated(wallet, socket) {
         api,
         socket,
         contract,
-        'authenticateWallet',
+        'setAuthenticated',
         'ilockerCollection',
         wallet,
       );
@@ -61,33 +62,22 @@ async function setAuthenticated(wallet, socket) {
     let nft: any;
     for (nft of array) {
 
-      // get attribute isathenticated state
+	    console.log('chirp')
+      // get attribute iswaiting state
       var [ gasRequired, storageDeposit, RESULT_waiting, OUTPUT_waiting ] =
         await contractGetter(
           api,
           socket,
           contract,
-          'authenticateWallet',
+          'setAuthenticated',
           'psp34Metadata::getAttribute',
-          [ {u64: nft.u64}, ISWAITING ],
+          {u64: nft.u64},
+          ISWAITING,
         ); 
       let waiting = JSON.parse(JSON.stringify(OUTPUT_waiting));
 
       // record nft id of one that is waiting and ready to authenticate
       if (waiting.ok == TRUE) {
-
-        notAuthenticatedId = nft.u64;
-
-        // check setWaiting contract call via dryrun
-        var [ gasRequired, storageDeposit, RESULT_dryrun, OUTPUT_dryrun ] =
-          await contractGetter(
-            api,
-            socket,
-            contract,
-            'setAuthenticated',
-            'setAuthenticated',
-            {u64: nft.u64}
-          );
 
         // call doer transaction
         await contractDoer(
@@ -105,12 +95,6 @@ async function setAuthenticated(wallet, socket) {
         );
       }
     }
-
-    // no nfts waiting
-    console.log(red(`ACCESSNFT:`) +
-      ` no nfts waiting in wallet ` + magenta(`${wallet}`));
-    terminateProcess(socket, 'setAuthenticated', 'none-waiting', wallet );
-
   } catch(error) {
 
     console.log(red(`ACCESSNFT: `) + error);
@@ -119,7 +103,7 @@ async function setAuthenticated(wallet, socket) {
 }
 
 process.on('message', wallet => {
-
+console.log('setauth')
   // setup socket connection with autheticateWallet script
   var socket = io.connect('http://localhost:3000', {reconnect: true});
   socket.on('connect', () => {

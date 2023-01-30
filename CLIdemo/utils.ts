@@ -138,7 +138,7 @@ export async function contractDoer(
     // logging and terminate
     console.log(red(`ACCESSNFT:`) +
       ' tx aborted, gas required is greater than the acceptable gas limit.');
-    terminateProcess(socket, origin, 'setwaiting-failure', ...args);
+    terminateProcess(socket, origin, '${origin}-failure', ...args);
   }
 
   // submit doer tx
@@ -150,15 +150,15 @@ export async function contractDoer(
     if (result.status.isInBlock) {
 
       // logging
-      console.log(green(`ACCESSNFT:`) + ' setWaiting in a block');
+      console.log(green(`ACCESSNFT:`) + ' ${origin} in a block');
 
     // when tx is finalized in block, tx is successful
     } else if (result.status.isFinalized) {
 
       // logging and terminate
       console.log(green(`ACCESSNFT:`) +
-        color.bold(` setWaiting successful`));
-      terminateProcess(socket, origin, 'awaiting-transfer', ...args);
+        color.bold(` ${method} successful`));
+      terminateProcess(socket, origin, 'transaction-complete', ...args);
     }
   });
 }
@@ -166,14 +166,16 @@ export async function contractDoer(
 //
 // setup blockchain connection session
 //
-export async function setupSession() {
+export async function setupSession(
+  origin: string
+) {
   
   // setup session
   //
   // logging
   console.log('');
   console.log(blue(`ACCESSNFT:`) +
-    ` establishing verifyWallet websocket connection with Aleph Zero blockchain...`);
+    ` establishing ${origin} websocket connection with Aleph Zero blockchain...`);
 
   // create api object
   const wsProvider = new WsProvider(WEB_SOCKET);
@@ -181,7 +183,7 @@ export async function setupSession() {
 
   // logging
   console.log(blue(`ACCESSNFT:`) +
-    ` established verifyWallet websocket connection with Aleph Zero blockchain ` +
+    ` established ${origin} websocket connection with Aleph Zero blockchain ` +
     cyan(`${WEB_SOCKET}`));
   console.log('');
 

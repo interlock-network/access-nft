@@ -33,7 +33,7 @@ async function setWaiting(message, socket) {
   try {
 
     // establish connection with blockchain
-    const [ api, contract ] = await setupSession();
+    const [ api, contract ] = await setupSession('setWaiting');
 
     // check setWaiting contract call via dryrun
     const [ gasRequired, storageDeposit, RESULT_dryrun, OUTPUT_dryrun ] =

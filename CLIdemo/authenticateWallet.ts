@@ -17,6 +17,7 @@ const fork = require('child_process').fork;
 const verifyWallet = path.resolve('verifyWallet.js');
 const getCredentials = path.resolve('getCredentials.js');
 const setAuthenticated = path.resolve('setAuthenticated.js');
+var io = require('socket.io-client');
 require('dotenv').config();
 
 // utility functions
@@ -43,10 +44,10 @@ const PORT = 3000;
 const OWNER_ADDRESS = process.env.OWNER_ADDRESS;
 const AMOUNT = 1;
 
-async function authenticateWallet() {
+async function authenticateWallet(socket) {
 
   // establish connection with blockchain
-  const [ api, contract ] = await setupSession();
+  const [ api, contract ] = await setupSession('authenticateWallet');
   
   // successful authenticateWallet initialization
   console.log(green(`ACCESSNFT:`) +
@@ -88,16 +89,12 @@ async function authenticateWallet() {
             color.bold(` verification transfer complete from wallet `) + magenta(`${event.data[0]}`));
           console.log(green(`ACCESSNFT:`) +
             ` wallet ` +  magenta(`${event.data[0]}`) + ` is verified`);
-
-          // change contract state to indicate nft is authenticated
-          const setAuthenticatedChild = fork(setAuthenticated);
-          setAuthenticatedChild.send(event.data[0]);
+          socket.emit('set-authenticated', event.data[0].toHuman());
         }
       }
     });
   });
 }
-
 
 // interprocess and server client-app messaging
 io.on('connection', (socket) => {
@@ -110,6 +107,13 @@ io.on('connection', (socket) => {
       // initiate authentication process for wallet
       const verifyWalletChild = fork(verifyWallet);
       verifyWalletChild.send(...args);
+
+    } else if (message == 'set-authenticated')  {
+   
+      // change contract state to indicate nft is authenticated
+      const setAuthenticatedChild = fork(setAuthenticated);
+      setAuthenticatedChild.send(args[0]);
+
     } else {
 
       // relay message to application
@@ -124,10 +128,17 @@ http.listen(PORT, () => {
     ` listening on ` + cyan(`*:`) + cyan(`${PORT}`));
 });
 
-// initiate async function that listens for transfer events
-authenticateWallet().catch((error) => {
-  console.error(error);
-  process.exit(-1);
+
+// setup socket connection with autheticateWallet script
+var socket = io.connect('http://localhost:3000', {reconnect: true});
+socket.on('connect', () => {
+
+  console.log(blue(`ACCESSNFT:`) +
+    ` verifyWallet socket connected, ID ` + cyan(`${socket.id}`));
+    
+  // initiate async function above that listens for transfer events
+  authenticateWallet(socket).catch((error) => {
+    console.error(error);
+    process.exit(-1);
+  });
 });
-
-
