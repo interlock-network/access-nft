@@ -44,6 +44,7 @@ async function setAuthenticated(wallet, socket) {
     const [ api, contract ] = await setupSession('setAuthenticated');
 
     var notAuthenticatedId;
+    var isWaiting = false;
 
     // get nft collection for wallet
     var [ gasRequired, storageDeposit, RESULT_collection, OUTPUT_collection ] =
@@ -79,6 +80,8 @@ async function setAuthenticated(wallet, socket) {
       // record nft id of one that is waiting and ready to authenticate
       if (waiting.ok == TRUE) {
 
+        isWaiting = true;
+
         // call doer transaction
         await contractDoer(
           api,
@@ -94,6 +97,12 @@ async function setAuthenticated(wallet, socket) {
           {u64: nft.u64}
         );
       }
+    }
+
+    // if no nfts are waiting, then we need to send authentication transfer first
+    if (!isWaiting) {
+      console.log(red(`ACCESSNFT: `) +
+        ` wallet ${wallet} has no waiting nfts`);
     }
   } catch(error) {
 
