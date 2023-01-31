@@ -34,13 +34,13 @@ socket.on('connect', () => {
     ])
     .then((answer) => {
 
-      console.log(answer.wallet);
+      socket.emit('authenticate-nft', answer.wallet);
     })
     .catch((error) => {
     
       if (error.isTtyError) {
 
-        console.log(`ACCESSNFT: ` + error.isTtyError)
+        console.log(red(`ACCESSNFT: `) + error.isTtyError)
       } else {
 
         console.log(red(`ACCESSNFT: `) + error);

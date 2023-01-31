@@ -7,7 +7,6 @@
 const { ApiPromise, WsProvider, Keyring } = require('@polkadot/api');
 const { ContractPromise, CodePromise } = require('@polkadot/api-contract');
 var io = require('socket.io-client');
-const colors = require('colors');
 const path = require('path');
 const fork = require('child_process').fork;
 const setWaiting = path.resolve('setWaiting.js');

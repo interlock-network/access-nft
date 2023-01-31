@@ -58,7 +58,7 @@ async function verifyWallet(wallet, socket) {
         socket,
         contract,
         'verifyWallet',
-        'ilockerCollection',
+        'getCollection',
         wallet,
       );
 

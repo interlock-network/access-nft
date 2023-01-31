@@ -39,7 +39,6 @@ async function setAuthenticated(wallet, socket) {
 
   try {
 
-	  console.log(wallet)
     // establish connection with blockchain
     const [ api, contract ] = await setupSession('setAuthenticated');
 
@@ -53,7 +52,7 @@ async function setAuthenticated(wallet, socket) {
         socket,
         contract,
         'setAuthenticated',
-        'ilockerCollection',
+        'getCollection',
         wallet,
       );
     const collection = JSON.parse(JSON.stringify(OUTPUT_collection));
