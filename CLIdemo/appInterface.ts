@@ -5,7 +5,7 @@
 
 // imports
 import { io } from 'socket.io-client';
-const inquirer = require('inquirer');
+import { inquirer } from 'inquirer';
 
 // specify color formatting
 import * as color from 'cli-color';
@@ -18,7 +18,7 @@ const magenta = color.magenta.bold;
 
 
 // setup socket connection with autheticateWallet script
-var socket = io'http://localhost:3000');
+var socket = io('http://localhost:3000');
 socket.on('connect', () => {
 
   console.log(blue(`ACCESSNFT:`) +
