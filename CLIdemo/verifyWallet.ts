@@ -5,7 +5,7 @@
 
 // imports
 var io = require('socket.io-client');
-const path = require('path');
+import * as path from 'path';
 const fork = require('child_process').fork;
 const setWaiting = path.resolve('setWaiting.js');
 
