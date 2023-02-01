@@ -3,12 +3,12 @@
 // PSP34 ACCESS NFT AUTHENTICATION
 //
 
-// imports
+// imports (anything polkadot with node-js must be required)
 const { ApiPromise, WsProvider, Keyring } = require('@polkadot/api');
 const { ContractPromise, CodePromise } = require('@polkadot/api-contract');
-//import { io } from 'socket.io-client';
-const { BN } = require('@polkadot/util');
 const WeightV2 = require('@polkadot/types/interfaces');
+
+// environment constants
 import * as dotenv from 'dotenv';
 dotenv.config();
 
