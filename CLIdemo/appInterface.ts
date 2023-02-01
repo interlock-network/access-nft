@@ -5,7 +5,7 @@
 
 // imports
 import { io } from 'socket.io-client';
-import { inquirer } from 'inquirer';
+import * as inquirer from 'inquirer';
 
 // specify color formatting
 import * as color from 'cli-color';

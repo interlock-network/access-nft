@@ -12,7 +12,8 @@ const fork = require('child_process').fork;
 const setWaiting = path.resolve('setWaiting.js');
 const { BN } = require('@polkadot/util');
 const WeightV2 = require('@polkadot/types/interfaces');
-require('dotenv').config();
+import * as dotenv from 'dotenv';
+dotenv.config();
 
 // specify color formatting
 import * as color from 'cli-color';

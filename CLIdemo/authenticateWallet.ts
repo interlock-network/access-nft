@@ -17,7 +17,8 @@ const fork = require('child_process').fork;
 const verifyWallet = path.resolve('verifyWallet.js');
 const setCredentials = path.resolve('setCredentials.js');
 const setAuthenticated = path.resolve('setAuthenticated.js');
-require('dotenv').config();
+import * as dotenv from 'dotenv';
+dotenv.config();
 
 // utility functions
 import {
@@ -116,8 +117,8 @@ io.on('connection', (socket) => {
     } else if (message == 'setAuthenticated-complete') {
 
       // initiate script that sets credentiails
-      const setCredentialChild = fork(setCredentials);
-      setCredentialChild.send('');
+ //     const setCredentialChild = fork(setCredentials);
+   //   setCredentialChild.send('');
       
     } else {
 

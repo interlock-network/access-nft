@@ -9,6 +9,14 @@ import { fork } from 'child_process';
 import * as path from 'path';
 const setWaiting = path.resolve('setWaiting.js');
 
+// utility functions
+import {
+  contractGetter,
+  setupSession,
+  sendMicropayment,
+  terminateProcess
+} from "./utils";
+
 // specify color formatting
 import * as color from 'cli-color';
 const red = color.red.bold;
@@ -17,14 +25,6 @@ const blue = color.blue.bold;
 const cyan = color.cyan.bold;
 const yellow = color.yellow.bold;
 const magenta = color.magenta.bold;
-
-// utility functions
-import {
-  contractGetter,
-  setupSession,
-  sendMicropayment,
-  terminateProcess
-} from "./utils";
 
 // constants
 const TRUE = '0x74727565';
