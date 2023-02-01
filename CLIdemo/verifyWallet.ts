@@ -50,7 +50,7 @@ async function verifyWallet(wallet, socket) {
       ` checking if waiting for micropayment from wallet ` + magenta(`${wallet}`));
     console.log(yellow(`ACCESSNFT:`) +
       ` and checking that wallet contains unauthenticated nfts`);
-console.log(wallet)
+
     // get nft collection for wallet
     var [ gasRequired, storageDepositRequired, RESULT_collection, OUTPUT_collection ] =
       await contractGetter(
