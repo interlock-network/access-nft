@@ -15,7 +15,7 @@ import {
 } from "./utils";
 
 // specify color formatting
-import { color } from 'cli-color';
+import * as color from 'cli-color';
 const red = color.red.bold;
 const blue = color.blue.bold;
 const cyan = color.cyan.bold;

@@ -6,7 +6,7 @@
 // imports
 const { ApiPromise, WsProvider, Keyring } = require('@polkadot/api');
 const { ContractPromise, CodePromise } = require('@polkadot/api-contract');
-var io = require('socket.io-client');
+//import { io } from 'socket.io-client';
 const path = require('path');
 const fork = require('child_process').fork;
 const setWaiting = path.resolve('setWaiting.js');
@@ -15,7 +15,7 @@ const WeightV2 = require('@polkadot/types/interfaces');
 require('dotenv').config();
 
 // specify color formatting
-const color = require('cli-color');
+import * as color from 'cli-color';
 const red = color.red.bold;
 const green = color.green.bold;
 const blue = color.blue.bold;

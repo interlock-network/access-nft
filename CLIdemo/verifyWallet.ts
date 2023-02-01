@@ -10,7 +10,7 @@ import * as path from 'path';
 const setWaiting = path.resolve('setWaiting.js');
 
 // specify color formatting
-import { color } from 'cli-color';
+import * as color from 'cli-color';
 const red = color.red.bold;
 const green = color.green.bold;
 const blue = color.blue.bold;
