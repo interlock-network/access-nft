@@ -39,10 +39,12 @@ const yellow = color.yellow.bold;
 const magenta = color.magenta.bold;
 
 // server
-var app = require('express')();
-var http = require('http').Server(app);
-var io = require('socket.io')(http);
-const PORT = 3000;
+import * as express from 'express';
+import { createServer } from 'http';
+import { Server } from 'socket.io';
+const app = express();
+const httpServer = createServer(app);
+const io = new Server(httpServer);
 
 // constants
 const OWNER_ADDRESS = process.env.OWNER_ADDRESS;
@@ -133,15 +135,16 @@ io.on('connection', (socket) => {
 });
 
 // fire up http server
-http.listen(PORT, () => {
+const PORT = 3000;
+httpServer.listen(PORT, () => {
   console.log(blue(`ACCESSNFT:`) +
     ` listening on ` + cyan(`*:`) + cyan(`${PORT}`));
 });
 
-
-// setup socket connection with autheticateWallet script
-var io = require('socket.io-client');
-var socket = io.connect('http://localhost:3000', {reconnect: true});
+// setup socket connection to server with listenting
+// part of the autheticateWallet script
+var ioclient = require('socket.io-client');
+var socket = ioclient(`http://localhost:${PORT}`);
 socket.on('connect', () => {
 
   console.log(blue(`ACCESSNFT:`) +
