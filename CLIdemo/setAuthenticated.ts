@@ -4,7 +4,7 @@
 //
 
 // imports
-var io = require('socket.io-client');
+import { io } from 'socket.io-client';
 
 // utility functions
 import {
@@ -112,7 +112,7 @@ async function setAuthenticated(wallet, socket) {
 process.on('message', wallet => {
 
   // setup socket connection with autheticateWallet script
-  var socket = io.connect('http://localhost:3000', {reconnect: true});
+  var socket = io('http://localhost:3000');
   socket.on('connect', () => {
 
     console.log(blue(`ACCESSNFT:`) +
