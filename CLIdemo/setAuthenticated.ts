@@ -15,7 +15,7 @@ import {
 } from "./utils";
 
 // specify color formatting
-const color = require('cli-color');
+import { color } from 'cli-color';
 const red = color.red.bold;
 const green = color.green.bold;
 const blue = color.blue.bold;

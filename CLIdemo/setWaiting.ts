@@ -4,7 +4,7 @@
 //
 
 // imports
-var io = require('socket.io-client');
+import { io } from 'socket.io-client';
 
 // utility functions
 import {
@@ -15,7 +15,7 @@ import {
 } from "./utils";
 
 // specify color formatting
-const color = require('cli-color');
+import { color } from 'cli-color';
 const red = color.red.bold;
 const blue = color.blue.bold;
 const cyan = color.cyan.bold;
@@ -71,7 +71,7 @@ async function setWaiting(message, socket) {
 process.on('message', message => {
 
   // setup socket connection with autheticateWallet script
-  var socket = io.connect('http://localhost:3000', {reconnect: true});
+  var socket = io('http://localhost:3000');
   socket.on('connect', () => {
 
     console.log(blue(`ACCESSNFT:`) +
