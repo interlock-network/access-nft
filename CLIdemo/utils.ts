@@ -7,9 +7,6 @@
 const { ApiPromise, WsProvider, Keyring } = require('@polkadot/api');
 const { ContractPromise, CodePromise } = require('@polkadot/api-contract');
 //import { io } from 'socket.io-client';
-const path = require('path');
-const fork = require('child_process').fork;
-const setWaiting = path.resolve('setWaiting.js');
 const { BN } = require('@polkadot/util');
 const WeightV2 = require('@polkadot/types/interfaces');
 import * as dotenv from 'dotenv';
