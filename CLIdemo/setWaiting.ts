@@ -18,7 +18,7 @@ import {
 import * as color from 'cli-color';
 const red = color.red.bold;
 const blue = color.blue.bold;
-const cyan = color.cyan.bold;
+const cyan = color.cyan;
 
 // constants
 //

@@ -34,9 +34,9 @@ import * as color from 'cli-color';
 const red = color.red.bold;
 const green = color.green.bold;
 const blue = color.blue.bold;
-const cyan = color.cyan.bold;
+const cyan = color.cyan;
 const yellow = color.yellow.bold;
-const magenta = color.magenta.bold;
+const magenta = color.magenta;
 
 // server
 import * as express from 'express';
@@ -138,7 +138,7 @@ io.on('connection', (socket) => {
 const PORT = 3000;
 httpServer.listen(PORT, () => {
   console.log(blue(`ACCESSNFT:`) +
-    ` listening on ` + cyan(`*:`) + cyan(`${PORT}`));
+    ` listening on ` + cyan(`*:${PORT}`));
 });
 
 // setup socket connection to server with listenting

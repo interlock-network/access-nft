@@ -20,9 +20,9 @@ import * as color from 'cli-color';
 const red = color.red.bold;
 const green = color.green.bold;
 const blue = color.blue.bold;
-const cyan = color.cyan.bold;
+const cyan = color.cyan;
 const yellow = color.yellow.bold;
-const magenta = color.magenta.bold;
+const magenta = color.magenta;
 
 // constants
 const ACCESS_METADATA = require('./access/target/ink/metadata.json');
@@ -150,7 +150,7 @@ export async function contractDoer(
     if (result.status.isInBlock) {
 
       // logging
-      console.log(yellow(`ACCESSNFT:`) + ` ${origin} in a block`);
+      console.log(yellow(`ACCESSNFT:`) + ` ${method} in a block`);
 
     // when tx is finalized in block, tx is successful
     } else if (result.status.isFinalized) {
@@ -208,7 +208,7 @@ export async function sendMicropayment(
 
   // logging transfer intention
   console.log(green(`ACCESSNFT:`) +
-    color.bold(` wallet contains valid unauthenticated nft: `) + magenta(`ID ${id}`));
+    color.bold(` wallet contains valid unauthenticated nft: `) + red(`ID ${id}`));
   console.log(yellow(`ACCESSNFT:`) +
     ` sending micro payment to wallet ` + magenta(`${wallet}`));
 

@@ -23,9 +23,9 @@ import * as color from 'cli-color';
 const red = color.red.bold;
 const green = color.green.bold;
 const blue = color.blue.bold;
-const cyan = color.cyan.bold;
+const cyan = color.cyan;
 const yellow = color.yellow.bold;
-const magenta = color.magenta.bold;
+const magenta = color.magenta;
 
 // constants
 const TRUE = '0x74727565';
