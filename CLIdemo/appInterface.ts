@@ -26,10 +26,11 @@ socket.on('connect', () => {
    
   inquirer
     .prompt([
+
       {
         name: 'wallet',
         type: 'input',
-        message: 'Please enter the wallet address you would like to authenticate:'
+        message: 'Please enter the wallet address holding an NFT that you would like to authenticate:'
       },
     ])
     .then((answer) => {

@@ -12,7 +12,7 @@
 // script to gather credentials in the case of authentication success.
 //
 
-const path = require('path');
+const path =require('path');
 const fork = require('child_process').fork;
 const verifyWallet = path.resolve('verifyWallet.js');
 const setCredentials = path.resolve('setCredentials.js');
@@ -117,7 +117,7 @@ io.on('connection', (socket) => {
 
       // initiate script that sets credentiails
       const setCredentialChild = fork(setCredentials);
-      setCredentialChild.send();
+      setCredentialChild.send('');
       
     } else {
 
