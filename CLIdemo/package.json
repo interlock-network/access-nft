@@ -16,6 +16,7 @@
     "@polkadot/api": "^9.12.1",
     "@polkadot/api-contract": "^9.12.1",
     "@polkadot/util": "^10.2.6",
+    "@types/node": "^18.11.18",
     "child_process": "^1.0.2",
     "cli-color": "^2.0.3",
     "dotenv": "^16.0.3",
