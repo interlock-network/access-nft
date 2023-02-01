@@ -5,8 +5,8 @@
 
 // imports
 import { io } from 'socket.io-client';
+import { fork } from 'child_process';
 import * as path from 'path';
-const fork = require('child_process').fork;
 const setWaiting = path.resolve('setWaiting.js');
 
 // specify color formatting
