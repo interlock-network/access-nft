@@ -12,11 +12,15 @@
 // script to gather credentials in the case of authentication success.
 //
 
-const path =require('path');
 import { fork } from 'child_process';
+
+// child process paths
+import * as path from 'path';
 const verifyWallet = path.resolve('verifyWallet.js');
 const setCredentials = path.resolve('setCredentials.js');
 const setAuthenticated = path.resolve('setAuthenticated.js');
+
+// environment constants
 import * as dotenv from 'dotenv';
 dotenv.config();
 
