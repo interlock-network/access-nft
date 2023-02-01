@@ -13,7 +13,7 @@
 //
 
 const path =require('path');
-const fork = require('child_process').fork;
+import { fork } from 'child_process';
 const verifyWallet = path.resolve('verifyWallet.js');
 const setCredentials = path.resolve('setCredentials.js');
 const setAuthenticated = path.resolve('setAuthenticated.js');
@@ -106,7 +106,7 @@ io.on('connection', (socket) => {
 
       // initiate authentication process for wallet
       const verifyWalletChild = fork(verifyWallet);
-      verifyWalletChild.send(...args);
+      verifyWalletChild.send(args[0]);
 
     } else if (message == 'set-authenticated')  {
    
