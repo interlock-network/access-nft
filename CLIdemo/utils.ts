@@ -87,14 +87,14 @@ export async function contractGetter(
       }
 
       // send message to App relay, and terminated process
-      terminateProcess(socket, origin, 'contract-error', ...args);
+      terminateProcess(socket, origin, 'contract-error', [...args]);
     }
   } else {
 
     // loggin calling error and terminate
     console.log(red(`ACCESSNFT:`) +
       ` ${result.asErr.toHuman()}`);
-    terminateProcess(socket, origin, 'calling-error', result.asErr.toHuman());
+    terminateProcess(socket, origin, 'calling-error', [result.asErr.toHuman()]);
   }
 
   return [ gasRequired, storageDeposit, RESULT, OUTPUT ]
@@ -135,7 +135,7 @@ export async function contractDoer(
     // logging and terminate
     console.log(red(`ACCESSNFT:`) +
       ' tx aborted, gas required is greater than the acceptable gas limit.');
-    terminateProcess(socket, origin, `${origin}-failure`, ...args);
+    terminateProcess(socket, origin, `${origin}-failure`, [...args]);
   }
 
   // submit doer tx
@@ -155,7 +155,7 @@ export async function contractDoer(
       // logging and terminate
       console.log(green(`ACCESSNFT:`) +
         color.bold(` ${method} successful`));
-      terminateProcess(socket, origin, `${method}-complete`, ...args);
+      terminateProcess(socket, origin, `${method}-complete`, [...args]);
     }
   });
 }
@@ -220,6 +220,8 @@ export async function sendMicropayment(
     color.bold(` authentication transfer sent`));
   console.log(green(`ACCESSNFT:`) +
     ` for record, transfer hash is ` + magenta(`${hash.toHex()}`));
+
+  return hash.toHex()
 }
 
 //
@@ -229,11 +231,12 @@ export function terminateProcess(
   socket: any,
   origin: string,
   message: string,
-  ...values: any
+  values: any[],
 ) {
      
-  // emit message to relay then exit after printing to log
-  socket.emit(message, ...values);
+  // emit message to parent process and relay then exit after printing to log
+  process.send(message);
+  socket.emit(origin, message, values);
   console.log(blue(`ACCESSNFT:`) +
     ` ${origin} socket disconnecting, ID ` + cyan(`${socket.id}`));
   socket.disconnect();

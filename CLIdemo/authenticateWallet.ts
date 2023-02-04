@@ -50,6 +50,10 @@ const io = new Server(httpServer);
 const OWNER_ADDRESS = process.env.OWNER_ADDRESS;
 const AMOUNT = 1;
 
+// map to keep track of waiting wallet transfers
+// mapping is [wallet -> socketID]
+var walletIDs = new Map();
+
 async function authenticateWallet(socket) {
 
   // establish connection with blockchain
@@ -95,7 +99,28 @@ async function authenticateWallet(socket) {
             color.bold(` verification transfer complete from wallet `) + magenta(`${event.data[0]}`));
           console.log(green(`ACCESSNFT:`) +
             ` wallet ` +  magenta(`${event.data[0]}`) + ` is verified`);
-          socket.emit('set-authenticated', event.data[0].toHuman());
+        
+	  // change contract state to indicate nft is authenticated
+          const setAuthenticatedChild = fork(setAuthenticated);
+          setAuthenticatedChild.send(event.data[0]);
+
+          // listen for results of setAuthenticated process child
+	  setAuthenticatedChild.on('message', () => {
+
+            // communitcate to client application that isauthenticated is set true
+            io.to(walletIDs.get(event.data[0].toHuman())).emit('setAuthenticate-complete');
+/*
+            // fork process to set credentials provided at authenticate-wallet call
+            const setCredentialsChild = fork(setCredentials);
+            setCredentialsChild.send({wallet: event.data[0], mapping: walletIDs});
+            
+            // listen for results of 
+            setCredentialsChild.on('setCredentials-complete', () => {
+
+              io.to(walletIDs.get(event.data[0])).emit('setCredentials-complete');
+              walletIDs.delete(event.data[0]);
+            });*/
+	  });
         }
       }
     });
@@ -110,15 +135,46 @@ io.on('connection', (socket) => {
 
     if (message == 'authenticate-nft') {
 
-      // initiate authentication process for wallet
-      const verifyWalletChild = fork(verifyWallet);
-      verifyWalletChild.send(args[0]);
+      // store wallet -> socketID in working memory
+      if (!walletIDs.has(args[0])) {
+      
+        walletIDs.set(args[0], socket.id);
+          
+        // initiate authentication process for wallet
+        const verifyWalletChild = fork(verifyWallet);
+        verifyWalletChild.send(args[0]);
+
+        verifyWalletChild.on('message', (contents) => {
+
+          if (contents == 'all-nfts-authenticated') {
+
+            io.to(socket.id).emit('all-nfts-authenticated');
+            walletIDs.delete(args[0]);
+
+          } else if (contents == 'waiting') {
+
+            io.to(socket.id).emit('return-transfer-waiting');
+
+          } else {
+
+            io.to(socket.id).emit(`${contents}`);
+          }
+	  console.log(walletIDs.get(args[0]))
+	  return
+        });
+
+      } else {
+
+        io.to(socket.id).emit('already-waiting');
+        socket.disconnect();
+	console.log('already waiting')
+	return
+      }
+
 
     } else if (message == 'set-authenticated')  {
    
-      // change contract state to indicate nft is authenticated
-      const setAuthenticatedChild = fork(setAuthenticated);
-      setAuthenticatedChild.send(args[0]);
+
 
     } else if (message == 'setAuthenticated-complete') {
 
@@ -157,3 +213,4 @@ socket.on('connect', () => {
     process.exit(-1);
   });
 });
+

@@ -6,6 +6,7 @@
 // imports
 import { io } from 'socket.io-client';
 import * as inquirer from 'inquirer';
+import * as crypto from 'crypto-js';
 
 // specify color formatting
 import * as color from 'cli-color';
@@ -36,6 +37,7 @@ socket.on('connect', () => {
     .then((answer) => {
 
       socket.emit('authenticate-nft', answer.wallet);
+      console.log('chirp')
     })
     .catch((error) => {
     
@@ -47,4 +49,9 @@ socket.on('connect', () => {
         console.log(red(`ACCESSNFT: `) + error);
       }
     });
+});
+
+socket.onAny((message, ...args) => {
+
+  console.log(message, ...args);
 });

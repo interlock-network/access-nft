@@ -63,52 +63,30 @@ async function verifyWallet(wallet, socket) {
 	wallet,
       );
 
-      // find nft to authenticate
-      const array = Array.from(OUTPUT_collection.ok.ok);
-      let nft: any;
-      for (nft of array) {
+    // find nft to authenticate
+    const array = Array.from(OUTPUT_collection.ok.ok);
+    let nft: any;
+    for (nft of array) {
 
-        // get attribute isathenticated state per nft
-        var [ gasRequired, storageDepositRequired, RESULT_authenticated, OUTPUT_authenticated ] =
-          await contractGetter(
-            api,
-            socket,
-            contract,
-            'verifyWallet',
-            'psp34Metadata::getAttribute',
-            {u64: nft.u64},
-            ISAUTHENTICATED,
-          );
-        let authenticated = JSON.parse(JSON.stringify(OUTPUT_authenticated));
+      // get attribute isathenticated state per nft
+      var [ gasRequired, storageDepositRequired, RESULT_authenticated, OUTPUT_authenticated ] =
+        await contractGetter(
+          api,
+          socket,
+          contract,
+          'verifyWallet',
+          'psp34Metadata::getAttribute',
+          {u64: nft.u64},
+          ISAUTHENTICATED,
+        );
+      let authenticated = JSON.parse(JSON.stringify(OUTPUT_authenticated));
 
-        // record nft id of one that has not yet been authenticated
-        if (authenticated.ok == FALSE) {
-          notAuthenticated = true;
-          notAuthenticatedId = nft.u64;
-        }
-
-        // get attribute isathenticated state
-        var [ gasRequired, storageDepositRequired, RESULT_waiting, OUTPUT_waiting ] =
-          await contractGetter(
-            api,
-            socket,
-            contract,
-            'verifyWallet',
-            'psp34Metadata::getAttribute',
-            {u64: nft.u64},
-            ISWAITING,
-          );
-        let waiting = JSON.parse(JSON.stringify(OUTPUT_waiting));
-        
-        // if any one of wallet's nfts are waiting, they must resolve this first
-        if (waiting.ok == TRUE) {
-
-          console.log(red(`ACCESSNFT:`) +
-            ` need wallet ` + magenta(`${wallet}`) + ` to return validation transfer`);
-
-          terminateProcess(socket, 'verifyWallet', 'still-waiting', [ notAuthenticatedId, wallet ]);
-        }
+      // record nft id of one that has not yet been authenticated
+      if (authenticated.ok == FALSE) {
+        notAuthenticated = true;
+        notAuthenticatedId = nft.u64;
       }
+    }
 
     // if after checking OUTPUT_collection there are no nfts to authenticate
     if (notAuthenticated == false) {
@@ -116,28 +94,23 @@ async function verifyWallet(wallet, socket) {
       console.log(red(`ACCESSNFT:`) +
         ` all nfts in wallet ` + magenta(`${wallet}`) + ` already authenticated`);
 
-      terminateProcess(socket, 'verifyWallet', 'all-nfts-authenticated', wallet);
+      //terminateProcess(socket, 'verifyWallet', 'all-nfts-authenticated', ['']);
 
     // or send micropayment to unauthenticated nft
     } else if (notAuthenticated == true) {
 
-      await sendMicropayment(
+      const hash = await sendMicropayment(
         api,
         wallet,
         notAuthenticatedId
       );
-        
-      // change contract state to indicate waiting for return micropayment transaction
-      const setWaitingChild = fork(setWaiting);
-      setWaitingChild.send({id: notAuthenticatedId, wallet: wallet});
 
-      terminateProcess(socket, 'verifyWallet', 'now-waiting', [ notAuthenticatedId, wallet ]);
+      terminateProcess(socket, 'verifyWallet', 'waiting', [hash])
     }
-
   } catch(error) {
 
     console.log(red(`ACCESSNFT: `) + error);
-    terminateProcess(socket, 'verifyWallet', 'process-error', wallet);
+    terminateProcess(socket, 'verifyWallet', 'program-error', []);
   }
 }
 

@@ -24,8 +24,8 @@ const yellow = color.yellow.bold;
 const magenta = color.magenta;
 
 // constants
-const ISWAITING = '0x697377616974696e67';
-const TRUE = '0x74727565';
+const ISAUTHENTICATED = '0x697361757468656e74696361746564';
+const FALSE = '0x66616c7365';
 
 // constants
 //
@@ -43,7 +43,6 @@ async function setAuthenticated(wallet, socket) {
     const [ api, contract ] = await setupSession('setAuthenticated');
 
     var notAuthenticatedId;
-    var isWaiting = false;
 
     // get nft collection for wallet
     var [ gasRequired, storageDeposit, RESULT_collection, OUTPUT_collection ] =
@@ -63,7 +62,7 @@ async function setAuthenticated(wallet, socket) {
     for (nft of array) {
 
       // get attribute iswaiting state
-      var [ gasRequired, storageDeposit, RESULT_waiting, OUTPUT_waiting ] =
+      var [ gasRequired, storageDeposit, RESULT_authenticated, OUTPUT_authenticated ] =
         await contractGetter(
           api,
           socket,
@@ -71,41 +70,36 @@ async function setAuthenticated(wallet, socket) {
           'setAuthenticated',
           'psp34Metadata::getAttribute',
           {u64: nft.u64},
-          ISWAITING,
+          ISAUTHENTICATED,
         ); 
-      let waiting = JSON.parse(JSON.stringify(OUTPUT_waiting));
+      let authenticated = JSON.parse(JSON.stringify(OUTPUT_authenticated));
 
       // record nft id of one that is waiting and ready to authenticate
-      if (waiting.ok == TRUE) {
+      if (authenticated.ok == FALSE) {
 
-        isWaiting = true;
-
-        // call doer transaction
-        await contractDoer(
-          api,
-          socket,
-          contract,
-          storageDepositLimit,
-          storageDeposit,
-          refTimeLimit,
-          proofSizeLimit,
-          gasRequired,
-          'setAuthenticated',
-          'setAuthenticated',
-          {u64: nft.u64}
-        );
+        notAuthenticatedId = nft.u64;
       }
     }
-
-    // if no nfts are waiting, then we need to send authentication transfer first
-    if (!isWaiting) {
-      console.log(red(`ACCESSNFT: `) +
-        ` wallet ${wallet} has no waiting nfts`);
-    }
+        
+    // call doer transaction
+    await contractDoer(
+      api,
+      socket,
+      contract,
+      storageDepositLimit,
+      storageDeposit,
+      refTimeLimit,
+      proofSizeLimit,
+      gasRequired,
+      'setAuthenticated',
+      'setAuthenticated',
+      {u64: nft.u64}
+    );
+      
   } catch(error) {
 
     console.log(red(`ACCESSNFT: `) + error);
-    terminateProcess(socket, 'setAuthenticated', 'process-error', [ notAuthenticatedId, wallet ]);
+    terminateProcess(socket, 'setAuthenticated', 'program-error', []);
   }
 }
 
