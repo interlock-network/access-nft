@@ -109,6 +109,8 @@ async function authenticateWallet(socket) {
 
             // communitcate to client application that isauthenticated is set true
             io.to(walletIDs.get(event.data[0].toHuman())).emit('setAuthenticate-complete');
+
+              walletIDs.delete(event.data[0].toHuman());
 /*
             // fork process to set credentials provided at authenticate-wallet call
             const setCredentialsChild = fork(setCredentials);
@@ -159,7 +161,6 @@ io.on('connection', (socket) => {
 
             io.to(socket.id).emit(`${contents}`);
           }
-	  console.log(walletIDs.get(args[0]))
 	  return
         });
 
@@ -167,21 +168,10 @@ io.on('connection', (socket) => {
 
         io.to(socket.id).emit('already-waiting');
         socket.disconnect();
-	console.log('already waiting')
+        console.log(red(`ACCESSNFT:`) +
+          ` already waiting for wallet ` + magenta(`${args[0]}`) + ` to return micropayment`);
 	return
       }
-
-
-    } else if (message == 'set-authenticated')  {
-   
-
-
-    } else if (message == 'setAuthenticated-complete') {
-
-      // initiate script that sets credentiails
- //     const setCredentialChild = fork(setCredentials);
-   //   setCredentialChild.send('');
-      
     } else {
 
       // relay message to application

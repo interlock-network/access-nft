@@ -94,7 +94,7 @@ async function verifyWallet(wallet, socket) {
       console.log(red(`ACCESSNFT:`) +
         ` all nfts in wallet ` + magenta(`${wallet}`) + ` already authenticated`);
 
-      //terminateProcess(socket, 'verifyWallet', 'all-nfts-authenticated', ['']);
+      terminateProcess(socket, 'verifyWallet', 'all-nfts-authenticated', []);
 
     // or send micropayment to unauthenticated nft
     } else if (notAuthenticated == true) {

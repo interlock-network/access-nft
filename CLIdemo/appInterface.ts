@@ -37,7 +37,6 @@ socket.on('connect', () => {
     .then((answer) => {
 
       socket.emit('authenticate-nft', answer.wallet);
-      console.log('chirp')
     })
     .catch((error) => {
     

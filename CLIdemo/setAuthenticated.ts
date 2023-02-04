@@ -93,7 +93,7 @@ async function setAuthenticated(wallet, socket) {
       gasRequired,
       'setAuthenticated',
       'setAuthenticated',
-      {u64: nft.u64}
+      {u64: notAuthenticatedId}
     );
       
   } catch(error) {
