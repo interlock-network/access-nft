@@ -1,5 +1,5 @@
 //
-// INTERLOCK NETWORK - SET WAITING
+// INTERLOCK NETWORK - SET CREDENTIALS
 // PSP34 ACCESS NFT AUTHENTICATION
 //
 
@@ -28,7 +28,7 @@ const refTimeLimit = 6050000000;
 const proofSizeLimit = 150000;
 const storageDepositLimit = null;
 
-async function setCredential(message, secureSocket) {
+async function setCredential(message, socket) {
 
   try {
 
@@ -43,7 +43,8 @@ async function setCredential(message, secureSocket) {
         contract,
         'setCredential',
         'setCredential',
-        {u64: message.id}
+        {u64: message.id},
+	message.hash
       );
 
     // call doer transaction
@@ -58,7 +59,8 @@ async function setCredential(message, secureSocket) {
       gasRequired,
       'setCredential',
       'setCredential',
-      {u64: message.id}
+      {u64: message.id},
+      message.hash
     );
 
   } catch(error) {
