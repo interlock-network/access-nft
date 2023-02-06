@@ -133,26 +133,26 @@ io.on('connection', (socket) => {
   // relay all script events to application
   socket.onAny((message, ...args) => {
 
-    
-
+    const wallet = args[0][0];
+    const credhash = args[0][1];
 
     if (message == 'authenticate-nft') {
 
       // store wallet -> socketID in working memory
-      if (!walletIDs.has(args[0])) {
+      if (!walletIDs.has(wallet)) {
       
-        walletIDs.set(args[0][0], [socket.id, args[0][1]]);
+        walletIDs.set(wallet, [socket.id, credhash]);
 
         // initiate authentication process for wallet
         const verifyWalletChild = fork(verifyWallet);
-        verifyWalletChild.send(args[0][0]);
+        verifyWalletChild.send(wallet);
 
         verifyWalletChild.on('message', (contents) => {
 
           if (contents == 'all-nfts-authenticated') {
 
             io.to(socket.id).emit('all-nfts-authenticated');
-            walletIDs.delete(args[0][0]);
+            walletIDs.delete(wallet);
 
           } else if (contents == 'waiting') {
 
@@ -170,7 +170,7 @@ io.on('connection', (socket) => {
         io.to(socket.id).emit('already-waiting');
         socket.disconnect();
         console.log(red(`ACCESSNFT:`) +
-          ` already waiting for wallet ` + magenta(`${args[0]}`) + ` to return micropayment`);
+          ` already waiting for wallet ` + magenta(`${wallet}`) + ` to return micropayment`);
 	return
       }
     } else {
