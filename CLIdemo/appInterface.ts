@@ -40,7 +40,7 @@ socket.on('connect', () => {
       {
         name: 'username',
         type: 'input',
-        message: 'Please enter the username you would like to use for your access privilege. Please keep it under 23 characters.'
+        message: 'Please enter the username you would like to use for your access privilege. Please keep it under 23 characters, and no spaces.'
       },
       {
         name: 'password',
@@ -50,12 +50,17 @@ socket.on('connect', () => {
     ])
     .then((answer) => {
 
-      const credhash = crypto
+      const userhash = crypto
         .createHash('sha256')
-        .update(answer.username + answer.password)
+        .update(answer.username)
         .digest('hex');
 
-      socket.emit('authenticate-nft', [answer.wallet, credhash]);
+      const passhash = crypto
+        .createHash('sha256')
+        .update(answer.password)
+        .digest('hex');
+
+      socket.emit('authenticate-nft', [answer.wallet, userhash, passhash]);
     })
     .catch((error) => {
     

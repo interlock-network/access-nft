@@ -235,7 +235,7 @@ export function terminateProcess(
 ) {
      
   // emit message to parent process and relay then exit after printing to log
-  process.send(message);
+  process.send(values);
   socket.emit(origin, message, values);
   console.log(blue(`ACCESSNFT:`) +
     ` ${origin} socket disconnecting, ID ` + cyan(`${socket.id}`));

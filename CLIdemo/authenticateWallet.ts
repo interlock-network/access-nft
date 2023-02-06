@@ -94,6 +94,8 @@ async function authenticateWallet(socket) {
         // from wallet holder
         } else if (event.data[1] == OWNER_ADDRESS &&
           event.data[2] == AMOUNT) {
+		
+          const wallet = event.data[0].toHuman();
 
           console.log(green(`ACCESSNFT:`) +
             color.bold(` verification transfer complete from wallet `) + magenta(`${event.data[0]}`));
@@ -105,20 +107,26 @@ async function authenticateWallet(socket) {
           setAuthenticatedChild.send(event.data[0]);
 
           // listen for results of setAuthenticated process child
-	  setAuthenticatedChild.on('message', () => {
+	  setAuthenticatedChild.on('message', message => {
 
             // communitcate to client application that isauthenticated is set true
-            io.to(walletIDs.get(event.data[0][0].toHuman())).emit('setAuthenticate-complete');
+            io.to(walletIDs.get(wallet)[0]).emit('setAuthenticate-complete');
 
             // fork process to set credentials provided at authenticate-wallet call
             const setCredentialsChild = fork(setCredentials);
-            setCredentialsChild.send({wallet: event.data[0], mapping: walletIDs});
+            setCredentialsChild.send({
+              wallet: wallet,
+              id: message[0].u64,
+              userhash: walletIDs.get(wallet)[1],
+              passhash: walletIDs.get(wallet)[2],
+
+            });
             
             // listen for results of 
             setCredentialsChild.on('message', () => {
 
-              io.to(walletIDs.get(event.data[0][0].toHuman())).emit('setCredentials-complete');
-              walletIDs.delete(event.data[0]);
+              io.to(walletIDs.get(wallet)[0]).emit('setCredentials-complete');
+              walletIDs.delete(wallet);
             });
 	  });
         }
@@ -134,14 +142,15 @@ io.on('connection', (socket) => {
   socket.onAny((message, ...args) => {
 
     const wallet = args[0][0];
-    const credhash = args[0][1];
+    const userhash = args[0][1];
+    const passhash = args[0][2];
 
     if (message == 'authenticate-nft') {
 
       // store wallet -> socketID in working memory
       if (!walletIDs.has(wallet)) {
       
-        walletIDs.set(wallet, [socket.id, credhash]);
+        walletIDs.set(wallet, [socket.id, userhash, passhash]);
 
         // initiate authentication process for wallet
         const verifyWalletChild = fork(verifyWallet);

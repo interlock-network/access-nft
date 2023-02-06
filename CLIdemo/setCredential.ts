@@ -17,6 +17,7 @@ import {
 // specify color formatting
 import * as color from 'cli-color';
 const red = color.red.bold;
+const green = color.green.bold;
 const blue = color.blue.bold;
 const cyan = color.cyan;
 
@@ -28,12 +29,15 @@ const refTimeLimit = 6050000000;
 const proofSizeLimit = 150000;
 const storageDepositLimit = null;
 
-async function setCredential(message, socket) {
+async function setCredential(socket, message) {
 
   try {
 
     // establish connection with blockchain
     const [ api, contract ] = await setupSession('setCredential');
+
+    console.log(green(`ACCESSNFT:`) +
+      ` setting username and password credentials for NFT ` + red(`ID ${message.id}`));
 
     // check setWaiting contract call via dryrun
     const [ gasRequired, storageDeposit, RESULT_dryrun, OUTPUT_dryrun ] =
@@ -44,7 +48,8 @@ async function setCredential(message, socket) {
         'setCredential',
         'setCredential',
         {u64: message.id},
-	message.hash
+	'0x' + message.userhash,
+	'0x' + message.passhash,
       );
 
     // call doer transaction
@@ -60,13 +65,14 @@ async function setCredential(message, socket) {
       'setCredential',
       'setCredential',
       {u64: message.id},
-      message.hash
+      '0x' + message.userhash,
+      '0x' + message.passhash,
     );
 
   } catch(error) {
 
     console.log(red(`ACCESSNFT: `) + error);
-    terminateProcess(socket, 'setCredential', 'process-error', [ authenticatingSocket, message.wallet ]);
+    terminateProcess(socket, 'setCredential', 'process-error', [ socket, message.wallet ]);
   }
 }
 
@@ -79,7 +85,7 @@ process.on('message', message => {
     console.log(blue(`ACCESSNFT:`) +
       ` setCredential socket connected, ID ` + cyan(`${socket.id}`));
     
-    setCredential(message, secureSocket).catch((error) => {
+    setCredential(socket, message).catch((error) => {
 
       console.error(error);
       process.exit(-1);
