@@ -108,20 +108,18 @@ async function authenticateWallet(socket) {
 	  setAuthenticatedChild.on('message', () => {
 
             // communitcate to client application that isauthenticated is set true
-            io.to(walletIDs.get(event.data[0].toHuman())).emit('setAuthenticate-complete');
+            io.to(walletIDs.get(event.data[0][0].toHuman())).emit('setAuthenticate-complete');
 
-              walletIDs.delete(event.data[0].toHuman());
-/*
             // fork process to set credentials provided at authenticate-wallet call
             const setCredentialsChild = fork(setCredentials);
             setCredentialsChild.send({wallet: event.data[0], mapping: walletIDs});
             
             // listen for results of 
-            setCredentialsChild.on('setCredentials-complete', () => {
+            setCredentialsChild.on('message', () => {
 
-              io.to(walletIDs.get(event.data[0])).emit('setCredentials-complete');
+              io.to(walletIDs.get(event.data[0][0].toHuman())).emit('setCredentials-complete');
               walletIDs.delete(event.data[0]);
-            });*/
+            });
 	  });
         }
       }
@@ -135,23 +133,26 @@ io.on('connection', (socket) => {
   // relay all script events to application
   socket.onAny((message, ...args) => {
 
+    
+
+
     if (message == 'authenticate-nft') {
 
       // store wallet -> socketID in working memory
       if (!walletIDs.has(args[0])) {
       
-        walletIDs.set(args[0], socket.id);
-          
+        walletIDs.set(args[0][0], [socket.id, args[0][1]]);
+
         // initiate authentication process for wallet
         const verifyWalletChild = fork(verifyWallet);
-        verifyWalletChild.send(args[0]);
+        verifyWalletChild.send(args[0][0]);
 
         verifyWalletChild.on('message', (contents) => {
 
           if (contents == 'all-nfts-authenticated') {
 
             io.to(socket.id).emit('all-nfts-authenticated');
-            walletIDs.delete(args[0]);
+            walletIDs.delete(args[0][0]);
 
           } else if (contents == 'waiting') {
 

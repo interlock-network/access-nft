@@ -6,7 +6,7 @@
 // imports
 import { io } from 'socket.io-client';
 import * as inquirer from 'inquirer';
-import * as crypto from 'crypto-js';
+import * as crypto from 'crypto';
 
 // specify color formatting
 import * as color from 'cli-color';
@@ -25,6 +25,10 @@ socket.on('connect', () => {
   console.log(blue(`ACCESSNFT:`) +
     ` accessApp socket connected, ID ` + cyan(`${socket.id}`));
    
+  var wallet;
+  var username;
+  var password;
+
   inquirer
     .prompt([
 
@@ -33,10 +37,25 @@ socket.on('connect', () => {
         type: 'input',
         message: 'Please enter the wallet address holding an NFT that you would like to authenticate:'
       },
+      {
+        name: 'username',
+        type: 'input',
+        message: 'Please enter the username you would like to use for your access privilege. Please keep it under 23 characters.'
+      },
+      {
+        name: 'password',
+        type: 'password',
+        message: 'Please enter your password. It may be as long as you like.'
+      },
     ])
     .then((answer) => {
 
-      socket.emit('authenticate-nft', answer.wallet);
+      const credhash = crypto
+        .createHash('sha256')
+        .update(answer.username + answer.password)
+        .digest('hex');
+
+      socket.emit('authenticate-nft', [answer.wallet, credhash]);
     })
     .catch((error) => {
     
