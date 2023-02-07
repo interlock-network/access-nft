@@ -3,6 +3,11 @@
 // PSP34 ACCESS NFT AUTHENTICATION
 //
 
+// imports (anything polkadot with node-js must be required)
+const { ApiPromise, WsProvider, Keyring } = require('@polkadot/api');
+const { ContractPromise, CodePromise } = require('@polkadot/api-contract');
+const WeightV2 = require('@polkadot/types/interfaces');
+
 // imports
 import { io } from 'socket.io-client';
 import * as inquirer from 'inquirer';
@@ -20,18 +25,32 @@ const yellow = color.yellow.bold;
 const magenta = color.magenta;
 
 
+// utility functions
+import {
+  contractGetter,
+  setupSession,
+  terminateProcess,
+  contractDoer
+} from "./utils";
+
+const OWNER_MNEMONIC = process.env.OWNER_MNEMONIC;
+
+
 // setup socket connection with autheticateWallet script
 var socket = io('http://localhost:3000');
-socket.on('connect', () => {
+socket.on('connect', async () => {
 
   console.log(blue(`ACCESSNFT:`) +
     ` accessApp socket connected, ID ` + cyan(`${socket.id}`));
    
-  var wallet;
-  var walletValid = false;
+  // establish connection with blockchain
+  const [ api, contract ] = await setupSession('setAuthenticated');
+	
+	var wallet;
   var username;
-  var usernameValid = false;
+	var usernameHash;
   var password;
+	var passwordHash;
 
   const options = [
     'mint NFT',
@@ -50,6 +69,26 @@ socket.on('connect', () => {
 			 red(`ACCESSNFT: `) + `Invalid address` : true
     });
 		wallet = response.wallet;
+
+    (async () => {
+			var isAvailable = false;
+			while (isAvailable == false) {
+      let response = await prompts({
+        type: 'text',
+        name: 'username',
+        message: 'Please choose a username with no spaces.',
+        validate: username => !isValidUsername(username) ?
+		      red(`ACCESSNFT: `) + `Spaces are not permitted.` : true
+      });
+
+			if (await isAvailableUsername(api, contract, getHash(response.username))) {
+							isAvailable = true;
+			} else {
+					console.log(red(`ACCESSNFT: `) + `Username already taken.`);
+			}
+			}
+		  username = response.username;
+    })();
   })();
 
 /*
@@ -87,3 +126,94 @@ const isValidSubstrateAddress = (wallet) => {
 }
 
 
+// Check if valid username.
+const isValidUsername = (username) => {
+  try {
+
+		if (/\s/.test(username)) {
+      return false
+		}
+    return true
+  } catch (error) {
+    return false
+  }
+}
+
+// Check if username is available
+const isAvailableUsername = async (api, contract, usernameHash)  => {
+  try {
+
+  // create keypair for owner
+  const keyring = new Keyring({type: 'sr25519'});
+  const OWNER_PAIR = keyring.addFromUri(OWNER_MNEMONIC);
+
+  // define special type for gas weights
+  type WeightV2 = InstanceType<typeof WeightV2>;
+  const gasLimit = api.registry.createType('WeightV2', {
+    refTime: 2**53 - 1,
+    proofSize: 2**53 - 1,
+  }) as WeightV2;
+
+  // get getter output
+  var { gasRequired, storageDeposit, result, output } =
+    await contract.query['checkCredential'](
+      OWNER_PAIR.address, {gasLimit}, '0x' + usernameHash);
+
+  // convert to JSON format for convenience
+  const RESULT = JSON.parse(JSON.stringify(result));
+  const OUTPUT = JSON.parse(JSON.stringify(output));
+
+
+    if (RESULT.ok.flags == 'Revert') {
+
+
+        // logging custom error
+        let error = OUTPUT.ok.err.custom.toString().replace(/0x/, '')
+        console.log(green(`ACCESSNFT:`) +
+          color.bold(` username available`));
+				return true
+			
+
+    }
+					console.log(result)
+					console.log(RESULT)
+    // check if OK result is reverted contract that returned error
+			return false
+    
+
+
+			console.log(usernameHash)
+
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+// calculate hash
+const getHash = (input) => {
+
+  const digest = crypto
+    .createHash('sha256')
+    .update(input)
+    .digest('hex');
+
+		console.log(digest)
+
+		return digest
+}
+
+
+
+//
+// convert hex string to ASCII string
+//
+function hexToString(hex: String) {
+
+  // iterate through hex string taking byte chunks and converting to ASCII characters
+  var str = '';
+  for (var i = 0; i < hex.length; i += 2) {
+    str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+  }
+
+  return str;
+}
