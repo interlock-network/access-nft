@@ -124,10 +124,11 @@ socket.on('connect', async () => {
               console.log(red(`ACCESSNFT: `) + `password mismatch`);
             }
           }
-        while (password != passwordVerify)
+          while (password != passwordVerify)
+        
         console.log(green(`ACCESSNFT: `) + `successfully entered information`);
 
-				socket.emit('authenticate-nft', [wallet, getHash(username), getHash(password)]);
+        socket.emit('authenticate-nft', [wallet, getHash(username), getHash(password)]);
       })();
     })();
   })();
