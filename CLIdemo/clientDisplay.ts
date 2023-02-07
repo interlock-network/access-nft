@@ -67,6 +67,7 @@ socket.on('connect', async () => {
         red(`ACCESSNFT: `) + `Invalid address` : true
     });
     wallet = responseWallet.wallet;
+    console.log('');
 
     // second prompt: username
     (async () => {
@@ -92,6 +93,7 @@ socket.on('connect', async () => {
         }
       }
       username = responseUsername.username;
+      console.log('');
     
       // third prompt: password
       (async () => {
@@ -119,6 +121,7 @@ socket.on('connect', async () => {
             ]);
             passwordVerify = responsePassword.passwordVerify;
             password = responsePassword.password;
+						console.log('');
 
             if (  password != passwordVerify) {
               console.log(red(`ACCESSNFT: `) + `password mismatch`);
@@ -129,6 +132,7 @@ socket.on('connect', async () => {
         console.log(green(`ACCESSNFT: `) + `successfully entered information`);
 
         socket.emit('authenticate-nft', [wallet, getHash(username), getHash(password)]);
+				console.log(getHash(username));
       })();
     })();
   })();
