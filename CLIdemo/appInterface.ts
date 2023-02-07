@@ -67,7 +67,7 @@ socket.on('connect', async () => {
       type: 'text',
       name: 'wallet',
       message: 'Please enter the wallet address containing\nthe NFT you would like to authenticate.',
-      validate: wallet => !isValidSubstrateAddress(wallet) ?
+      validate: wallet => (!isValidSubstrateAddress(wallet) && (wallet.length > 0)) ?
         red(`ACCESSNFT: `) + `Invalid address` : true
     });
     wallet = response.wallet;
@@ -83,9 +83,9 @@ socket.on('connect', async () => {
         let response = await prompts({
           type: 'text',
           name: 'username',
-          message: 'Please choose a username with no spaces.',
+          message: 'Please choose a username with 5 or more characters and no spaces.',
           validate: username => !isValidUsername(username) ?
-            red(`ACCESSNFT: `) + `Spaces are not permitted.` : true
+            red(`ACCESSNFT: `) + `Too short or contains spaces.` : true
         });
 
         // if valid, check if username is available
@@ -96,6 +96,21 @@ socket.on('connect', async () => {
         }
       }
       username = response.username;
+    
+      // third prompt: password
+      (async () => {
+
+        // get valid password
+        let response = await prompts({
+          type: 'password',
+          name: 'password',
+          message: 'Please choose a password with 8 or more characters.\nIt may contain whitespace.',
+          validate: password => (password.length < 8) ?
+            red(`ACCESSNFT: `) + `Password too short.` : true
+        });
+
+        password = response.password;
+      })();
     })();
   })();
 
@@ -145,6 +160,12 @@ const isValidUsername = (username) => {
 
     // search for any whitespace
     if (/\s/.test(username)) {
+
+      // username not valid
+      return false
+
+    // make sure not too short
+    } else if (username.length < 5) {
 
       // username not valid
       return false
