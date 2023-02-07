@@ -63,14 +63,14 @@ socket.on('connect', async () => {
   (async () => {
 
     // get valid wallet address
-    let response = await prompts({
+    let responseWallet = await prompts({
       type: 'text',
       name: 'wallet',
       message: 'Please enter the wallet address containing\nthe NFT you would like to authenticate.',
       validate: wallet => (!isValidSubstrateAddress(wallet) && (wallet.length > 0)) ?
         red(`ACCESSNFT: `) + `Invalid address` : true
     });
-    wallet = response.wallet;
+    wallet = responseWallet.wallet;
 
     // second prompt: username
     (async () => {
@@ -80,7 +80,7 @@ socket.on('connect', async () => {
       while (isAvailable == false) {
 
         // get valid username
-        let response = await prompts({
+        var responseUsername = await prompts({
           type: 'text',
           name: 'username',
           message: 'Please choose a username with 5 or more characters and no spaces.',
@@ -89,27 +89,47 @@ socket.on('connect', async () => {
         });
 
         // if valid, check if username is available
-        if (await isAvailableUsername(api, contract, getHash(response.username))) {
+        if (await isAvailableUsername(api, contract, getHash(responseUsername.username))) {
           isAvailable = true;
         } else {
           console.log(red(`ACCESSNFT: `) + `Username already taken.`);
         }
       }
-      username = response.username;
+      username = responseUsername.username;
     
       // third prompt: password
       (async () => {
 
-        // get valid password
-        let response = await prompts({
-          type: 'password',
-          name: 'password',
-          message: 'Please choose a password with 8 or more characters.\nIt may contain whitespace.',
-          validate: password => (password.length < 8) ?
-            red(`ACCESSNFT: `) + `Password too short.` : true
-        });
+        // loop prompt until valid username
+        var passwordVerify = '********';
+        
+          // loop prompt until valid password match
+          do {
 
-        password = response.password;
+            // get valid password
+            var responsePassword = await prompts([
+              {
+                type: 'password',
+                name: 'password',
+                message: 'Please choose a password with 8 or more characters.\nIt may contain whitespace.',
+                validate: password => (password.length < 8) ?
+                  red(`ACCESSNFT: `) + `Password too short.` : true
+              },
+              {
+                type: 'password',
+                name: 'passwordVerify',
+                message: 'Please verify your password.',
+              }
+            ]);
+            passwordVerify = responsePassword.passwordVerify;
+             password = responsePassword.password;
+
+            if (  password != passwordVerify) {
+              console.log(red(`ACCESSNFT: `) + `password mismatch`);
+            }
+          }
+        while (password != passwordVerify)
+        console.log(green(`ACCESSNFT: `) + `successfully entered information`);
       })();
     })();
   })();
