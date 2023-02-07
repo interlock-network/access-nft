@@ -6,8 +6,10 @@
 // imports
 import { io } from 'socket.io-client';
 import * as inquirer from 'inquirer';
+import * as prompts from 'prompts';
 import * as crypto from 'crypto';
-
+import * as bs58check from 'bs58check';
+const { decodeAddress, encodeAddress } = require('@polkadot/keyring')
 // specify color formatting
 import * as color from 'cli-color';
 const red = color.red.bold;
@@ -26,30 +28,33 @@ socket.on('connect', () => {
     ` accessApp socket connected, ID ` + cyan(`${socket.id}`));
    
   var wallet;
+  var walletValid = false;
   var username;
+  var usernameValid = false;
   var password;
 
-  inquirer
-    .prompt([
+  const options = [
+    'mint NFT',
+    'authenticate NFT',
+    'display collection',
+    'reset username and password',
+    'login to secure area'
+  ];
 
-      {
-        name: 'wallet',
-        type: 'input',
-        message: 'Please enter the wallet address holding an NFT that you would like to authenticate:'
-      },
-      {
-        name: 'username',
-        type: 'input',
-        message: 'Please enter the username you would like to use for your access privilege. Please keep it under 23 characters, and no spaces.'
-      },
-      {
-        name: 'password',
-        type: 'password',
-        message: 'Please enter your password. It may be as long as you like.'
-      },
-    ])
-    .then((answer) => {
+  (async () => {
+    let response = await prompts({
+      type: 'text',
+      name: 'wallet',
+      message: 'Please enter the wallet address containing\nthe NFT you would like to authenticate.',
+      validate: wallet => !isValidSubstrateAddress(wallet) ?
+			 red(`ACCESSNFT: `) + `Invalid address` : true
+    });
+		wallet = response.wallet;
+  })();
 
+/*
+	    console.log(answer.wallet)
+	    console.log(answer.walletValid)
       const userhash = crypto
         .createHash('sha256')
         .update(answer.username)
@@ -61,20 +66,24 @@ socket.on('connect', () => {
         .digest('hex');
 
       socket.emit('authenticate-nft', [answer.wallet, userhash, passhash]);
-    })
-    .catch((error) => {
-    
-      if (error.isTtyError) {
+*/
 
-        console.log(red(`ACCESSNFT: `) + error.isTtyError)
-      } else {
-
-        console.log(red(`ACCESSNFT: `) + error);
-      }
-    });
 });
 
 socket.onAny((message, ...args) => {
 
   console.log(message, ...args);
 });
+
+// Check address.
+const isValidSubstrateAddress = (wallet) => {
+  try {
+
+    encodeAddress(decodeAddress(wallet))
+    return true
+  } catch (error) {
+    return false
+  }
+}
+
+
