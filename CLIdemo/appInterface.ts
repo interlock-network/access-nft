@@ -13,7 +13,6 @@ const WeightV2 = require('@polkadot/types/interfaces');
 import { io } from 'socket.io-client';
 import * as prompts from 'prompts';
 import * as crypto from 'crypto';
-import * as bs58check from 'bs58check';
 
 // specify color formatting
 import * as color from 'cli-color';
@@ -26,10 +25,7 @@ const magenta = color.magenta;
 
 // utility functions
 import {
-  contractGetter,
   setupSession,
-  terminateProcess,
-  contractDoer
 } from "./utils";
 
 const OWNER_MNEMONIC = process.env.OWNER_MNEMONIC;
@@ -122,7 +118,7 @@ socket.on('connect', async () => {
               }
             ]);
             passwordVerify = responsePassword.passwordVerify;
-             password = responsePassword.password;
+            password = responsePassword.password;
 
             if (  password != passwordVerify) {
               console.log(red(`ACCESSNFT: `) + `password mismatch`);
@@ -130,26 +126,11 @@ socket.on('connect', async () => {
           }
         while (password != passwordVerify)
         console.log(green(`ACCESSNFT: `) + `successfully entered information`);
+
+				socket.emit('authenticate-nft', [wallet, getHash(username), getHash(password)]);
       })();
     })();
   })();
-
-/*
-      console.log(answer.wallet)
-      console.log(answer.walletValid)
-      const userhash = crypto
-        .createHash('sha256')
-        .update(answer.username)
-        .digest('hex');
-
-      const passhash = crypto
-        .createHash('sha256')
-        .update(answer.password)
-        .digest('hex');
-
-      socket.emit('authenticate-nft', [answer.wallet, userhash, passhash]);
-*/
-
 });
 
 socket.onAny((message, ...args) => {
