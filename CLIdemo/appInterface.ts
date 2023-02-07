@@ -6,15 +6,15 @@
 // imports (anything polkadot with node-js must be required)
 const { ApiPromise, WsProvider, Keyring } = require('@polkadot/api');
 const { ContractPromise, CodePromise } = require('@polkadot/api-contract');
+const { decodeAddress, encodeAddress } = require('@polkadot/keyring')
 const WeightV2 = require('@polkadot/types/interfaces');
 
 // imports
 import { io } from 'socket.io-client';
-import * as inquirer from 'inquirer';
 import * as prompts from 'prompts';
 import * as crypto from 'crypto';
 import * as bs58check from 'bs58check';
-const { decodeAddress, encodeAddress } = require('@polkadot/keyring')
+
 // specify color formatting
 import * as color from 'cli-color';
 const red = color.red.bold;
@@ -23,7 +23,6 @@ const blue = color.blue.bold;
 const cyan = color.cyan;
 const yellow = color.yellow.bold;
 const magenta = color.magenta;
-
 
 // utility functions
 import {
@@ -34,7 +33,19 @@ import {
 } from "./utils";
 
 const OWNER_MNEMONIC = process.env.OWNER_MNEMONIC;
+  
+var wallet;
+var username;
+var password;
 
+// start menu options
+const options = [
+  'mint NFT',
+  'authenticate NFT',
+  'display collection',
+  'reset username and password',
+  'login to secure area'
+];
 
 // setup socket connection with autheticateWallet script
 var socket = io('http://localhost:3000');
@@ -45,55 +56,52 @@ socket.on('connect', async () => {
    
   // establish connection with blockchain
   const [ api, contract ] = await setupSession('setAuthenticated');
-	
-	var wallet;
-  var username;
-	var usernameHash;
-  var password;
-	var passwordHash;
 
-  const options = [
-    'mint NFT',
-    'authenticate NFT',
-    'display collection',
-    'reset username and password',
-    'login to secure area'
-  ];
-
+  // begin prompt tree
+  //
+  // first prompt: wallet address
   (async () => {
+
+    // get valid wallet address
     let response = await prompts({
       type: 'text',
       name: 'wallet',
       message: 'Please enter the wallet address containing\nthe NFT you would like to authenticate.',
       validate: wallet => !isValidSubstrateAddress(wallet) ?
-			 red(`ACCESSNFT: `) + `Invalid address` : true
+        red(`ACCESSNFT: `) + `Invalid address` : true
     });
-		wallet = response.wallet;
+    wallet = response.wallet;
 
+    // second prompt: username
     (async () => {
-			var isAvailable = false;
-			while (isAvailable == false) {
-      let response = await prompts({
-        type: 'text',
-        name: 'username',
-        message: 'Please choose a username with no spaces.',
-        validate: username => !isValidUsername(username) ?
-		      red(`ACCESSNFT: `) + `Spaces are not permitted.` : true
-      });
 
-			if (await isAvailableUsername(api, contract, getHash(response.username))) {
-							isAvailable = true;
-			} else {
-					console.log(red(`ACCESSNFT: `) + `Username already taken.`);
-			}
-			}
-		  username = response.username;
+      // loop prompt until valid username
+      var isAvailable = false;
+      while (isAvailable == false) {
+
+        // get valid username
+        let response = await prompts({
+          type: 'text',
+          name: 'username',
+          message: 'Please choose a username with no spaces.',
+          validate: username => !isValidUsername(username) ?
+            red(`ACCESSNFT: `) + `Spaces are not permitted.` : true
+        });
+
+        // if valid, check if username is available
+        if (await isAvailableUsername(api, contract, getHash(response.username))) {
+          isAvailable = true;
+        } else {
+          console.log(red(`ACCESSNFT: `) + `Username already taken.`);
+        }
+      }
+      username = response.username;
     })();
   })();
 
 /*
-	    console.log(answer.wallet)
-	    console.log(answer.walletValid)
+      console.log(answer.wallet)
+      console.log(answer.walletValid)
       const userhash = crypto
         .createHash('sha256')
         .update(answer.username)
@@ -119,8 +127,13 @@ const isValidSubstrateAddress = (wallet) => {
   try {
 
     encodeAddress(decodeAddress(wallet))
+
+    // address encodes/decodes wo error => valid address
     return true
+
   } catch (error) {
+
+    // encode/decode failure => invalid address
     return false
   }
 }
@@ -130,10 +143,16 @@ const isValidSubstrateAddress = (wallet) => {
 const isValidUsername = (username) => {
   try {
 
-		if (/\s/.test(username)) {
+    // search for any whitespace
+    if (/\s/.test(username)) {
+
+      // username not valid
       return false
-		}
+    }
+
+    // username valid
     return true
+
   } catch (error) {
     return false
   }
@@ -163,26 +182,20 @@ const isAvailableUsername = async (api, contract, usernameHash)  => {
   const RESULT = JSON.parse(JSON.stringify(result));
   const OUTPUT = JSON.parse(JSON.stringify(output));
 
-
+    // if this call reverts, then only possible error is 'credential nonexistent'
     if (RESULT.ok.flags == 'Revert') {
 
+      // logging custom error
+      let error = OUTPUT.ok.err.custom.toString().replace(/0x/, '')
+      console.log(green(`ACCESSNFT:`) +
+        color.bold(` username available`));
 
-        // logging custom error
-        let error = OUTPUT.ok.err.custom.toString().replace(/0x/, '')
-        console.log(green(`ACCESSNFT:`) +
-          color.bold(` username available`));
-				return true
-			
-
+      // username is available
+      return true
     }
-					console.log(result)
-					console.log(RESULT)
-    // check if OK result is reverted contract that returned error
-			return false
     
-
-
-			console.log(usernameHash)
+    // username is not available
+    return false
 
   } catch (error) {
     console.log(error)
@@ -197,23 +210,6 @@ const getHash = (input) => {
     .update(input)
     .digest('hex');
 
-		console.log(digest)
-
-		return digest
+  return digest
 }
 
-
-
-//
-// convert hex string to ASCII string
-//
-function hexToString(hex: String) {
-
-  // iterate through hex string taking byte chunks and converting to ASCII characters
-  var str = '';
-  for (var i = 0; i < hex.length; i += 2) {
-    str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
-  }
-
-  return str;
-}
