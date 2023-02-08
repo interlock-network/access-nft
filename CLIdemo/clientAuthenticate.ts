@@ -11,7 +11,12 @@ const WeightV2 = require('@polkadot/types/interfaces');
 
 // imports
 import { io } from 'socket.io-client';
+import { fork } from 'child_process';
 import * as prompts from 'prompts';
+
+// child process paths
+import * as path from 'path';
+const menu = path.resolve('client.js');
 
 // specify color formatting
 import * as color from 'cli-color';
@@ -122,6 +127,8 @@ socket.on('connect', async () => {
         console.log(green(`ACCESSNFT: `) + `successfully entered information\n`);
 
         socket.emit('authenticate-nft', [wallet, getHash(username), getHash(password)]);
+	const menuChild = fork(menu);
+	process.exit();
 
       })().catch(error => otherError());
     })().catch(error => otherError());

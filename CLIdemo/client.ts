@@ -44,50 +44,30 @@ async function mainMenu() {
 
         // initiate minting process for wallet
         const mintChild = fork(mint);
-
-        mintChild.on('message', () => {
-          mainMenu();
-        });
         break;    
 
       case 'authenticate':
 
         // initiate authentication process for wallet
         const authenticateChild = fork(authenticate);
-
-        authenticateChild.on('message', () => {
-          mainMenu();
-        });
         break;
 
       case 'display':
 
         // display wallet's available NFTs
         const displayChild = fork(display);
-
-        displayChild.on('message', () => {
-          mainMenu();
-        });
         break;
 
       case 'login':
 
         // login to secure restricted access area
         const loginChild = fork(login);
-
-        loginChild.on('message', async () => {
-          await mainMenu();
-        });
         break;
 
       case 'reset':
 
         // reset username and password
         const resetChild = fork(reset);
-
-        resetChild.on('message', () => {
-          mainMenu();
-        });
         break;
     }
 
