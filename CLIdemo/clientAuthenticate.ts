@@ -12,7 +12,6 @@ const WeightV2 = require('@polkadot/types/interfaces');
 // imports
 import { io } from 'socket.io-client';
 import * as prompts from 'prompts';
-import * as crypto from 'crypto';
 
 // specify color formatting
 import * as color from 'cli-color';
@@ -26,6 +25,7 @@ const magenta = color.magenta;
 // utility functions
 import {
   setupSession,
+  getHash
 } from "./utils";
 
 const OWNER_MNEMONIC = process.env.OWNER_MNEMONIC;
@@ -122,8 +122,6 @@ socket.on('connect', async () => {
         console.log(green(`ACCESSNFT: `) + `successfully entered information\n`);
 
         socket.emit('authenticate-nft', [wallet, getHash(username), getHash(password)]);
-        process.send('done');
-	process.exit();
 
       })().catch(error => otherError());
     })().catch(error => otherError());
@@ -133,6 +131,7 @@ socket.on('connect', async () => {
 socket.onAny((message, ...args) => {
 
   console.log(message, ...args);
+
 });
 
 // Check address.
@@ -219,17 +218,6 @@ const isAvailableUsername = async (api, contract, usernameHash)  => {
   } catch (error) {
     console.log(error)
   }
-}
-
-// calculate hash
-const getHash = (input) => {
-
-  const digest = crypto
-    .createHash('sha256')
-    .update(input)
-    .digest('hex');
-
-  return digest
 }
 
 // handle misc error

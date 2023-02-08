@@ -16,9 +16,9 @@ import { fork } from 'child_process';
 
 // child process paths
 import * as path from 'path';
-const verifyWallet = path.resolve('verifyWallet.js');
-const setCredentials = path.resolve('setCredential.js');
-const setAuthenticated = path.resolve('setAuthenticated.js');
+const verifyWallet = path.resolve('serverVerifyWallet.js');
+const setCredentials = path.resolve('serverSetCredential.js');
+const setAuthenticated = path.resolve('serverSetAuthenticated.js');
 
 // environment constants
 import * as dotenv from 'dotenv';

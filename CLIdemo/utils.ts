@@ -259,7 +259,7 @@ export function getHash(input) {
 //
 // convert hex string to ASCII string
 //
-function hexToString(hex: String) {
+export function hexToString(hex: String) {
 
   // iterate through hex string taking byte chunks and converting to ASCII characters
   var str = '';

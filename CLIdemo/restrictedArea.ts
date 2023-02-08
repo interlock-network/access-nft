@@ -32,7 +32,7 @@ const cyan = color.cyan;
 const magenta = color.magenta.bold;
 
 // constants
-const SERVERPORT = 3000;
+const SERVERPORT = 8443;
 
 // setup server
 const app = express();

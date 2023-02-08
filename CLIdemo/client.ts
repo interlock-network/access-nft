@@ -75,8 +75,8 @@ async function mainMenu() {
         // login to secure restricted access area
         const loginChild = fork(login);
 
-        loginChild.on('message', () => {
-          mainMenu();
+        loginChild.on('message', async () => {
+          await mainMenu();
         });
         break;
 

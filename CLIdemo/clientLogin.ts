@@ -32,7 +32,7 @@ const OWNER_MNEMONIC = process.env.OWNER_MNEMONIC;
   
 
 // setup socket connection with autheticateWallet script
-var socket = io('https://localhost:3000', {
+var socket = io('https://localhost:8443', {
 		rejectUnauthorized: false
 });
 socket.on('connect', async () => {

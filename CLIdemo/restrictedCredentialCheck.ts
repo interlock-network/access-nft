@@ -1,7 +1,12 @@
 //
 // INTERLOCK NETWORK & ALEPH ZERO
-// PSP34 UNIVERSAL ACCESS NFT - SERVER SET AUTHENTICATED
+// PSP34 UNIVERSAL ACCESS NFT - RESTRICTED CREDENTIAL CHECK
 //
+
+// imports (anything polkadot with node-js must be required)
+const { ApiPromise, WsProvider, Keyring } = require('@polkadot/api');
+const { ContractPromise, CodePromise } = require('@polkadot/api-contract');
+const WeightV2 = require('@polkadot/types/interfaces');
 
 // imports
 import { io } from 'socket.io-client';
@@ -10,8 +15,7 @@ import { io } from 'socket.io-client';
 import {
   contractGetter,
   setupSession,
-  terminateProcess,
-  contractDoer
+  hexToString
 } from "./utils";
 
 // specify color formatting
@@ -27,53 +31,88 @@ const magenta = color.magenta;
 const ISAUTHENTICATED = '0x697361757468656e74696361746564';
 const FALSE = '0x66616c7365';
 
-// constants
-//
-// null === no limit
-// refTime and proofSize determined by contracts-ui estimation plus fudge-factor
-const refTimeLimit = 6050000000;
-const proofSizeLimit = 150000;
-const storageDepositLimit = null;
+const OWNER_MNEMONIC = process.env.OWNER_MNEMONIC;
 
-async function setAuthenticated(wallet, socket) {
+async function credentialCheck(message) {
 
   try {
   
 			// establish connection with blockchain
   		const [ api, contract ] = await setupSession('restrictedArea');
 
-    	// get nft collection for wallet
-    	var [ gasRequired, storageDepositRequired, RESULT_check, OUTPUT_check ] =
-      	await contractGetter(
-        	api,
-	        socket,
-  	      contract,
-    	    'restrictedArea',
-      	  'getCollection',
-					wallet,
-      	);
+  // create keypair for owner
+  const keyring = new Keyring({type: 'sr25519'});
+  const OWNER_PAIR = keyring.addFromUri(OWNER_MNEMONIC);
+
+  // define special type for gas weights
+  type WeightV2 = InstanceType<typeof WeightV2>;
+  const gasLimit = api.registry.createType('WeightV2', {
+    refTime: 2**53 - 1,
+    proofSize: 2**53 - 1,
+  }) as WeightV2;
+
+  // get getter output
+  var { gasRequired, storageDeposit, result, output } =
+    await contract.query['checkCredential'](
+      OWNER_PAIR.address, {gasLimit}, '0x' + message.userhash);
+
+  // convert to JSON format for convenience
+  const OUTPUT = JSON.parse(JSON.stringify(output));
+  const RESULT = JSON.parse(JSON.stringify(result));
+
+  // check if the call was successful
+  if (result.isOk) {
+      
+    // check if OK result is reverted contract that returned error
+    if (RESULT.ok.flags == 'Revert') {
+
+      // is this error a custom error?      
+      if (OUTPUT.ok.err.hasOwnProperty('custom')) {
+
+        // logging custom error
+        let error = OUTPUT.ok.err.custom.toString().replace(/0x/, '')
+        console.log(red(`ACCESSNFT:`) +
+          ` ${hexToString(error)}`);
+				process.send('bad-username');
+				process.exit();
+
+      } else {
+          
+        // if not custom then print Error enum type
+        console.log(red(`ACCESSNFT:`) +
+          ` ${OUTPUT.ok.err}`);
+      }
+    }
+  } else {
+
+    // loggin calling error and terminate
+    console.log(red(`ACCESSNFT:`) +
+      ` ${result.asErr.toHuman()}`);
+  }
+
+  const onchainPasshash = OUTPUT.ok.ok[0];
+
+  if (onchainPasshash != '0x' + message.passhash) {
+
+		process.send('bad-password');
+		process.exit();
+	}
+
+  process.send('access-granted');
+	process.exit();
 
       
   } catch(error) {
 
     console.log(red(`ACCESSNFT: `) + error);
-    terminateProcess(socket, 'setAuthenticated', 'program-error', []);
   }
 }
 
-process.on('message', wallet => {
+process.on('message', message => {
 
-  // setup socket connection with autheticateWallet script
-  var socket = io('http://localhost:3000');
-  socket.on('connect', () => {
+  credentialCheck(message).catch((error) => {
 
-    console.log(blue(`ACCESSNFT:`) +
-      ` setAuthenticated socket connected, ID ` + cyan(`${socket.id}`));
-    
-    setAuthenticated(wallet, socket).catch((error) => {
-
-      console.error(error);
-      process.exit(-1);
-    });
+    console.error(error);
+    process.exit(-1);
   });
 });
