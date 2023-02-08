@@ -1,6 +1,6 @@
 //
-// INTERLOCK NETWORK - CLI INTERFACE
-// PSP34 ACCESS NFT AUTHENTICATION
+// INTERLOCK NETWORK & ALEPH ZERO
+// PSP34 UNIVERSAL ACCESS NFT - CLIENT DISPLAY
 //
 
 // imports (anything polkadot with node-js must be required)

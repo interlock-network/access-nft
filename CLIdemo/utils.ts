@@ -1,6 +1,6 @@
 //
-// INTERLOCK NETWORK - UTILITIES
-// PSP34 ACCESS NFT AUTHENTICATION
+// INTERLOCK NETWORK & ALEPH ZERO
+// PSP34 UNIVERSAL ACCESS NFT - UTILITIES
 //
 
 // imports (anything polkadot with node-js must be required)

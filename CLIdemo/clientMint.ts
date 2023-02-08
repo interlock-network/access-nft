@@ -1,18 +1,17 @@
 //
-// INTERLOCK NETWORK - CLI INTERFACE
-// PSP34 ACCESS NFT AUTHENTICATION
+// INTERLOCK NETWORK & ALEPH ZERO
+// PSP34 UNIVERSAL ACCESS NFT - CLIENT MINT
 //
 
 // imports (anything polkadot with node-js must be required)
 const { ApiPromise, WsProvider, Keyring } = require('@polkadot/api');
 const { ContractPromise, CodePromise } = require('@polkadot/api-contract');
-const { decodeAddress, encodeAddress } = require('@polkadot/keyring')
+const { decodeAddress, encodeAddress } = require('@polkadot/keyring');
 const WeightV2 = require('@polkadot/types/interfaces');
 
 // imports
 import { io } from 'socket.io-client';
 import * as prompts from 'prompts';
-import * as crypto from 'crypto';
 
 // specify color formatting
 import * as color from 'cli-color';
@@ -163,10 +162,10 @@ const mint = async (api, contract, wallet)  => {
       }
     });
   } catch (error) {
+
     console.log(red(`ACCESSNFT: `) + 'failed to mint\n');
     process.send('error');
     process.exit();
-
   }
 }
 
