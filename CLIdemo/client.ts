@@ -7,6 +7,7 @@ import { fork } from 'child_process';
 
 // child process paths
 import * as path from 'path';
+const menu = path.resolve('client.js');
 const mint = path.resolve('clientMint.js');
 const authenticate = path.resolve('clientAuthenticate.js');
 const display = path.resolve('clientDisplay.js');
@@ -44,30 +45,60 @@ async function mainMenu() {
 
         // initiate minting process for wallet
         const mintChild = fork(mint);
+
+        mintChild.on('message', () => {
+          
+          // initiate minting process for wallet
+          const menuChild = fork(menu);
+        });
         break;    
 
       case 'authenticate':
 
         // initiate authentication process for wallet
         const authenticateChild = fork(authenticate);
+
+        authenticateChild.on('message', () => {
+          
+	  // initiate minting process for wallet
+          const menuChild = fork(menu);
+        });
         break;
 
       case 'display':
 
         // display wallet's available NFTs
         const displayChild = fork(display);
+
+        displayChild.on('message', () => {
+          
+	  // initiate minting process for wallet
+          const menuChild = fork(menu);
+        });
         break;
 
       case 'login':
 
         // login to secure restricted access area
         const loginChild = fork(login);
+
+        loginChild.on('message', () => {
+          
+	  // initiate minting process for wallet
+          const menuChild = fork(menu);
+        });
         break;
 
       case 'reset':
 
         // reset username and password
         const resetChild = fork(reset);
+
+        resetChild.on('message', () => {
+          
+	  // initiate minting process for wallet
+          const menuChild = fork(menu);
+        });
         break;
     }
 

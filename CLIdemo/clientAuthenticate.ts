@@ -127,9 +127,8 @@ socket.on('connect', async () => {
         console.log(green(`ACCESSNFT: `) + `successfully entered information\n`);
 
         socket.emit('authenticate-nft', [wallet, getHash(username), getHash(password)]);
-	const menuChild = fork(menu);
-	process.exit();
 
+	process.send('done');
       })().catch(error => otherError());
     })().catch(error => otherError());
   })().catch(error => otherError());
