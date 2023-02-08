@@ -30,135 +30,78 @@ import {
 
 const OWNER_MNEMONIC = process.env.OWNER_MNEMONIC;
   
-var wallet;
-var username;
-var password;
-
-// start menu options
-const options = [
-  'mint NFT',
-  'authenticate NFT',
-  'display collection',
-  'reset username and password',
-  'login to secure area'
-];
 
 // setup socket connection with autheticateWallet script
-var socket = io('http://localhost:3000');
+var socket = io('https://localhost:3000', {
+		rejectUnauthorized: false
+});
 socket.on('connect', async () => {
 
   console.log(blue(`ACCESSNFT:`) +
     ` accessApp socket connected, ID ` + cyan(`${socket.id}`));
-   
-  // establish connection with blockchain
-  const [ api, contract ] = await setupSession('setAuthenticated');
 
   // begin prompt tree
   //
-  // first prompt: wallet address
+  // first prompt: login username
   (async () => {
 
-    // get valid wallet address
-    let responseWallet = await prompts({
+    // get username
+    var responseUsername = await prompts({
       type: 'text',
-      name: 'wallet',
-      message: 'Please enter the wallet address containing\nthe NFT you would like to authenticate.',
-      validate: wallet => (!isValidSubstrateAddress(wallet) && (wallet.length > 0)) ?
-        red(`ACCESSNFT: `) + `Invalid address` : true
+      name: 'username',
+      message: 'Please enter your username.',
+      validate: username => !isValidUsername(username) ?
+        red(`ACCESSNFT: `) + `Too short or contains spaces.` : true
     });
-    wallet = responseWallet.wallet;
+    const username = responseUsername.username;
     console.log('');
-
-    // second prompt: username
+    
+    // second prompt: password
     (async () => {
 
-      // loop prompt until valid username
-      var isAvailable = false;
-      while (isAvailable == false) {
+      // get password
+      var responsePassword = await prompts({
+        type: 'password',
+        name: 'password',
+        message: 'Please enter your password.',
+        validate: password => (password.length < 8) ?
+          red(`ACCESSNFT: `) + `Password invalid.` : true
+		  });
+      const password = responsePassword.password;
+			console.log('');
 
-        // get valid username
-        var responseUsername = await prompts({
-          type: 'text',
-          name: 'username',
-          message: 'Please choose a username with 5 or more characters and no spaces.',
-          validate: username => !isValidUsername(username) ?
-            red(`ACCESSNFT: `) + `Too short or contains spaces.` : true
-        });
+      console.log(green(`ACCESSNFT: `) +
+			  `submitting login information over secure connection for verification`);
 
-        // if valid, check if username is available
-        if (await isAvailableUsername(api, contract, getHash(responseUsername.username))) {
-          isAvailable = true;
-        } else {
-          console.log(red(`ACCESSNFT: `) + `Username already taken.`);
-        }
-      }
-      username = responseUsername.username;
-      console.log('');
-    
-      // third prompt: password
-      (async () => {
+			socket.emit('request-access', username, password);
 
-        // loop prompt until valid username
-        var passwordVerify = '********';
-        
-          // loop prompt until valid password match
-          do {
+			socket.onAny((message, ...args) => {
 
-            // get valid password
-            var responsePassword = await prompts([
-              {
-                type: 'password',
-                name: 'password',
-                message: 'Please choose a password with 8 or more characters.\nIt may contain whitespace.',
-                validate: password => (password.length < 8) ?
-                  red(`ACCESSNFT: `) + `Password too short.` : true
-              },
-              {
-                type: 'password',
-                name: 'passwordVerify',
-                message: 'Please verify your password.',
-              }
-            ]);
-            passwordVerify = responsePassword.passwordVerify;
-            password = responsePassword.password;
-						console.log('');
+				if (message == 'bad-username') {
 
-            if (  password != passwordVerify) {
-              console.log(red(`ACCESSNFT: `) + `password mismatch`);
-            }
-          }
-          while (password != passwordVerify)
-        
-        console.log(green(`ACCESSNFT: `) + `successfully entered information`);
+      		console.log(red(`ACCESSNFT: `) +
+			  		`username is incorrect or does not exist...please try again`);
+					console.log('');
+					process.send('fail');
+					process.exit();
 
-        socket.emit('authenticate-nft', [wallet, getHash(username), getHash(password)]);
-				console.log(getHash(username));
-      })();
+				} else if (message == 'bad-password') {
+
+      		console.log(red(`ACCESSNFT: `) +
+			  		`password is incorrect...please try again`);
+					console.log('');
+					process.send('fail');
+					process.exit();
+
+				} else if (message == 'access-granted') {
+
+					console.log('access granted access granted');
+
+				}
+			});
     })();
   })();
 });
-
-socket.onAny((message, ...args) => {
-
-  console.log(message, ...args);
-});
-
-// Check address.
-const isValidSubstrateAddress = (wallet) => {
-  try {
-
-    encodeAddress(decodeAddress(wallet))
-
-    // address encodes/decodes wo error => valid address
-    return true
-
-  } catch (error) {
-
-    // encode/decode failure => invalid address
-    return false
-  }
-}
-
 
 // Check if valid username.
 const isValidUsername = (username) => {
@@ -185,58 +128,4 @@ const isValidUsername = (username) => {
   }
 }
 
-// Check if username is available
-const isAvailableUsername = async (api, contract, usernameHash)  => {
-  try {
-
-  // create keypair for owner
-  const keyring = new Keyring({type: 'sr25519'});
-  const OWNER_PAIR = keyring.addFromUri(OWNER_MNEMONIC);
-
-  // define special type for gas weights
-  type WeightV2 = InstanceType<typeof WeightV2>;
-  const gasLimit = api.registry.createType('WeightV2', {
-    refTime: 2**53 - 1,
-    proofSize: 2**53 - 1,
-  }) as WeightV2;
-
-  // get getter output
-  var { gasRequired, storageDeposit, result, output } =
-    await contract.query['checkCredential'](
-      OWNER_PAIR.address, {gasLimit}, '0x' + usernameHash);
-
-  // convert to JSON format for convenience
-  const RESULT = JSON.parse(JSON.stringify(result));
-  const OUTPUT = JSON.parse(JSON.stringify(output));
-
-    // if this call reverts, then only possible error is 'credential nonexistent'
-    if (RESULT.ok.flags == 'Revert') {
-
-      // logging custom error
-      let error = OUTPUT.ok.err.custom.toString().replace(/0x/, '')
-      console.log(green(`ACCESSNFT:`) +
-        color.bold(` username available`));
-
-      // username is available
-      return true
-    }
-    
-    // username is not available
-    return false
-
-  } catch (error) {
-    console.log(error)
-  }
-}
-
-// calculate hash
-const getHash = (input) => {
-
-  const digest = crypto
-    .createHash('sha256')
-    .update(input)
-    .digest('hex');
-
-  return digest
-}
 

@@ -10,6 +10,7 @@ const WeightV2 = require('@polkadot/types/interfaces');
 
 // environment constants
 import * as dotenv from 'dotenv';
+import * as crypto from 'crypto';
 dotenv.config();
 
 // specify color formatting
@@ -32,7 +33,6 @@ const FALSE = '0x66616c7365';
 const ISAUTHENTICATED = '0x697361757468656e74696361746564';
 const ISWAITING = '0x697377616974696e67';
 const AMOUNT = 1;
-
 
 //
 // call smart contract getter
@@ -241,6 +241,19 @@ export function terminateProcess(
     ` ${origin} socket disconnecting, ID ` + cyan(`${socket.id}`));
   socket.disconnect();
   process.exit();
+}
+
+//
+// calculate SHA256 hash
+//
+export function getHash(input) {
+
+  const digest = crypto
+    .createHash('sha256')
+    .update(input)
+    .digest('hex');
+
+  return digest
 }
 
 //
