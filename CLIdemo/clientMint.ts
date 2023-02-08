@@ -99,27 +99,27 @@ const isValidSubstrateAddress = (wallet) => {
 // Check if username is available
 const mint = async (api, contract, wallet)  => {
   
-	try {
+  try {
 
-  	// create keypair for owner
-  	const keyring = new Keyring({type: 'sr25519'});
-  	const OWNER_PAIR = keyring.addFromUri(OWNER_MNEMONIC);
+    // create keypair for owner
+    const keyring = new Keyring({type: 'sr25519'});
+    const OWNER_PAIR = keyring.addFromUri(OWNER_MNEMONIC);
 
-  	// define special type for gas weights
-  	type WeightV2 = InstanceType<typeof WeightV2>;
-  	const gasLimit = api.registry.createType('WeightV2', {
-  	  refTime: refTimeLimit,
-  	  proofSize: proofSizeLimit,
-  	}) as WeightV2;
+    // define special type for gas weights
+    type WeightV2 = InstanceType<typeof WeightV2>;
+    const gasLimit = api.registry.createType('WeightV2', {
+      refTime: refTimeLimit,
+      proofSize: proofSizeLimit,
+    }) as WeightV2;
 
-  	// get getter output
-  	var { gasRequired, storageDeposit, result, output } =
-  	  await contract.query['mint'](
-  	    OWNER_PAIR.address, {gasLimit}, wallet);
+    // get getter output
+    var { gasRequired, storageDeposit, result, output } =
+      await contract.query['mint'](
+        OWNER_PAIR.address, {gasLimit}, wallet);
 
- 		// convert to JSON format for convenience
- 		const RESULT = JSON.parse(JSON.stringify(result));
-  	const OUTPUT = JSON.parse(JSON.stringify(output));
+     // convert to JSON format for convenience
+     const RESULT = JSON.parse(JSON.stringify(result));
+    const OUTPUT = JSON.parse(JSON.stringify(output));
 
     // if this call reverts, then only possible error is 'credential nonexistent'
     if (RESULT.ok.flags == 'Revert') {
@@ -131,37 +131,37 @@ const mint = async (api, contract, wallet)  => {
       process.exit();
     }
 
-  	// too much gas required?
-  	if (gasRequired > gasLimit) {
+    // too much gas required?
+    if (gasRequired > gasLimit) {
   
-    	// logging and terminate
-    	console.log(red(`ACCESSNFT:`) +
-    	  ' tx aborted, gas required is greater than the acceptable gas limit.\n');
-    	process.send('error');
-  	  process.exit();
-  	}
+      // logging and terminate
+      console.log(red(`ACCESSNFT:`) +
+        ' tx aborted, gas required is greater than the acceptable gas limit.\n');
+      process.send('error');
+      process.exit();
+    }
 
-  	// submit doer tx
-  	let extrinsic = await contract.tx['mint'](
-  	  { storageDepositLimit, gasLimit }, wallet)
-    	  .signAndSend(OWNER_PAIR, result => {
+    // submit doer tx
+    let extrinsic = await contract.tx['mint'](
+      { storageDepositLimit, gasLimit }, wallet)
+        .signAndSend(OWNER_PAIR, result => {
 
-    	// when tx hits block
-    	if (result.status.isInBlock) {
+      // when tx hits block
+      if (result.status.isInBlock) {
 
-    		// logging
-      	console.log(yellow(`ACCESSNFT:`) + ` mint tx in a block`);
+        // logging
+        console.log(yellow(`ACCESSNFT:`) + ` mint tx in a block`);
 
-	    // when tx is finalized in block, tx is successful
-  	  } else if (result.status.isFinalized) {
+      // when tx is finalized in block, tx is successful
+      } else if (result.status.isFinalized) {
 
-    	  // logging and terminate
-      	console.log(green(`ACCESSNFT:`) +
-	        color.bold(` mint tx successful\n`));
-  	    process.send('done');
-    	  process.exit();
-	    }
-  	});
+        // logging and terminate
+        console.log(green(`ACCESSNFT:`) +
+          color.bold(` mint tx successful\n`));
+        process.send('done');
+        process.exit();
+      }
+    });
   } catch (error) {
     console.log(red(`ACCESSNFT: `) + 'failed to mint\n');
     process.send('error');
