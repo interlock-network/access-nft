@@ -33,7 +33,15 @@ const OWNER_MNEMONIC = process.env.OWNER_MNEMONIC;
 var wallet;
 var username;
 var password;
-var passwordVerify;
+
+// start menu options
+const options = [
+  'mint NFT',
+  'authenticate NFT',
+  'display collection',
+  'reset username and password',
+  'login to secure area'
+];
 
 // setup socket connection with autheticateWallet script
 var socket = io('http://localhost:3000');
@@ -45,6 +53,13 @@ socket.on('connect', async () => {
   // establish connection with blockchain
   const [ api, contract ] = await setupSession('setAuthenticated');
 
+  console.log(blue('\nYou will be minting your universal access NFT'));
+  console.log(blue('as the owner of the NFT smart contract. In practice,'));
+  console.log(blue('the client application will not have this privilege,'));
+  console.log(blue('and the NFTs will be minted by the server that contains'));
+  console.log(blue('the secret mnemonic key for the contract\'s owner.'));
+  console.log(blue('This functionality is up to the adopter to implement.\n'));
+
   // begin prompt tree
   //
   // first prompt: wallet address
@@ -54,8 +69,8 @@ socket.on('connect', async () => {
     let responseWallet = await prompts({
       type: 'text',
       name: 'wallet',
-      message: 'Please enter the wallet address containing\nthe NFT you would like to authenticate.\n',
-      validate: wallet => (!isValidSubstrateAddress(wallet)) ?
+      message: 'Please enter the wallet address that you would like to mint to.\n',
+      validate: wallet => (!isValidSubstrateAddress(wallet) && (wallet.length > 0)) ?
         red(`ACCESSNFT: `) + `Invalid address` : true
     });
     wallet = responseWallet.wallet;
@@ -90,44 +105,44 @@ socket.on('connect', async () => {
       // third prompt: password
       (async () => {
 
+        // loop prompt until valid username
+        var passwordVerify = '********';
         
-        // loop prompt until valid password match
-        do {
+          // loop prompt until valid password match
+          do {
 
-          // get valid password
-          var responsePassword = await prompts([
-            {
-              type: 'password',
-              name: 'password',
-              message: 'Please choose a password with 8 or more characters.\nIt may contain whitespace.',
-              validate: password => (password.length < 8) ?
-                red(`ACCESSNFT: `) + `Password too short.` : true
-            },
-            {
-              type: 'password',
-              name: 'passwordVerify',
-              message: 'Please verify your password.',
+            // get valid password
+            var responsePassword = await prompts([
+              {
+                type: 'password',
+                name: 'password',
+                message: 'Please choose a password with 8 or more characters.\nIt may contain whitespace.',
+                validate: password => (password.length < 8) ?
+                  red(`ACCESSNFT: `) + `Password too short.` : true
+              },
+              {
+                type: 'password',
+                name: 'passwordVerify',
+                message: 'Please verify your password.',
+              }
+            ]);
+            passwordVerify = responsePassword.passwordVerify;
+            password = responsePassword.password;
+						console.log('');
+
+            if (  password != passwordVerify) {
+              console.log(red(`ACCESSNFT: `) + `password mismatch`);
             }
-          ]);
-          passwordVerify = responsePassword.passwordVerify;
-          password = responsePassword.password;
-          console.log('');
-
-          if (  password != passwordVerify) {
-            console.log(red(`ACCESSNFT: `) + `password mismatch`);
           }
-        }
-        while (password != passwordVerify);
+          while (password != passwordVerify)
         
-        console.log(green(`ACCESSNFT: `) + `successfully entered information\n`);
+        console.log(green(`ACCESSNFT: `) + `successfully entered information`);
 
         socket.emit('authenticate-nft', [wallet, getHash(username), getHash(password)]);
-        process.send('done');
-	process.exit();
-
-      })().catch(error => otherError());
-    })().catch(error => otherError());
-  })().catch(error => otherError());
+				console.log(getHash(username));
+      })();
+    })();
+  })();
 });
 
 socket.onAny((message, ...args) => {
@@ -232,10 +247,3 @@ const getHash = (input) => {
   return digest
 }
 
-// handle misc error
-const otherError = () => {
-
-  console.log(red(`ACCESSNFT: `) + 'failed to gather required information\n');
-  process.send('error');
-  process.exit();
-}

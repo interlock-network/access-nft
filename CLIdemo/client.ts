@@ -47,10 +47,10 @@ var password;
 // start menu options
 const options = [
   { title: 'mint universal access NFT', value: 'mint' },
-	{ title: 'authenticate universal access NFT', value: 'authenticate' },
+	{ title: 'register universal access NFT', value: 'authenticate' },
 	{ title: 'display universal access NFT collection', value: 'display' },
-	{ title: 'reset username and password secure restricted access area', value: 'reset' },
-	{ title: 'login to secure restricted access area', value: 'login' }
+	{ title: 'login to restricted access area', value: 'login' },
+	{ title: 'reset username and password for restricted access area', value: 'reset' }
 ];
 
 async function mainMenu() {
@@ -60,7 +60,7 @@ try {
     {
       type: 'select',
       name: 'choice',
-      message: 'Choose an action:',
+      message: '\nUNIVERSAL ACCESS NFT DEMO APP ~ Please choose an action:',
       choices: options,
     }
   ]);
@@ -97,22 +97,22 @@ try {
 			});
 			break;
 
-		case 'reset':
-
-		  // reset username and password
-      const resetChild = fork(reset);
-
-		  resetChild.on('message', () => {
-				mainMenu();
-			});
-		  break;
-
 		case 'login':
 
 		  // login to secure restricted access area
       const loginChild = fork(login);
 
 		  loginChild.on('message', () => {
+				mainMenu();
+			});
+		  break;
+
+		case 'reset':
+
+		  // reset username and password
+      const resetChild = fork(reset);
+
+		  resetChild.on('message', () => {
 				mainMenu();
 			});
 		  break;
