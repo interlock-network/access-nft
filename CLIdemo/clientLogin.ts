@@ -71,7 +71,7 @@ socket.on('connect', async () => {
 			console.log('');
 
       console.log(green(`ACCESSNFT: `) +
-			  `submitting login information over secure connection for verification`);
+			  `submitting login information over secure connection for verification\n`);
 
 			socket.emit('request-access', username, password);
 

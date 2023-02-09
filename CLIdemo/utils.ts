@@ -155,7 +155,7 @@ export async function contractDoer(
       // logging and terminate
       console.log(green(`ACCESSNFT:`) +
         color.bold(` ${method} successful`));
-      terminateProcess(socket, origin, `${method}-complete`, [...args]);
+      terminateProcess(socket, origin, `${args}`, []);
     }
   });
 }
@@ -235,7 +235,7 @@ export function terminateProcess(
 ) {
      
   // emit message to parent process and relay then exit after printing to log
-  process.send(values);
+  process.send(message);
   socket.emit(origin, message, values);
   console.log(blue(`ACCESSNFT:`) +
     ` ${origin} socket disconnecting, ID ` + cyan(`${socket.id}`));

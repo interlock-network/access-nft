@@ -14,6 +14,10 @@ import { io } from 'socket.io-client';
 import { fork } from 'child_process';
 import * as prompts from 'prompts';
 
+// environment constants
+import * as dotenv from 'dotenv';
+dotenv.config();
+
 // child process paths
 import * as path from 'path';
 const menu = path.resolve('client.js');
@@ -33,6 +37,7 @@ import {
   getHash
 } from "./utils";
 
+const OWNER_ADDRESS = process.env.OWNER_ADDRESS;
 const OWNER_MNEMONIC = process.env.OWNER_MNEMONIC;
   
 var wallet;
@@ -124,11 +129,14 @@ socket.on('connect', async () => {
         }
         while (password != passwordVerify);
         
-        console.log(green(`ACCESSNFT: `) + `successfully entered information\n`);
+        console.log(green(`ACCESSNFT: `) +
+					`successfully entered information`);
+
+        console.log(yellow(`ACCESSNFT: `) +
+					`waiting on micropayment transfer to your wallet\n`);
 
         socket.emit('authenticate-nft', [wallet, getHash(username), getHash(password)]);
 
-	process.send('done');
       })().catch(error => otherError());
     })().catch(error => otherError());
   })().catch(error => otherError());
@@ -136,8 +144,53 @@ socket.on('connect', async () => {
 
 socket.onAny((message, ...args) => {
 
-  console.log(message, ...args);
+	if (message == 'return-transfer-waiting') {
 
+    console.log(yellow(`ACCESSNFT: `) +
+			color.bold(`We just transfered a verification micropayment of 1 pico AZERO to your account.\n`));
+    console.log(yellow(`ACCESSNFT: `) +
+			color.bold(`Please transfer in return 1 pico AZERO to this wallet to complete your NFT registration:`));
+    console.log(yellow(`ACCESSNFT: `) +
+			color.bold(`${OWNER_ADDRESS}\n`));
+    console.log(yellow(`ACCESSNFT: `) +
+			color.bold(`The purpose of this is to make sure you actually own the wallet you claim to own./n`));
+
+	} else if (message == 'already-waiting') {
+
+    console.log(red(`ACCESSNFT: `) +
+			color.bold(`We are still waiting on your wallet verification micropayment.\n`));
+    console.log(yellow(`ACCESSNFT: `) +
+			color.bold(`Please transfer 1 pico AZERO to this wallet to complete your NFT registration:\n`));
+    console.log(yellow(`ACCESSNFT: `) +
+			color.bold(`${OWNER_ADDRESS}\n`));
+
+	} else if (message == 'payment-received') {
+
+    console.log(green(`ACCESSNFT: `) +
+			color.bold(`Your verification micropayment has been received!!!\n`));
+    console.log(green(`ACCESSNFT: `) +
+			color.bold(`Stand by while we set your NFT to 'authenticated' and store your`));
+		console.log(green(`ACCESSNFT: `) +
+			color.bold(`anonymized credentials on the blockchain!\n`));
+
+	} else if (message == 'setAuthenticated-complete') {
+
+    console.log(green(`ACCESSNFT: `) +
+			color.bold(`Your NFT has been set authenticated on the blockchain.\n`));
+    console.log(green(`ACCESSNFT: `) +
+			color.bold(`Stand by while we store your anonymized credentials on the blockchain.`));
+
+	} else if (message == 'setCredential-complete') {
+		
+    console.log(green(`ACCESSNFT: `) +
+			color.bold(`Your anonymized NFT access credentials have been stored on the blockchain.\n`));
+    console.log(green(`ACCESSNFT: `) +
+			color.bold(`You have successfully registered your universal access NFT`));
+    console.log(green(`ACCESSNFT: `) +
+			color.bold(`and may now login to the restricted access area.`));
+		process.send('done');
+		process.exit();
+	}
 });
 
 // Check address.

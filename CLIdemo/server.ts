@@ -94,23 +94,26 @@ async function authenticateWallet(socket) {
         // from wallet holder
         } else if (event.data[1] == OWNER_ADDRESS &&
           event.data[2] == AMOUNT) {
-		
+                
           const wallet = event.data[0].toHuman();
 
           console.log(green(`ACCESSNFT:`) +
             color.bold(` verification transfer complete from wallet `) + magenta(`${event.data[0]}`));
           console.log(green(`ACCESSNFT:`) +
             ` wallet ` +  magenta(`${event.data[0]}`) + ` is verified`);
+
+          // notify the client that their transfer was recorded
+					io.to(walletIDs.get(wallet)[0]).emit('payment-received');
         
-	  // change contract state to indicate nft is authenticated
+          // change contract state to indicate nft is authenticated
           const setAuthenticatedChild = fork(setAuthenticated);
           setAuthenticatedChild.send(event.data[0]);
 
           // listen for results of setAuthenticated process child
-	  setAuthenticatedChild.on('message', message => {
+          setAuthenticatedChild.on('message', message => {
 
-            // communitcate to client application that isauthenticated is set true
-            io.to(walletIDs.get(wallet)[0]).emit('setAuthenticate-complete');
+            // communicate to client application that isauthenticated is set true
+            io.to(walletIDs.get(wallet)[0]).emit('setAuthenticated-complete');
 
             // fork process to set credentials provided at authenticate-wallet call
             const setCredentialsChild = fork(setCredentials);
@@ -125,10 +128,10 @@ async function authenticateWallet(socket) {
             // listen for results of 
             setCredentialsChild.on('message', () => {
 
-              io.to(walletIDs.get(wallet)[0]).emit('setCredentials-complete');
+              io.to(walletIDs.get(wallet)[0]).emit('setCredential-complete');
               walletIDs.delete(wallet);
             });
-	  });
+          });
         }
       }
     });
@@ -171,7 +174,7 @@ io.on('connection', (socket) => {
 
             io.to(socket.id).emit(`${contents}`);
           }
-	  return
+          return
         });
 
       } else {
@@ -180,7 +183,7 @@ io.on('connection', (socket) => {
         socket.disconnect();
         console.log(red(`ACCESSNFT:`) +
           ` already waiting for wallet ` + magenta(`${wallet}`) + ` to return micropayment`);
-	return
+        return
       }
     } else {
 
