@@ -17,14 +17,14 @@ const login = path.resolve('clientLogin.js');
 // imports
 import * as prompts from 'prompts';
 
-
 // start menu options
 const options = [
   { title: 'mint universal access NFT', value: 'mint' },
   { title: 'register universal access NFT', value: 'authenticate' },
   { title: 'display universal access NFT collection', value: 'display' },
   { title: 'login to restricted access area', value: 'login' },
-  { title: 'reset username and password for restricted access area', value: 'reset' }
+  { title: 'reset username and password for restricted access area', value: 'reset' },
+  { title: 'quit application', value: 'quit' }
 ];
 
 async function mainMenu() {
@@ -60,7 +60,7 @@ async function mainMenu() {
 
         authenticateChild.on('message', () => {
           
-	  // initiate minting process for wallet
+          // initiate minting process for wallet
           const menuChild = fork(menu);
         });
         break;
@@ -72,7 +72,7 @@ async function mainMenu() {
 
         displayChild.on('message', () => {
           
-	  // initiate minting process for wallet
+          // initiate minting process for wallet
           const menuChild = fork(menu);
         });
         break;
@@ -84,7 +84,7 @@ async function mainMenu() {
 
         loginChild.on('message', () => {
           
-	  // initiate minting process for wallet
+          // initiate minting process for wallet
           const menuChild = fork(menu);
         });
         break;
@@ -96,9 +96,15 @@ async function mainMenu() {
 
         resetChild.on('message', () => {
           
-	  // initiate minting process for wallet
+          // initiate minting process for wallet
           const menuChild = fork(menu);
         });
+        break;
+
+      case 'quit application':
+
+        console.log('goodbye.');
+        process.exit();
         break;
     }
 
