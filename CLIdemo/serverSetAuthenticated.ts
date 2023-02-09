@@ -10,7 +10,6 @@ import { io } from 'socket.io-client';
 import {
   contractGetter,
   setupSession,
-  terminateProcess,
   contractDoer
 } from "./utils";
 
@@ -99,7 +98,11 @@ async function setAuthenticated(wallet, socket) {
   } catch(error) {
 
     console.log(red(`ACCESSNFT: `) + error);
-    terminateProcess(socket, 'setAuthenticated', 'program-error', []);
+		process.send('program-error');
+  	console.log(blue(`ACCESSNFT:`) +
+    	` ${origin} socket disconnecting, ID ` + cyan(`${socket.id}`));
+  	socket.disconnect();
+  	process.exit();
   }
 }
 

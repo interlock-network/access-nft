@@ -35,7 +35,7 @@ const OWNER_MNEMONIC = process.env.OWNER_MNEMONIC;
 //
 // null === no limit
 // refTime and proofSize determined by contracts-ui estimation plus fudge-factor
-const refTimeLimit = 6500000000;
+const refTimeLimit = 8000000000;
 const proofSizeLimit = 180000;
 const storageDepositLimit = null;
   
@@ -51,12 +51,12 @@ socket.on('connect', async () => {
   // establish connection with blockchain
   const [ api, contract ] = await setupSession('setAuthenticated');
 
-  console.log(green('\nYou will be minting this universal access NFT'));
-  console.log(green('as the owner of the NFT smart contract. In practice,'));
-  console.log(green('the client application will not have this privilege,'));
-  console.log(green('and the NFTs will be minted by the server that contains'));
-  console.log(green('the secret mnemonic key for the contract\'s owner account.'));
-  console.log(green('This functionality is up to the adopter to implement.\n'));
+  console.log(magenta('\nYou will be minting this universal access NFT'));
+  console.log(magenta('as the owner of the NFT smart contract. In practice,'));
+  console.log(magenta('the client application will not have this privilege,'));
+  console.log(magenta('and the NFTs will be minted by the server that contains'));
+  console.log(magenta('the secret mnemonic key for the contract\'s owner account.'));
+  console.log(magenta('This functionality is up to the adopter to implement.\n'));
 
   // begin prompt tree
   //
@@ -116,8 +116,8 @@ const mint = async (api, contract, wallet)  => {
       await contract.query['mint'](
         OWNER_PAIR.address, {gasLimit}, wallet);
 
-     // convert to JSON format for convenience
-     const RESULT = JSON.parse(JSON.stringify(result));
+    // convert to JSON format for convenience
+    const RESULT = JSON.parse(JSON.stringify(result));
     const OUTPUT = JSON.parse(JSON.stringify(output));
 
     // if this call reverts, then only possible error is 'credential nonexistent'

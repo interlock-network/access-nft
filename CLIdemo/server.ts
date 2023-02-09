@@ -52,7 +52,7 @@ const AMOUNT = 1;
 
 // map to keep track of waiting wallet transfers
 // mapping is [wallet -> socketID]
-var walletIDs = new Map();
+var walletInfo = new Map();
 
 async function authenticateWallet(socket) {
 
@@ -79,12 +79,16 @@ async function authenticateWallet(socket) {
       // listen for Transfer events
       if (event.method == 'Transfer') {
 
+				const sendingWallet = event.data[0];
+				const receivingWallet = event.data[1];
+				const transferAmount = event.data[2];
+
         //console.log(event)
         // check for verification transfers
         //
         // from Interlock
-        if ( event.data[0] == OWNER_ADDRESS &&
-          event.data[2] == AMOUNT) {
+        if ( sendingWallet == OWNER_ADDRESS &&
+          transferAmount == AMOUNT) {
 
           console.log(green(`ACCESSNFT:`) +
             color.bold(` authentication transfer complete to wallet `) + magenta(`${event.data[1]}`));
@@ -92,44 +96,47 @@ async function authenticateWallet(socket) {
             ` waiting on returning verification transfer to wallet ` + magenta(`${event.data[1]}`));
         //
         // from wallet holder
-        } else if (event.data[1] == OWNER_ADDRESS &&
-          event.data[2] == AMOUNT) {
+        } else if (receivingWallet == OWNER_ADDRESS &&
+          transferAmount == AMOUNT) {
                 
-          const wallet = event.data[0].toHuman();
+          const clientWallet = sendingWallet.toHuman();
+					const clientSocketId = walletInfo.get(clientWallet)[0];
+					const userhash = walletInfo.get(clientWallet)[1];
+					const passhash = walletInfo.get(clientWallet)[2];
+					const nftId = walletInfo.get(clientWallet)[3];
 
           console.log(green(`ACCESSNFT:`) +
-            color.bold(` verification transfer complete from wallet `) + magenta(`${event.data[0]}`));
+            color.bold(` verification transfer complete from wallet `) + magenta(`${clientWallet}`));
           console.log(green(`ACCESSNFT:`) +
-            ` wallet ` +  magenta(`${event.data[0]}`) + ` is verified`);
+            ` wallet ` +  magenta(`${clientWallet}`) + ` is verified`);
 
           // notify the client that their transfer was recorded
-					io.to(walletIDs.get(wallet)[0]).emit('payment-received');
+					io.to(clientSocketId).emit('payment-received', [nftId]);
         
           // change contract state to indicate nft is authenticated
           const setAuthenticatedChild = fork(setAuthenticated);
-          setAuthenticatedChild.send(event.data[0]);
+          setAuthenticatedChild.send(clientWallet);
 
           // listen for results of setAuthenticated process child
           setAuthenticatedChild.on('message', message => {
 
             // communicate to client application that isauthenticated is set true
-            io.to(walletIDs.get(wallet)[0]).emit('setAuthenticated-complete');
+            io.to(clientSocketId).emit('setAuthenticated-complete', [nftId]);
 
             // fork process to set credentials provided at authenticate-wallet call
             const setCredentialsChild = fork(setCredentials);
             setCredentialsChild.send({
-              wallet: wallet,
-              id: message[0].u64,
-              userhash: walletIDs.get(wallet)[1],
-              passhash: walletIDs.get(wallet)[2],
-
+              wallet: clientWallet,
+              id: nftId,
+              userhash: userhash,
+              passhash: passhash
             });
             
             // listen for results of 
             setCredentialsChild.on('message', () => {
 
-              io.to(walletIDs.get(wallet)[0]).emit('setCredential-complete');
-              walletIDs.delete(wallet);
+              io.to(clientSocketId).emit('credential-set', [nftId, userhash, passhash]);
+              walletInfo.delete(clientWallet);
             });
           });
         }
@@ -144,16 +151,17 @@ io.on('connection', (socket) => {
   // relay all script events to application
   socket.onAny((message, ...args) => {
 
-    const wallet = args[0][0];
-    const userhash = args[0][1];
-    const passhash = args[0][2];
-
     if (message == 'authenticate-nft') {
 
+    	const wallet = args[0][0];
+    	const userhash = args[0][1];
+    	const passhash = args[0][2];
+
+
       // store wallet -> socketID in working memory
-      if (!walletIDs.has(wallet)) {
+      if (!walletInfo.has(wallet)) {
       
-        walletIDs.set(wallet, [socket.id, userhash, passhash]);
+        walletInfo.set(wallet, [socket.id, userhash, passhash, 0]);
 
         // initiate authentication process for wallet
         const verifyWalletChild = fork(verifyWallet);
@@ -164,11 +172,7 @@ io.on('connection', (socket) => {
           if (contents == 'all-nfts-authenticated') {
 
             io.to(socket.id).emit('all-nfts-authenticated');
-            walletIDs.delete(wallet);
-
-          } else if (contents == 'waiting') {
-
-            io.to(socket.id).emit('return-transfer-waiting');
+            walletInfo.delete(wallet);
 
           } else {
 
@@ -179,13 +183,28 @@ io.on('connection', (socket) => {
 
       } else {
 
-        io.to(socket.id).emit('already-waiting');
+				const waitingWallet = walletInfo.get(wallet);
+				const waitingNftId = waitingWallet[3];
+        io.to(socket.id).emit('already-waiting', [waitingNftId]);
         socket.disconnect();
         console.log(red(`ACCESSNFT:`) +
           ` already waiting for wallet ` + magenta(`${wallet}`) + ` to return micropayment`);
         return
       }
-    } else {
+    } else if (message == 'waiting') {
+
+			const hash = args[0][0];
+			const nftId = args[0][1];
+			const wallet = args[0][2];
+			const walletID = walletInfo.get(wallet);
+			const clientSocketId = walletID[0];
+			
+			walletID[3] = nftId;
+			walletInfo.set(wallet, walletID);
+
+			io.to(clientSocketId).emit('return-transfer-waiting', [nftId, hash]);
+						
+    }  else  {
 
       // relay message to application
       socket.emit(`apprelay-${message}`, ...args);

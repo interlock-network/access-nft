@@ -102,7 +102,8 @@ async function verifyWallet(wallet, socket) {
         notAuthenticatedId
       );
 
-      terminateProcess(socket, 'verifyWallet', 'waiting', [hash])
+			//socket.emit('testee')
+      terminateProcess(socket, 'verifyWallet', 'waiting', [hash, notAuthenticatedId, wallet])
     }
   } catch(error) {
 

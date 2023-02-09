@@ -91,7 +91,7 @@ socket.on('connect', async () => {
         if (await isAvailableUsername(api, contract, getHash(responseUsername.username))) {
           isAvailable = true;
         } else {
-          console.log(red(`ACCESSNFT: `) + `Username already taken.`);
+          console.log(red(`ACCESSNFT: `) + `Username already taken.\n`);
         }
       }
       username = responseUsername.username;
@@ -130,10 +130,9 @@ socket.on('connect', async () => {
         while (password != passwordVerify);
         
         console.log(green(`ACCESSNFT: `) +
-					`successfully entered information`);
-
+					color.bold(`You successfully entered credential and wallet information.`));
         console.log(yellow(`ACCESSNFT: `) +
-					`waiting on micropayment transfer to your wallet\n`);
+					color.bold(`Wait while we transfer a micropayment to your wallet.\n`));
 
         socket.emit('authenticate-nft', [wallet, getHash(username), getHash(password)]);
 
@@ -146,49 +145,128 @@ socket.onAny((message, ...args) => {
 
 	if (message == 'return-transfer-waiting') {
 
+		const nftId = args[0][0];
+		const transactionHash = args[0][1];
+
     console.log(yellow(`ACCESSNFT: `) +
-			color.bold(`We just transfered a verification micropayment of 1 pico AZERO to your account.\n`));
+			color.bold(`We just transfered a verification micropayment of 1 pico AZERO to your wallet at`));
+	  console.log(yellow(`ACCESSNFT: `) +
+			magenta(`${wallet}` + `\n`));
+		console.log(yellow(`ACCESSNFT: `) +
+			color.bold(`You may confirm this via the transaction hash`));
+	
+		console.log(yellow(`ACCESSNFT: `) +
+			cyan(`0x${transactionHash}`) + `\n`);
+
+    console.log(green(`ACCESSNFT: `) +
+			color.bold(`Please transfer 1 pico AZERO in return to complete`));
+		console.log(green(`ACCESSNFT: `) +
+			color.bold(`your registration for universal access NFT `) +
+			red(`ID ${nftId}`) + color.bold(` to our wallet:`)) 
+    console.log(green(`ACCESSNFT: `) +
+			magenta(`${OWNER_ADDRESS}\n`));
+
     console.log(yellow(`ACCESSNFT: `) +
-			color.bold(`Please transfer in return 1 pico AZERO to this wallet to complete your NFT registration:`));
-    console.log(yellow(`ACCESSNFT: `) +
-			color.bold(`${OWNER_ADDRESS}\n`));
-    console.log(yellow(`ACCESSNFT: `) +
-			color.bold(`The purpose of this is to make sure you actually own the wallet you claim to own./n`));
+			color.bold(`The purpose of this is to make sure you actually own the wallet (and NFT) you claim to own.\n`));
 
 	} else if (message == 'already-waiting') {
 
+		const nftId = args[0][0];
+
     console.log(red(`ACCESSNFT: `) +
-			color.bold(`We are still waiting on your wallet verification micropayment.\n`));
+			color.bold(`We are still waiting on your wallet verification micropayment for NFT `) +
+			red(`ID ${nftId}`) + `.\n`);
     console.log(yellow(`ACCESSNFT: `) +
-			color.bold(`Please transfer 1 pico AZERO to this wallet to complete your NFT registration:\n`));
+			color.bold(`Please transfer 1 pico AZERO to our wallet to complete your NFT registration:`));
     console.log(yellow(`ACCESSNFT: `) +
-			color.bold(`${OWNER_ADDRESS}\n`));
+			magenta(`${OWNER_ADDRESS}\n`));
 
 	} else if (message == 'payment-received') {
 
+		const nftId = args[0][0];
+
     console.log(green(`ACCESSNFT: `) +
 			color.bold(`Your verification micropayment has been received!!!\n`));
-    console.log(green(`ACCESSNFT: `) +
-			color.bold(`Stand by while we set your NFT to 'authenticated' and store your`));
+
+    console.log(yellow(`ACCESSNFT: `) +
+			color.bold(`Stand by while we set your NFT `) + red(`ID ${nftId} `) +
+			color.bold(`to 'authenticated' and store your`));
 		console.log(green(`ACCESSNFT: `) +
 			color.bold(`anonymized credentials on the blockchain!\n`));
 
 	} else if (message == 'setAuthenticated-complete') {
 
-    console.log(green(`ACCESSNFT: `) +
-			color.bold(`Your NFT has been set authenticated on the blockchain.\n`));
-    console.log(green(`ACCESSNFT: `) +
-			color.bold(`Stand by while we store your anonymized credentials on the blockchain.`));
+		const nftId = args[0][0];
 
-	} else if (message == 'setCredential-complete') {
+    console.log(green(`ACCESSNFT: `) +
+			color.bold(`Your NFT `) + red(`ID ${nftId} `) +
+			color.bold(`has been set authenticated on the blockchain.\n`));
+
+    console.log(yellow(`ACCESSNFT: `) +
+			color.bold(`Stand by while we store your anonymized credentials on the blockchain.\n`));
+
+	} else if (message == 'credential-set') {
+
+		const nftId = args[0][0];
+		const userhash = args[0][1];
+		const passhash = args[0][2];
 		
     console.log(green(`ACCESSNFT: `) +
-			color.bold(`Your anonymized NFT access credentials have been stored on the blockchain.\n`));
+			color.bold(`Your anonymized NFT access credentials have been stored on the blockchain.\n\n\n`));
+
     console.log(green(`ACCESSNFT: `) +
-			color.bold(`You have successfully registered your universal access NFT`));
+			color.bold(`You have successfully registered your universal access NFT`) + red(` ID ${nftId}`));
     console.log(green(`ACCESSNFT: `) +
-			color.bold(`and may now login to the restricted access area.`));
+			color.bold(`and may now login to the restricted access area!!!\n\n\n`));
+
+    console.log(red(`ACCESSNFT: `) +
+			color.bold(`!!! WARNING !!!\n`));
+
+    console.log(red(`ACCESSNFT: `) +
+			color.bold(`Because your credentials are anonymized, it is impossible for us to tell you your`));
+    console.log(red(`ACCESSNFT: `) +
+			color.bold(`username or password if you forget.`));
+
+    console.log(red(`ACCESSNFT: `) +
+			color.bold(`If you forget your username or password, you must repeat this registration process using`));
+    console.log(red(`ACCESSNFT: `) +
+			color.bold(`a DIFFERENT username. This is the only way to ensure that access credentials are`));
+    console.log(red(`ACCESSNFT: `) +
+			color.bold(`anonymized and secure in a blockchain environment. Maybe write them down somewhere...\n\n`));
+
+
+    console.log(color.bold.magenta(`ACCESSNFT: `) +
+			color.bold(`USERNAME STORED ON BLOCKCHAIN AS SHA256 HASH`));
+    console.log(color.bold.magenta(`ACCESSNFT: `) +
+			blue(` 0x${userhash}`));
+    console.log(color.bold.magenta(`ACCESSNFT: `) +
+			color.bold(`PASSWORD STORED ON BLOCKCHAIN AS SHA256 HASH `));
+    console.log(color.bold.magenta(`ACCESSNFT: `) +
+			blue(` 0x${passhash}\n`));
+
+    console.log(color.bold.magenta(`ACCESSNFT: `) +
+			color.bold(`YOUR USERNAME AND PASSWORD ARE IMPOSSIBLE TO DERIVE FROM THE SHA256 HASH. `));
+    console.log(color.bold.magenta(`ACCESSNFT: `) +
+			color.bold(`SHA256 HASH NUMBERS ARE USED TO VERIFY THAT YOU POSSESS THE CORRECT CREDENTIALS`));
+		console.log(color.bold.magenta(`ACCESSNFT: `) +
+			color.bold(`BY COMPARING LOCAL HASH OF CREDENTIALS YOU PROVIDE ON LOGIN WITH HASH`));
+		console.log(color.bold.magenta(`ACCESSNFT: `) +
+			color.bold(`STORED ON BLOCKCHAIN THAT WE GENERATED IN THIS REGISTRATION SESSION.`));
+
+    console.log(color.bold.magenta(`ACCESSNFT: `) +
+			color.bold(`AT NO POINT ARE YOUR CREDENTIALS STORED IN A DATABASE.\n\n\n`));
+
 		process.send('done');
+		process.exit();
+
+	} else if (message == 'all-nfts-authenticated') {
+		
+    console.log(red(`ACCESSNFT: `) +
+			color.bold(`All your NFTs are already authenticated.`));
+    console.log(red(`ACCESSNFT: `) +
+			color.bold(`You need to buy a new universal access NFT to register and gain access to restricted area.`));
+
+		process.send('error');
 		process.exit();
 	}
 });
