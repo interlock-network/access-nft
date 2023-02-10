@@ -26,7 +26,8 @@ const magenta = color.magenta;
 import {
   contractGetter,
   setupSession,
-  contractDoer
+  contractDoer,
+  returnToMain
 } from "./utils";
 
 const OWNER_MNEMONIC = process.env.OWNER_MNEMONIC;
@@ -143,7 +144,7 @@ const mint = async (api, contract, wallet)  => {
     // submit doer tx
     let extrinsic = await contract.tx['mint'](
       { storageDepositLimit, gasLimit }, wallet)
-        .signAndSend(OWNER_PAIR, result => {
+        .signAndSend(OWNER_PAIR, async result => {
 
       // when tx hits block
       if (result.status.isInBlock) {
@@ -158,18 +159,7 @@ const mint = async (api, contract, wallet)  => {
         console.log(green(`ACCESSNFT:`) +
           color.bold(` mint tx successful\n`));
 
-        (async () => {
-
-          var choice = await prompts({
-            type: 'select',
-            name: 'return',
-            message: 'Now choose one of the following options:',
-            choices: [{ title: 'return to main menu', value: 'return' }]
-          });
-
-          process.send('done');
-          process.exit();
-        })();
+        await returnToMain('return to main menu');          
       }
     });
   } catch (error) {
