@@ -286,8 +286,8 @@ socket.onAny((message, ...args) => {
 
       var choice = await prompts({
         type: 'select',
-         name: 'return',
-         message: 'Now choose one of the following options:',
+        name: 'return',
+        message: 'Now choose one of the following options:',
         choices: [{ title: 'return to main menu', value: 'return' }]
       });
 

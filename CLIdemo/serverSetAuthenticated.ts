@@ -60,7 +60,7 @@ async function setAuthenticated(wallet, socket) {
     let nft: any;
     for (nft of array) {
 
-      // get attribute iswaiting state
+      // get attribute isauthenticated state
       var [ gasRequired, storageDeposit, RESULT_authenticated, OUTPUT_authenticated ] =
         await contractGetter(
           api,
