@@ -256,9 +256,18 @@ socket.onAny((message, ...args) => {
     console.log(color.bold.magenta(`ACCESSNFT: `) +
 			color.bold(`AT NO POINT ARE YOUR CREDENTIALS STORED IN A DATABASE.\n\n\n`));
 
-		process.send('done');
-		process.exit();
+	  (async () => {
 
+    	var choice = await prompts({
+      	type: 'select',
+     		name: 'return',
+   			message: 'Now choose one of the following options:',
+				choices: [{ title: 'return to main menu', value: 'return' }]
+			});
+
+			process.send('done');
+			process.exit();
+		})();
 	} else if (message == 'all-nfts-authenticated') {
 		
     console.log(red(`ACCESSNFT: `) +
@@ -266,8 +275,18 @@ socket.onAny((message, ...args) => {
     console.log(red(`ACCESSNFT: `) +
 			color.bold(`You need to buy a new universal access NFT to register and gain access to restricted area.`));
 
-		process.send('error');
-		process.exit();
+	  (async () => {
+
+    	var choice = await prompts({
+      	type: 'select',
+     		name: 'return',
+   			message: 'Now choose one of the following options:',
+				choices: [{ title: 'return to main menu', value: 'return' }]
+			});
+
+			process.send('done');
+			process.exit();
+		})();
 	}
 });
 

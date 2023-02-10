@@ -48,7 +48,6 @@ async function mainMenu() {
 
         mintChild.on('message', () => {
           
-          // initiate minting process for wallet
           const menuChild = fork(menu);
         });
         break;    
@@ -60,7 +59,6 @@ async function mainMenu() {
 
         authenticateChild.on('message', () => {
           
-          // initiate minting process for wallet
           const menuChild = fork(menu);
         });
         break;
@@ -72,7 +70,6 @@ async function mainMenu() {
 
         displayChild.on('message', () => {
           
-          // initiate minting process for wallet
           const menuChild = fork(menu);
         });
         break;
@@ -84,7 +81,6 @@ async function mainMenu() {
 
         loginChild.on('message', () => {
           
-          // initiate minting process for wallet
           const menuChild = fork(menu);
         });
         break;
@@ -96,14 +92,12 @@ async function mainMenu() {
 
         resetChild.on('message', () => {
           
-          // initiate minting process for wallet
           const menuChild = fork(menu);
         });
         break;
 
       case 'quit application':
 
-        console.log('goodbye.');
         process.exit();
         break;
     }
@@ -113,4 +107,7 @@ async function mainMenu() {
   }
 }
 
-mainMenu()
+console.clear();
+console.log(`\n\n`);
+
+mainMenu();

@@ -9,6 +9,7 @@ import { createServer } from "https";
 import { readFileSync } from "fs";
 import { Server } from "socket.io";
 import * as express from 'express';
+import * as figlet from 'figlet';
 
 // child process paths
 import * as path from 'path';
@@ -33,6 +34,8 @@ const magenta = color.magenta.bold;
 
 // constants
 const SERVERPORT = 8443;
+
+var somethingUseful;
 
 // setup server
 const app = express();
@@ -83,32 +86,47 @@ io.on('connect', (socket) => {
             `login success for client on socket ` + cyan(`ID ${socket.id}`));
           socket.emit('access-granted');
 
-          socket.on('message', (session) => {
+          socket.onAny((session) => {
 
             // RESTRICTED AREA BELOW!!!
             //
             // only the privileged few who possess a
             // universal access NFT may interact in this space
             //
-            var somethingUseless = false;
-            var logout = false;
+            var somethingUseful = false;
 
-            do {
-              if (session == 'do-something-useless') {
+              if (session == 'do-something-useful') {
 
-                somethingUseless = true;
+                somethingUseful = true;
+                console.log(magenta(`ACCESSNFT: `) +
+                  `${username} on socket ` + cyan(`ID ${socket.id}` +
+                  `just did something extremely useful`));
+                socket.emit('did-something-useful', somethingUseful);
+
+              } else if (session == 'do-something-useless') {
+
+                somethingUseful = false;
                 console.log(magenta(`ACCESSNFT: `) +
                   `${username} on socket ` + cyan(`ID ${socket.id}` +
                   `just did something extremely useless`));
-                socket.emit('did-something-useless');
+                socket.emit('did-something-useless', somethingUseful);
 
-              } else if (session == 'undo-something-useless') {
+              } else if (session == 'fetch-art') {
 
-                somethingUseless = false;
                 console.log(magenta(`ACCESSNFT: `) +
                   `${username} on socket ` + cyan(`ID ${socket.id}` +
-                  `just undid something extremely useless`));
-                socket.emit('undid-something-useless');
+                  `just fetched ascii art`));
+
+								figlet('(:  RESTRICTED AREA  :)', function(err, data) {
+							    
+									if (err) {
+						        console.log('Something went wrong...');
+ 							      console.dir(err);
+					        	return;
+					    		}
+    							socket.emit('ascii-art', data);
+								});
+
               } else if (session == 'logout') {
 
                 console.log(magenta(`ACCESSNFT: `) +
@@ -116,7 +134,6 @@ io.on('connect', (socket) => {
                   `just logged out`));
                 socket.disconnect();
               }
-            } while (!logout);
             //
             // RESTRICTED ACCESS AREA ABOVE!!!
           });
