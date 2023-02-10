@@ -34,7 +34,8 @@ const magenta = color.magenta;
 // utility functions
 import {
   setupSession,
-  getHash
+  getHash,
+  returnToMain
 } from "./utils";
 
 const OWNER_ADDRESS = process.env.OWNER_ADDRESS;
@@ -71,27 +72,16 @@ socket.on('connect', async () => {
     });
     wallet = responseWallet.wallet;
     console.log('');
-
-    // if valid, check to see if wallet has nft collection
-    await (async () => {
     
-      // if no collection propmt to return to main menu      
+      // if valid, check to see if wallet has nft collection
       if (!(await hasCollection(api, contract, wallet))) {
         
         console.log(red(`ACCESSNFT: `) +
            color.bold(`This wallet has no universal access NFT collection. Please return to main menu to mint.\n`));
 
-         var choice = await prompts({
-           type: 'select',
-           name: 'return',
-           message: 'Options:',
-           choices: [{ title: 'return to main menu to mint NFT', value: 'return' }]
-        });
-
-        process.send('done');
-         process.exit();
+        // if no collection propmt to return to main menu      
+        await returnToMain('return to main menu to mint NFT');
       }
-     })();
 
     // second prompt: username
     (async () => {
@@ -167,7 +157,7 @@ socket.on('connect', async () => {
   })().catch(error => otherError());
 });
 
-socket.onAny((message, ...args) => {
+socket.onAny(async (message, ...args) => {
 
   if (message == 'return-transfer-waiting') {
 
@@ -282,18 +272,8 @@ socket.onAny((message, ...args) => {
     console.log(color.bold.magenta(`ACCESSNFT: `) +
       color.bold(`AT NO POINT ARE YOUR CREDENTIALS STORED IN A DATABASE.\n\n\n`));
 
-    (async () => {
+    await returnToMain('return to main menu');
 
-      var choice = await prompts({
-        type: 'select',
-        name: 'return',
-        message: 'Now choose one of the following options:',
-        choices: [{ title: 'return to main menu', value: 'return' }]
-      });
-
-      process.send('done');
-      process.exit();
-    })();
   } else if (message == 'all-nfts-authenticated') {
     
     console.log(red(`ACCESSNFT: `) +
@@ -301,18 +281,7 @@ socket.onAny((message, ...args) => {
     console.log(red(`ACCESSNFT: `) +
       color.bold(`You need to buy a new universal access NFT to register and gain access to restricted area.`));
 
-    (async () => {
-
-      var choice = await prompts({
-        type: 'select',
-         name: 'return',
-         message: 'Now choose one of the following options:',
-        choices: [{ title: 'return to main menu', value: 'return' }]
-      });
-
-      process.send('done');
-      process.exit();
-    })();
+    await returnToMain('return to main menu to mint new nft');
   }
 });
 

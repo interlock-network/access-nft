@@ -28,7 +28,7 @@ import {
   contractGetter,
   setupSession,
   contractDoer,
-	returnToMain
+  returnToMain
 } from "./utils";
 
 const OWNER_MNEMONIC = process.env.OWNER_MNEMONIC;
@@ -68,11 +68,11 @@ socket.on('connect', async () => {
         
           console.log(red(`ACCESSNFT: `) +
             color.bold(`This wallet has no universal access NFT collection.`) +
-	 				  color.bold(`	Please return to main menu to mint.\n`));
+             color.bold(`  Please return to main menu to mint.\n`));
 
-        	// if no collection propmt to return to main menu      
-					await returnToMain('return to main menu to mint NFT');
-				}
+          // if no collection propmt to return to main menu      
+          await returnToMain('return to main menu to mint NFT');
+        }
 
         // if collection exists, get array
         //

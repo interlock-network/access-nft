@@ -281,8 +281,8 @@ export async function returnToMain(message: String) {
     name: 'return',
     message: 'Options:',
     choices: [{ title: message, value: 'return' }]
-   });
+  });
 
-   process.send('done');
-   process.exit();
+  process.send('done');
+  process.exit();
 }
