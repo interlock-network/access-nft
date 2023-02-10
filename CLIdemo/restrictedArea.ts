@@ -40,8 +40,8 @@ var somethingUseful;
 // setup server
 const app = express();
 const options = {  
-  key: readFileSync('/Users/blairmunroakusa/_ROOT/interlockDUMP/access-nft/CLIdemo/server-creds/key.pem'),
-  cert: readFileSync('/Users/blairmunroakusa/_ROOT/interlockDUMP/access-nft/CLIdemo/server-creds/cert.pem')
+  key: readFileSync('./server-creds/key.pem'),
+  cert: readFileSync('./server-creds/cert.pem')
 };
 const httpsServer = createServer(options, app);
 const io = new Server(httpsServer);
