@@ -49,8 +49,9 @@ var passwordVerify;
 var socket = io('http://localhost:3000');
 socket.on('connect', async () => {
 
-  console.log(blue(`ACCESSNFT:`) +
-    ` accessApp socket connected, ID ` + cyan(`${socket.id}`));
+  console.log(blue(`\nACCESSNFT: `) +
+    color.bold(`UNIVERSAL ACCESS NFT DEMO APP, socket ID ` + cyan(`${socket.id}`)) + 
+    color.bold(` connected successfully to the secure registration server.`));
    
   // establish connection with blockchain
   const [ api, contract ] = await setupSession('setAuthenticated');
@@ -64,12 +65,33 @@ socket.on('connect', async () => {
     let responseWallet = await prompts({
       type: 'text',
       name: 'wallet',
-      message: 'Please enter the wallet address containing\nthe NFT you would like to authenticate.\n',
+      message: 'Please enter the wallet address containing the NFT you would like to authenticate.\n',
       validate: wallet => (!isValidSubstrateAddress(wallet)) ?
         red(`ACCESSNFT: `) + `Invalid address` : true
     });
     wallet = responseWallet.wallet;
     console.log('');
+
+    // if valid, check to see if wallet has nft collection
+    await (async () => {
+    
+      // if no collection propmt to return to main menu      
+      if (!(await hasCollection(api, contract, wallet))) {
+        
+        console.log(red(`ACCESSNFT: `) +
+           color.bold(`This wallet has no universal access NFT collection. Please return to main menu to mint.\n`));
+
+         var choice = await prompts({
+           type: 'select',
+           name: 'return',
+           message: 'Options:',
+           choices: [{ title: 'return to main menu to mint NFT', value: 'return' }]
+        });
+
+        process.send('done');
+         process.exit();
+      }
+     })();
 
     // second prompt: username
     (async () => {
@@ -86,20 +108,24 @@ socket.on('connect', async () => {
           validate: username => !isValidUsername(username) ?
             red(`ACCESSNFT: `) + `Too short or contains spaces.` : true
         });
+        username = responseUsername.username;
+        console.log('');
 
         // if valid, check if username is available
-        if (await isAvailableUsername(api, contract, getHash(responseUsername.username))) {
+        if (await isAvailableUsername(api, contract, getHash(username))) {
+
+          // break the prompt loop
           isAvailable = true;
+
         } else {
-          console.log(red(`ACCESSNFT: `) + `Username already taken.\n`);
+
+          console.log(red(`ACCESSNFT: `) +
+            `Username already taken. Choose a different username.\n`);
         }
       }
-      username = responseUsername.username;
-      console.log('');
     
       // third prompt: password
       (async () => {
-
         
         // loop prompt until valid password match
         do {
@@ -124,7 +150,7 @@ socket.on('connect', async () => {
           console.log('');
 
           if (  password != passwordVerify) {
-            console.log(red(`ACCESSNFT: `) + `password mismatch`);
+            console.log(red(`ACCESSNFT: `) + `Password mismatch.`);
           }
         }
         while (password != passwordVerify);
@@ -370,6 +396,46 @@ const isAvailableUsername = async (api, contract, usernameHash)  => {
     
     // username is not available
     return false
+
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+// Check if wallet has collection
+const hasCollection = async (api, contract, wallet)  => {
+  try {
+
+  // create keypair for owner
+  const keyring = new Keyring({type: 'sr25519'});
+  const OWNER_PAIR = keyring.addFromUri(OWNER_MNEMONIC);
+
+  // define special type for gas weights
+  type WeightV2 = InstanceType<typeof WeightV2>;
+  const gasLimit = api.registry.createType('WeightV2', {
+    refTime: 2**53 - 1,
+    proofSize: 2**53 - 1,
+  }) as WeightV2;
+
+  // get getter output
+  var { gasRequired, storageDeposit, result, output } =
+    await contract.query['getCollection'](
+      OWNER_PAIR.address, {gasLimit}, wallet);
+
+  // convert to JSON format for convenience
+  const RESULT = JSON.parse(JSON.stringify(result));
+
+    // if this call reverts, then only possible error is 'credential nonexistent'
+    if (RESULT.ok.flags == 'Revert') {
+
+      // the only possible error is the custom 'no collection' type
+      //
+      // :. wallet has no collection
+      return false
+    }
+    
+    // wallet has collection
+    return true
 
   } catch (error) {
     console.log(error)
