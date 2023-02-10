@@ -11,6 +11,7 @@ const WeightV2 = require('@polkadot/types/interfaces');
 // environment constants
 import * as dotenv from 'dotenv';
 import * as crypto from 'crypto';
+import * as prompts from 'prompts';
 dotenv.config();
 
 // specify color formatting
@@ -270,3 +271,18 @@ export function hexToString(hex: String) {
   return str;
 }
 
+//
+// prompt to return to main menu
+//
+export async function returnToMain(message: String) {
+
+  const choice = await prompts({
+    type: 'select',
+    name: 'return',
+    message: 'Options:',
+    choices: [{ title: message, value: 'return' }]
+   });
+
+   process.send('done');
+   process.exit();
+}

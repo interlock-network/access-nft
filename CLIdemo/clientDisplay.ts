@@ -27,7 +27,8 @@ const magenta = color.magenta;
 import {
   contractGetter,
   setupSession,
-  contractDoer
+  contractDoer,
+	returnToMain
 } from "./utils";
 
 const OWNER_MNEMONIC = process.env.OWNER_MNEMONIC;
@@ -61,28 +62,17 @@ socket.on('connect', async () => {
         });
         wallet = responseWallet.wallet;
         console.log('');
-
-        // if valid, check to see if wallet has nft collection
-        await (async () => {
     
-          // if no collection propmt to return to main menu      
-          if (!(await hasCollection(api, contract, wallet))) {
+        // if valid, check to see if wallet has nft collection
+        if (!(await hasCollection(api, contract, wallet))) {
         
-            console.log(red(`ACCESSNFT: `) +
-               color.bold(`This wallet has no universal access NFT collection.`) +
-							 color.bold(`	Please return to main menu to mint.\n`));
+          console.log(red(`ACCESSNFT: `) +
+            color.bold(`This wallet has no universal access NFT collection.`) +
+	 				  color.bold(`	Please return to main menu to mint.\n`));
 
-             var choice = await prompts({
-               type: 'select',
-               name: 'return',
-               message: 'Options:',
-               choices: [{ title: 'return to main menu to mint NFT', value: 'return' }]
-            });
-
-            process.send('done');
-             process.exit();
-          }
-        })();
+        	// if no collection propmt to return to main menu      
+					await returnToMain('return to main menu to mint NFT');
+				}
 
         // if collection exists, get array
         //
