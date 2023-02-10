@@ -30,14 +30,9 @@ import {
 
 const OWNER_MNEMONIC = process.env.OWNER_MNEMONIC;
 
-// start menu options
-const options = [
-  { title: 'logout now', value: 'logout' },
-];
-
 // setup socket connection with autheticateWallet script
 var socket = io('https://localhost:8443', {
-		rejectUnauthorized: false
+    rejectUnauthorized: false
 });
 socket.on('connect', async () => {
 
@@ -70,111 +65,111 @@ socket.on('connect', async () => {
         message: 'Please enter your password.',
         validate: password => (password.length < 8) ?
           red(`ACCESSNFT: `) + `Password invalid.` : true
-		  });
+      });
       const password = responsePassword.password;
-			console.log('');
+      console.log('');
 
       console.log(green(`ACCESSNFT: `) +
-			  `submitting login information over secure connection for verification\n`);
+        `submitting login information over secure connection for verification\n`);
 
-			socket.emit('request-access', username, password);
+      socket.emit('request-access', username, password);
 
-			socket.onAny((message, ...args) => {
+      socket.onAny((message, ...args) => {
 
-				if (message == 'bad-username') {
+        if (message == 'bad-username') {
 
-      		console.log(red(`ACCESSNFT: `) +
-			  		`username is incorrect or does not exist...please try again`);
-					console.log('');
-					process.send('fail');
-					process.exit();
+          console.log(red(`ACCESSNFT: `) +
+            `username is incorrect or does not exist...please try again`);
+          console.log('');
+          process.send('fail');
+          process.exit();
 
-				} else if (message == 'bad-password') {
+        } else if (message == 'bad-password') {
 
-      		console.log(red(`ACCESSNFT: `) +
-			  		`password is incorrect...please try again`);
-					console.log('');
-					process.send('fail');
-					process.exit();
+          console.log(red(`ACCESSNFT: `) +
+            `password is incorrect...please try again`);
+          console.log('');
+          process.send('fail');
+          process.exit();
 
-				} else if (message == 'access-granted') {
+        } else if (message == 'access-granted') {
 
-					console.clear();
-					console.log(`SUCCESS!!!\n\n\n\n\n\n\n`);
-					socket.emit('fetch-art');
+          console.clear();
+          console.log(`SUCCESS!!!\n\n\n\n\n\n\n`);
+          socket.emit('fetch-art');
 
-					socket.on('ascii-art', (art) => {
+          socket.on('ascii-art', (art) => {
 
-						console.log(red(`\n\n${art}`));
-						console.log(`\n\n\n\n\n\n\n`);
+            console.log(red(`\n\n${art}`));
+            console.log(`\n\n\n\n\n\n\n`);
 
-					  // prompt
- 						//
-  					// do something useful?
-  					(async () => {
+            // prompt
+             //
+            // do something useful?
+            (async () => {
 
-    					// get response
-    					var responseSomething = await prompts({
-      					type: 'confirm',
-      					name: 'something',
-      					message: 'do something useful?',
-    					});
-   						const something = responseSomething.something;
-    					console.log('');
+              // get response
+              var responseSomething = await prompts({
+                type: 'confirm',
+                name: 'something',
+                message: 'do something useful?',
+              });
+               const something = responseSomething.something;
+              console.log('');
 
-							if (something) {
-								socket.emit('do-something-useful');
-							} else {
-								socket.emit('do-something-useless');
-							}
-						})();
-					});
+              if (something) {
+                socket.emit('do-something-useful');
+              } else {
+                socket.emit('do-something-useless');
+              }
+            })();
+          });
 
-					socket.on('did-something-useful', (result) => {
+          socket.on('did-something-useful', (result) => {
 
-						console.log(
-							green('You just did something useful by setting somethingUseful=true in the restricted area..\n'));
+            console.log(
+              green('You just did something useful by setting somethingUseful=true in the restricted area..\n'));
 
-  					(async () => {
+            (async () => {
 
-    					var choice = await prompts({
-      					type: 'select',
-      					name: 'logout',
-      					message: 'Now choose one of the following options:',
-								choices: [{ title: 'logout now', value: 'logout' }]
-							});
-   						
-    					console.log('');
-							socket.emit('logout');
-							console.log('goodbye\n');
-							process.send('done');
-							process.exit();
-						})();
-					});
+              var choice = await prompts({
+                type: 'select',
+                name: 'logout',
+                message: 'Now choose one of the following options:',
+                choices: [{ title: 'logout now', value: 'logout' }]
+              });
+               
+              console.log('');
+              socket.emit('logout');
+              console.log('goodbye\n');
+              process.send('done');
+              process.exit();
+            })();
+          });
 
-					socket.on('did-something-useless', (result) => {
+          socket.on('did-something-useless', (result) => {
 
-						console.log(
-							red('You just did something useless by setting somethingUseful=false in the restricted area..\n'));
+            console.log(
+              red('You just did something useless by setting somethingUseful=false in the restricted area..\n'));
 
-  					(async () => {
+            (async () => {
 
-    					var choice = await prompts({
-      					type: 'select',
-      					name: 'logout',
-      					message: 'Now choose one of the following options:',
-								choices: [{ title: 'logout now', value: 'logout' }]
-    					});
-   						
-    					console.log('');
-							socket.emit('logout');
-							console.log('goodbye\n');
-							process.send('done');
-							process.exit();
-						})();
-					});
-				}
-			});
+              var choice = await prompts({
+                type: 'select',
+                name: 'logout',
+                message: 'Now choose one of the following options:',
+                choices: [{ title: 'logout now', value: 'logout' }]
+              });
+               
+              console.log('');
+              socket.emit('logout');
+              console.log('goodbye\n');
+              process.send('done');
+              process.exit();
+            })();
+          });
+        }
+      });
     })();
   })();
 });

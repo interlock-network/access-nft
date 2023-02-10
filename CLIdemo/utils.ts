@@ -38,12 +38,12 @@ const AMOUNT = 1;
 // call smart contract getter
 //
 export async function contractGetter(
-	api: any,
-	socket: any,
-	contract: any,
-	origin: string,
-	method: string,
-	...args: any[]
+  api: any,
+  socket: any,
+  contract: any,
+  origin: string,
+  method: string,
+  ...args: any[]
 ) {
 
   // create keypair for owner
@@ -131,7 +131,7 @@ export async function contractDoer(
 
   // too much gas required?
   if (gasMin > gasLimit) {
-	
+  
     // logging and terminate
     console.log(red(`ACCESSNFT:`) +
       ' tx aborted, gas required is greater than the acceptable gas limit.');

@@ -158,18 +158,18 @@ const mint = async (api, contract, wallet)  => {
         console.log(green(`ACCESSNFT:`) +
           color.bold(` mint tx successful\n`));
 
-	  		(async () => {
+        (async () => {
 
-    			var choice = await prompts({
-      			type: 'select',
-      			name: 'return',
-      			message: 'Now choose one of the following options:',
-						choices: [{ title: 'return to main menu', value: 'return' }]
-					});
+          var choice = await prompts({
+            type: 'select',
+            name: 'return',
+            message: 'Now choose one of the following options:',
+            choices: [{ title: 'return to main menu', value: 'return' }]
+          });
 
-					process.send('done');
-					process.exit();
-				})();
+          process.send('done');
+          process.exit();
+        })();
       }
     });
   } catch (error) {

@@ -47,8 +47,8 @@ async function setCredential(socket, message) {
         'setCredential',
         'setCredential',
         {u64: message.id},
-	'0x' + message.userhash,
-	'0x' + message.passhash,
+        '0x' + message.userhash,
+        '0x' + message.passhash,
       );
 
     // call doer transaction
@@ -72,10 +72,10 @@ async function setCredential(socket, message) {
 
     console.log(red(`ACCESSNFT: `) + error);
     process.send('process-error');
-  	console.log(blue(`ACCESSNFT:`) +
-    	` ${origin} socket disconnecting, ID ` + cyan(`${socket.id}`));
-  	socket.disconnect();
-  	process.exit();
+    console.log(blue(`ACCESSNFT:`) +
+      ` ${origin} socket disconnecting, ID ` + cyan(`${socket.id}`));
+    socket.disconnect();
+    process.exit();
   }
 }
 

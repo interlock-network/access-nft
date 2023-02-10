@@ -37,8 +37,8 @@ async function credentialCheck(message) {
 
   try {
   
-			// establish connection with blockchain
-  		const [ api, contract ] = await setupSession('restrictedArea');
+  // establish connection with blockchain
+  const [ api, contract ] = await setupSession('restrictedArea');
 
   // create keypair for owner
   const keyring = new Keyring({type: 'sr25519'});
@@ -73,8 +73,8 @@ async function credentialCheck(message) {
         let error = OUTPUT.ok.err.custom.toString().replace(/0x/, '')
         console.log(red(`ACCESSNFT:`) +
           ` ${hexToString(error)}`);
-				process.send('bad-username');
-				process.exit();
+        process.send('bad-username');
+        process.exit();
 
       } else {
           
@@ -94,12 +94,12 @@ async function credentialCheck(message) {
 
   if (onchainPasshash != '0x' + message.passhash) {
 
-		process.send('bad-password');
-		process.exit();
-	}
+    process.send('bad-password');
+    process.exit();
+  }
 
   process.send('access-granted');
-	process.exit();
+  process.exit();
 
       
   } catch(error) {

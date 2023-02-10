@@ -57,7 +57,7 @@ async function verifyWallet(wallet, socket) {
         contract,
         'verifyWallet',
         'getCollection',
-	wallet,
+        wallet,
       );
 
     // find nft to authenticate
@@ -102,7 +102,6 @@ async function verifyWallet(wallet, socket) {
         notAuthenticatedId
       );
 
-			//socket.emit('testee')
       terminateProcess(socket, 'verifyWallet', 'waiting', [hash, notAuthenticatedId, wallet])
     }
   } catch(error) {

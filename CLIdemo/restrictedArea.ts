@@ -117,15 +117,15 @@ io.on('connect', (socket) => {
                   `${username} on socket ` + cyan(`ID ${socket.id}` +
                   `just fetched ascii art`));
 
-								figlet('(:  RESTRICTED AREA  :)', function(err, data) {
-							    
-									if (err) {
-						        console.log('Something went wrong...');
- 							      console.dir(err);
-					        	return;
-					    		}
-    							socket.emit('ascii-art', data);
-								});
+                figlet('(:  RESTRICTED AREA  :)', function(err, data) {
+                  
+                  if (err) {
+                    console.log('Something went wrong...');
+                     console.dir(err);
+                    return;
+                  }
+                  socket.emit('ascii-art', data);
+                });
 
               } else if (session == 'logout') {
 

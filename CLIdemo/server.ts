@@ -79,9 +79,9 @@ async function authenticateWallet(socket) {
       // listen for Transfer events
       if (event.method == 'Transfer') {
 
-				const sendingWallet = event.data[0];
-				const receivingWallet = event.data[1];
-				const transferAmount = event.data[2];
+        const sendingWallet = event.data[0];
+        const receivingWallet = event.data[1];
+        const transferAmount = event.data[2];
 
         //console.log(event)
         // check for verification transfers
@@ -100,10 +100,10 @@ async function authenticateWallet(socket) {
           transferAmount == AMOUNT) {
                 
           const clientWallet = sendingWallet.toHuman();
-					const clientSocketId = walletInfo.get(clientWallet)[0];
-					const userhash = walletInfo.get(clientWallet)[1];
-					const passhash = walletInfo.get(clientWallet)[2];
-					const nftId = walletInfo.get(clientWallet)[3];
+          const clientSocketId = walletInfo.get(clientWallet)[0];
+          const userhash = walletInfo.get(clientWallet)[1];
+          const passhash = walletInfo.get(clientWallet)[2];
+          const nftId = walletInfo.get(clientWallet)[3];
 
           console.log(green(`ACCESSNFT:`) +
             color.bold(` verification transfer complete from wallet `) + magenta(`${clientWallet}`));
@@ -111,7 +111,7 @@ async function authenticateWallet(socket) {
             ` wallet ` +  magenta(`${clientWallet}`) + ` is verified`);
 
           // notify the client that their transfer was recorded
-					io.to(clientSocketId).emit('payment-received', [nftId]);
+          io.to(clientSocketId).emit('payment-received', [nftId]);
         
           // change contract state to indicate nft is authenticated
           const setAuthenticatedChild = fork(setAuthenticated);
@@ -153,9 +153,9 @@ io.on('connection', (socket) => {
 
     if (message == 'authenticate-nft') {
 
-    	const wallet = args[0][0];
-    	const userhash = args[0][1];
-    	const passhash = args[0][2];
+      const wallet = args[0][0];
+      const userhash = args[0][1];
+      const passhash = args[0][2];
 
 
       // store wallet -> socketID in working memory
@@ -183,8 +183,8 @@ io.on('connection', (socket) => {
 
       } else {
 
-				const waitingWallet = walletInfo.get(wallet);
-				const waitingNftId = waitingWallet[3];
+        const waitingWallet = walletInfo.get(wallet);
+        const waitingNftId = waitingWallet[3];
         io.to(socket.id).emit('already-waiting', [waitingNftId]);
         socket.disconnect();
         console.log(red(`ACCESSNFT:`) +
@@ -193,17 +193,17 @@ io.on('connection', (socket) => {
       }
     } else if (message == 'waiting') {
 
-			const hash = args[0][0];
-			const nftId = args[0][1];
-			const wallet = args[0][2];
-			const walletID = walletInfo.get(wallet);
-			const clientSocketId = walletID[0];
-			
-			walletID[3] = nftId;
-			walletInfo.set(wallet, walletID);
+      const hash = args[0][0];
+      const nftId = args[0][1];
+      const wallet = args[0][2];
+      const walletID = walletInfo.get(wallet);
+      const clientSocketId = walletID[0];
+      
+      walletID[3] = nftId;
+      walletInfo.set(wallet, walletID);
 
-			io.to(clientSocketId).emit('return-transfer-waiting', [nftId, hash]);
-						
+      io.to(clientSocketId).emit('return-transfer-waiting', [nftId, hash]);
+            
     }  else  {
 
       // relay message to application

@@ -98,11 +98,11 @@ async function setAuthenticated(wallet, socket) {
   } catch(error) {
 
     console.log(red(`ACCESSNFT: `) + error);
-		process.send('program-error');
-  	console.log(blue(`ACCESSNFT:`) +
-    	` ${origin} socket disconnecting, ID ` + cyan(`${socket.id}`));
-  	socket.disconnect();
-  	process.exit();
+    process.send('program-error');
+    console.log(blue(`ACCESSNFT:`) +
+      ` ${origin} socket disconnecting, ID ` + cyan(`${socket.id}`));
+    socket.disconnect();
+    process.exit();
   }
 }
 
