@@ -137,7 +137,8 @@ export async function contractDoer(
     // logging and terminate
     console.log(red(`ACCESSNFT:`) +
       ' tx aborted, gas required is greater than the acceptable gas limit.');
-    terminateProcess(socket, origin, `${origin}-failure`, [...args]);
+		socket.emit(`${origin}-failure`, [...args]);
+		return false
   }
 
   // submit doer tx
@@ -157,9 +158,12 @@ export async function contractDoer(
       // logging and terminate
       console.log(green(`ACCESSNFT:`) +
         color.bold(` ${method} successful`));
-      terminateProcess(socket, origin, `${method}-complete`, [...args]);
+
+			socket.emit(`${method}-complete`, [...args]);
+			return true
     }
   });
+	return false
 }
 
 //
@@ -306,8 +310,9 @@ export function isValidSubstrateAddress(wallet: string) {
   }
 }
 
-
+//
 // Check if wallet has collection
+//
 export async function hasCollection(api, contract, wallet) {
   try {
 
