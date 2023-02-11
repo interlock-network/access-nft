@@ -69,34 +69,39 @@ export async function contractGetter(
   const RESULT = JSON.parse(JSON.stringify(result));
 
   // check if the call was successful
+	let outputerror = result.asErr.toHuman();
   if (result.isOk) {
       
     // check if OK result is reverted contract that returned error
     if (RESULT.ok.flags == 'Revert') {
 
-      // is this error a custom error?      
+      // is this error a custom error?  
+			let outputerror;    
       if (OUTPUT.ok.err.hasOwnProperty('custom')) {
 
         // logging custom error
-        let error = OUTPUT.ok.err.custom.toString().replace(/0x/, '')
+				outputerror = hexToString(OUTPUT.ok.err.custom.toString().replace(/0x/, ''));
         console.log(red(`ACCESSNFT:`) +
-          ` ${hexToString(error)}`);
+          ` ${outputerror}`);
       } else {
           
         // if not custom then print Error enum type
+				outputerror = OUTPUT.ok.err
         console.log(red(`ACCESSNFT:`) +
-          ` ${OUTPUT.ok.err}`);
+          ` ${outputerror}`);
       }
 
-      // send message to App relay, and terminated process
-      terminateProcess(socket, origin, 'contract-error', [...args]);
+      // send message and signature values to servers
+			socket.emit(`${origin}-${method}-contract-error`, [...args]);
+			return [ false, false, false, false ]
     }
   } else {
 
-    // loggin calling error and terminate
+    // send calling error message
     console.log(red(`ACCESSNFT:`) +
       ` ${result.asErr.toHuman()}`);
-    terminateProcess(socket, origin, 'calling-error', [result.asErr.toHuman()]);
+		socket.emit(`${origin}-${method}-calling-error`, [...args, outputerror]);
+		return [ false, false, false, false ]
   }
 
   return [ gasRequired, storageDeposit, RESULT, OUTPUT ]
@@ -134,10 +139,10 @@ export async function contractDoer(
   // too much gas required?
   if (gasMin > gasLimit) {
   
-    // logging and terminate
+    // emit error message with signature values to server
     console.log(red(`ACCESSNFT:`) +
       ' tx aborted, gas required is greater than the acceptable gas limit.');
-		socket.emit(`${origin}-failure`, [...args]);
+		socket.emit(`${origin}-${method}-gaslimit`, [...args], gasMin);
 		return false
   }
 
@@ -159,6 +164,7 @@ export async function contractDoer(
       console.log(green(`ACCESSNFT:`) +
         color.bold(` ${method} successful`));
 
+			// emit success message with signature values to server
 			socket.emit(`${method}-complete`, [...args]);
 			return true
     }
