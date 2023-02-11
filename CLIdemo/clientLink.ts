@@ -1,6 +1,6 @@
 //
 // INTERLOCK NETWORK & ALEPH ZERO
-// PSP34 UNIVERSAL ACCESS NFT - CLIENT DISPLAY COLLECTION
+// PSP34 UNIVERSAL ACCESS NFT - CLIENT LINK WALLET
 //
 
 // imports (anything polkadot with node-js must be required)
@@ -155,5 +155,6 @@ const isValidSubstrateAddress = (wallet) => {
     return false
   }
 }
+
 
 

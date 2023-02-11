@@ -3,11 +3,10 @@
 // PSP34 UNIVERSAL ACCESS NFT - CLIENT MAIN
 //
 
-import { fork } from 'child_process';
-
 // child process paths
 import * as path from 'path';
 const menu = path.resolve('client.js');
+const link = path.resolve('clientLink.js');
 const mint = path.resolve('clientMint.js');
 const authenticate = path.resolve('clientAuthenticate.js');
 const display = path.resolve('clientDisplay.js');
@@ -15,10 +14,12 @@ const reset = path.resolve('clientReset.js');
 const login = path.resolve('clientLogin.js');
 
 // imports
+import { fork } from 'child_process';
 import * as prompts from 'prompts';
 
 // start menu options
 const options = [
+  { title: 'link your wallet to this demo application', value: 'link'},
   { title: 'mint universal access NFT', value: 'mint' },
   { title: 'register universal access NFT', value: 'authenticate' },
   { title: 'display universal access NFT collection', value: 'display' },
@@ -40,6 +41,17 @@ async function mainMenu() {
     ]);
 
     switch (response.choice) {
+
+      case 'link':
+
+        // initiate minting process for wallet
+        const linkChild = fork(link);
+
+        linkChild.on('message', () => {
+          
+          const menuChild = fork(menu);
+        });
+        break;    
 
       case 'mint':
 
