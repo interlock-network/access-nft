@@ -19,6 +19,7 @@ import * as path from 'path';
 const verifyWallet = path.resolve('serverVerifyWallet.js');
 const setCredentials = path.resolve('serverSetCredential.js');
 const setAuthenticated = path.resolve('serverSetAuthenticated.js');
+const mint = path.resolve('mint.js');
 
 // environment constants
 import * as dotenv from 'dotenv';
@@ -27,6 +28,7 @@ dotenv.config();
 // utility functions
 import {
   setupSession,
+	contractGetter
 } from "./utils";
 
 // specify color formatting
@@ -130,7 +132,7 @@ async function authenticateWallet(socket) {
             setCredentialsChild.send({
               wallet: clientWallet,
               id: nftId,
-              userhash: userhashxx,
+              userhash: userhash,
               passhash: passhash
             });
             
@@ -146,11 +148,12 @@ async function authenticateWallet(socket) {
           transferAmount == mintQueue.get(sendingWallet.toHuman())) {
                 
           const recipient = sendingWallet.toHuman();
+          const clientSocketId = walletInfo.get(mintQueue)[0];
 
           console.log(green(`ACCESSNFT:`) +
             color.bold(` NFT payment transfer complete from wallet `) + magenta(`${recipient}`));
           console.log(green(`ACCESSNFT:`) +
-            ` minting NFT for wallet ` +  magenta(`${clientWallet}`));
+            ` minting NFT for wallet ` +  magenta(`${recipient}`));
 
           // notify the client that their transfer was recorded
           io.to(clientSocketId).emit('minting-nft', []);
@@ -160,10 +163,28 @@ async function authenticateWallet(socket) {
           mintChild.send(recipient);
 
           // listen for results of setAuthenticated process child
-          mintChild.on('message', message => {
+          mintChild.on('message', async message => {
 
-            // communicate to client application that isauthenticated is set true
+        		// get new array of nfts
+		        //
+  		      // get nft collection for wallet
+    		    var [ gasRequired, storageDeposit, RESULT_collection, OUTPUT_collection ] =
+      		    await contractGetter(
+        		    api,
+          		  socket,
+            		contract,
+	            	'Main',
+	  	          'getCollection',
+  	  	        recipient,
+    	  	    );
+      		  const collection = JSON.parse(JSON.stringify(OUTPUT_collection));
+
+		        // get the id of new nft (last in collection)
+    		    const nftId = Array.from(collection.ok.ok).pop();
+
+            // communicate to client application that mint of nft ID successful
             io.to(clientSocketId).emit('mint-complete', [nftId]);
+						mintQueue.delete(recipient);
           });
 				}}
     });
@@ -225,7 +246,7 @@ io.on('connection', (socket) => {
 			// payments to OWNER account that have not requested an nft mint will not be honored
 			mintQueue.set(recipient, NFTPRICE);
 
-			io.to(socket.id).emit('pay-to-mint', [NFTPRICE]);
+			io.to(socket.id).emit('pay-to-mint', [socket.id, NFTPRICE]);
 
 			// remove recipient from mint queue after one minute of no payment receipt
 			//
