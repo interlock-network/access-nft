@@ -130,7 +130,7 @@ async function authenticateWallet(socket) {
             setCredentialsChild.send({
               wallet: clientWallet,
               id: nftId,
-              userhash: userhash,
+              userhash: userhashxx,
               passhash: passhash
             });
             
@@ -141,8 +141,31 @@ async function authenticateWallet(socket) {
               walletInfo.delete(clientWallet);
             });
           });
-        }
-      }
+        } else if (receivingWallet == OWNER_ADDRESS &&
+					mintQueue.has(sendingWallet.toHuman()) &&
+          transferAmount == mintQueue.get(sendingWallet.toHuman())) {
+                
+          const recipient = sendingWallet.toHuman();
+
+          console.log(green(`ACCESSNFT:`) +
+            color.bold(` NFT payment transfer complete from wallet `) + magenta(`${recipient}`));
+          console.log(green(`ACCESSNFT:`) +
+            ` minting NFT for wallet ` +  magenta(`${clientWallet}`));
+
+          // notify the client that their transfer was recorded
+          io.to(clientSocketId).emit('minting-nft', []);
+        
+          // fire up minting script
+          const mintChild = fork(mint);
+          mintChild.send(recipient);
+
+          // listen for results of setAuthenticated process child
+          mintChild.on('message', message => {
+
+            // communicate to client application that isauthenticated is set true
+            io.to(clientSocketId).emit('mint-complete', [nftId]);
+          });
+				}}
     });
   });
 }
