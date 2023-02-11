@@ -49,10 +49,12 @@ const io = new Server(httpServer);
 // constants
 const OWNER_ADDRESS = process.env.OWNER_ADDRESS;
 const AMOUNT = 1;
+const NFTPRICE = 1000000000000000; // pico TZERO = 10 TZERO
 
 // map to keep track of waiting wallet transfers
 // mapping is [wallet -> socketID]
 var walletInfo = new Map();
+var mintQueue = new Map();
 
 async function authenticateWallet(socket) {
 
@@ -191,6 +193,26 @@ io.on('connection', (socket) => {
           ` already waiting for wallet ` + magenta(`${wallet}`) + ` to return micropayment`);
         return
       }
+    } else if (message == 'mint-nft') {
+
+      const recipient = args[0][0];
+			
+			// log that we are expecting payment of NFTPRICE from recipient in immediate future
+			//
+			// payments to OWNER account that have not requested an nft mint will not be honored
+			mintQueue.set(recipient, NFTPRICE);
+
+			io.to(socket.id).emit('pay-to-mint', [NFTPRICE]);
+
+			// remove recipient from mint queue after one minute of no payment receipt
+			//
+			// this is to avoid ddos type scenario where someone crashes server by flooding with mint requests
+			setTimeout( () => {
+				mintQueue.delete(recipient);
+				console.log(color.magenta.bold(`ACCESSNFT: `) + 
+					`mint recipient ${recipient} took too long to pay -- removed from mint queue`)
+			}, 100000);
+
     } else if (message == 'waiting') {
 
       const hash = args[0][0];
