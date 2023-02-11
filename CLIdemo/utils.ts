@@ -6,6 +6,7 @@
 // imports (anything polkadot with node-js must be required)
 const { ApiPromise, WsProvider, Keyring } = require('@polkadot/api');
 const { ContractPromise, CodePromise } = require('@polkadot/api-contract');
+const { decodeAddress, encodeAddress } = require('@polkadot/keyring')
 const WeightV2 = require('@polkadot/types/interfaces');
 
 // environment constants
@@ -285,4 +286,63 @@ export async function returnToMain(message: String) {
 
   process.send('done');
   process.exit();
+}
+
+//
+// checks address to make sure valid substrate address
+//
+export function isValidSubstrateAddress(wallet: string) {
+  try {
+
+    encodeAddress(decodeAddress(wallet))
+
+    // address encodes/decodes wo error => valid address
+    return true
+
+  } catch (error) {
+
+    // encode/decode failure => invalid address
+    return false
+  }
+}
+
+
+// Check if wallet has collection
+export async function hasCollection(api, contract, wallet) {
+  try {
+
+  // create keypair for owner
+  const keyring = new Keyring({type: 'sr25519'});
+  const OWNER_PAIR = keyring.addFromUri(OWNER_MNEMONIC);
+
+  // define special type for gas weights
+  type WeightV2 = InstanceType<typeof WeightV2>;
+  const gasLimit = api.registry.createType('WeightV2', {
+    refTime: 2**53 - 1,
+    proofSize: 2**53 - 1,
+  }) as WeightV2;
+
+  // get getter output
+  var { gasRequired, storageDeposit, result, output } =
+    await contract.query['getCollection'](
+      OWNER_PAIR.address, {gasLimit}, wallet);
+
+  // convert to JSON format for convenience
+  const RESULT = JSON.parse(JSON.stringify(result));
+
+    // if this call reverts, then only possible error is 'credential nonexistent'
+    if (RESULT.ok.flags == 'Revert') {
+
+      // the only possible error is the custom 'no collection' type
+      //
+      // :. wallet has no collection
+      return false
+    }
+
+    // wallet has collection
+    return true
+
+  } catch (error) {
+    console.log(error)
+  }
 }
