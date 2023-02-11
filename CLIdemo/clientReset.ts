@@ -19,11 +19,11 @@ dotenv.config();
 
 // utility functions
 import {
-	setupSession,
+  setupSession,
   returnToMain,
-	contractGetter,
-	isValidSubstrateAddress,
-	hasCollection
+  contractGetter,
+  isValidSubstrateAddress,
+  hasCollection
 } from "./utils";
 
 // specify color formatting
@@ -52,11 +52,11 @@ const storageDepositLimit = null;
 var socket = io('http://localhost:3000');
 socket.on('connect', async () => {
 
-	// establish connection with blockchain
- 	const [ api, contract ] = await setupSession('setAuthenticated');
+  // establish connection with blockchain
+   const [ api, contract ] = await setupSession('setAuthenticated');
 
   console.log(green(`\nACCESSNFT: `) +
-		color.bold(`In order to reset your universal access NFT credentials, you MUST know the NFT ID.\n`));
+    color.bold(`In order to reset your universal access NFT credentials, you MUST know the NFT ID.\n`));
 
   // begin prompt tree
   //
@@ -105,7 +105,7 @@ socket.on('connect', async () => {
     // print table of NFTs and their authentication status
     console.log(color.bold(`AVAILABLE NFTs TO RESET\n`));
     let nft: any;
-		let reset: number[] = [];
+    let reset: number[] = [];
     for (nft of nfts) {
 
       // get attribute isauthenticated state
@@ -125,8 +125,8 @@ socket.on('connect', async () => {
       if (authenticated.ok == TRUE) {
 
         console.log(green(`\t${nft.u64}\n`));
-						
-				reset.push(nft.u64);
+            
+        reset.push(nft.u64);
       }
     }
 
@@ -140,19 +140,19 @@ socket.on('connect', async () => {
       await returnToMain('return to main menu');
     }
 
-   	// second prompt, get NFT ID
-   	await (async () => {
+     // second prompt, get NFT ID
+     await (async () => {
 
       // get valid wallet address
-     	let responseId = await prompts({
-       	type: 'number',
-	      name: 'id',
+       let responseId = await prompts({
+         type: 'number',
+        name: 'id',
         message: 'Now, enter the ID of the NFT credentials you would like to reset.\n',
-   	    validate: id => !reset.includes(id) ?
-     	    red(`ACCESSNFT: `) + `Not a NFT you can reset right now. Reenter ID.` : true
+         validate: id => !reset.includes(id) ?
+           red(`ACCESSNFT: `) + `Not a NFT you can reset right now. Reenter ID.` : true
       });
-     	const id = responseId.id;
-     	console.log('');
+       const id = responseId.id;
+       console.log('');
        /* 
       // get attribute isauthenticated state
       var [ gasRequired, storageDeposit, RESULT_authenticated, OUTPUT_authenticated ] =
@@ -162,53 +162,53 @@ socket.on('connect', async () => {
           contract,
           'Reset',
           'psp34::transfer',
-					wallet,
+          wallet,
           {u64: id},
           0
         ); 
 */
 
-			// create key pair for owner
-		 	const keyring = new Keyring({type: 'sr25519'});
-			const OWNER_PAIR = keyring.addFromUri(OWNER_MNEMONIC);
+      // create key pair for owner
+       const keyring = new Keyring({type: 'sr25519'});
+      const OWNER_PAIR = keyring.addFromUri(OWNER_MNEMONIC);
 
-	  	// define special type for gas weights
-		 	type WeightV2 = InstanceType<typeof WeightV2>;
-		  const gasLimit = api.registry.createType('WeightV2', {
-		    refTime: refTimeLimit,
-	      proofSize: proofSizeLimit,
-	  	}) as WeightV2;
+      // define special type for gas weights
+       type WeightV2 = InstanceType<typeof WeightV2>;
+      const gasLimit = api.registry.createType('WeightV2', {
+        refTime: refTimeLimit,
+        proofSize: proofSizeLimit,
+      }) as WeightV2;
 
-		  // too much gas required?
-			if (gasRequired > gasLimit) {
+      // too much gas required?
+      if (gasRequired > gasLimit) {
 
- 			  // logging and terminate
-	 		  console.log(red(`ACCESSNFT:`) +
-		   		' tx aborted, gas required is greater than the acceptable gas limit.');
-		  }
+         // logging and terminate
+         console.log(red(`ACCESSNFT:`) +
+           ' tx aborted, gas required is greater than the acceptable gas limit.');
+      }
 
-			// submit doer tx
-		  let extrinsic = await contract.tx['psp34::transfer'](
-	 		  { storageDepositLimit, gasLimit }, wallet, {u64: id}, 0)
-	   		  .signAndSend(OWNER_PAIR, async result => {
+      // submit doer tx
+      let extrinsic = await contract.tx['psp34::transfer'](
+         { storageDepositLimit, gasLimit }, wallet, {u64: id}, 0)
+           .signAndSend(OWNER_PAIR, async result => {
 
-			  // when tx hits block
-			  if (result.status.isInBlock) {
-	
-  		  	// logging
-	  	   	console.log(yellow(`ACCESSNFT:`) + ` NFT transfer in a block`);
+        // when tx hits block
+        if (result.status.isInBlock) {
+  
+          // logging
+           console.log(yellow(`ACCESSNFT:`) + ` NFT transfer in a block`);
 
-	  		// when tx is finalized in block, tx is successful
-  	 		} else if (result.status.isFinalized) {
+        // when tx is finalized in block, tx is successful
+         } else if (result.status.isFinalized) {
 
-  	  		// logging and terminate
-     			console.log(green(`ACCESSNFT: `) +
-   	   			color.bold(`NFT transfer successful`));
-					await returnToMain('return to main menu to reregister NFT ' + red(`ID ${id}`));
-  	 		}
-  		});
-		})();
-	})();
+          // logging and terminate
+           console.log(green(`ACCESSNFT: `) +
+              color.bold(`NFT transfer successful`));
+          await returnToMain('return to main menu to reregister NFT ' + red(`ID ${id}`));
+         }
+      });
+    })();
+  })();
 });
 
 
