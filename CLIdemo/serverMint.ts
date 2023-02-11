@@ -1,6 +1,6 @@
 //
 // INTERLOCK NETWORK & ALEPH ZERO
-// PSP34 UNIVERSAL ACCESS NFT - SERVER SET AUTHENTICATED
+// PSP34 UNIVERSAL ACCESS NFT - SERVER MINT
 //
 
 // imports
@@ -23,8 +23,6 @@ const yellow = color.yellow.bold;
 const magenta = color.magenta;
 
 // constants
-const ISAUTHENTICATED = '0x697361757468656e74696361746564';
-const FALSE = '0x66616c7365';
 const MAXRETRY = 3;
 
 // constants
@@ -54,41 +52,41 @@ async function setAuthenticated(recipient, socket) {
       ); 
 
     // call doer transaction
-		let retry = 0;
+    let retry = 0;
     while(retry <= MAXRETRY) {
-						
-			if((
-				await contractDoer(
-      		api,
-	      	socket,
-  	    	contract,
-    	  	storageDepositLimit,
-      		storageDeposit,
-	      	refTimeLimit,
-  	    	proofSizeLimit,
-    	  	gasRequired,
-      		'mint',
-	      	'mint',
-  	    	recipient
-    		))) {
+            
+      if((
+        await contractDoer(
+          api,
+          socket,
+          contract,
+          storageDepositLimit,
+          storageDeposit,
+          refTimeLimit,
+          proofSizeLimit,
+          gasRequired,
+          'mint',
+          'mint',
+          recipient
+        ))) {
 
-      	process.send('mint-complete');
-  			console.log(blue(`ACCESSNFT:`) +
-    			` ${origin} socket disconnecting, ID ` + cyan(`${socket.id}`));
-  			socket.disconnect();
-  			process.exit();
-			}
+        process.send('mint-complete');
+        console.log(blue(`ACCESSNFT:`) +
+          ` ${origin} socket disconnecting, ID ` + cyan(`${socket.id}`));
+        socket.disconnect();
+        process.exit();
+      }
 
-			retry++;
-		}
+      retry++;
+    }
 
     console.log(red(`ACCESSNFT:`) +
       ` FATAL ERROR, UNABLE TO PROCESS MINT TRANSACTION`);
-		process.send('mint-complete');
- 		console.log(blue(`ACCESSNFT:`) +
-    	` ${origin} socket disconnecting, ID ` + cyan(`${socket.id}`));
-  	socket.disconnect();
-		process.exit();
+    process.send('mint-complete');
+     console.log(blue(`ACCESSNFT:`) +
+      ` ${origin} socket disconnecting, ID ` + cyan(`${socket.id}`));
+    socket.disconnect();
+    process.exit();
 
   } catch(error) {
 

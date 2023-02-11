@@ -21,6 +21,9 @@ const blue = color.blue.bold;
 const cyan = color.cyan;
 
 // constants
+const MAXRETRY = 3;
+
+// constants
 //
 // null === no limit
 // refTime and proofSize determined by contracts-ui estimation plus fudge-factor
@@ -52,21 +55,35 @@ async function setCredential(socket, message) {
       );
 
     // call doer transaction
-    await contractDoer(
-      api,
-      socket,
-      contract,
-      storageDepositLimit,
-      storageDeposit,
-      refTimeLimit,
-      proofSizeLimit,
-      gasRequired,
-      'setCredential',
-      'setCredential',
-      {u64: message.id},
-      '0x' + message.userhash,
-      '0x' + message.passhash,
-    );
+    let retry = 0;
+    while(retry <= MAXRETRY) {
+            
+      if((
+        await contractDoer(
+          api,
+          socket,
+          contract,
+          storageDepositLimit,
+          storageDeposit,
+          refTimeLimit,
+          proofSizeLimit,
+          gasRequired,
+          'setCredential',
+          'setCredential',
+          {u64: message.id},
+          '0x' + message.userhash,
+          '0x' + message.passhash,
+        ))) {
+
+        process.send('setCredential-complete');
+        console.log(blue(`ACCESSNFT:`) +
+          ` ${origin} socket disconnecting, ID ` + cyan(`${socket.id}`));
+        socket.disconnect();
+        process.exit();
+      }
+
+      retry++;
+    }
 
   } catch(error) {
 

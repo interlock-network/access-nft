@@ -25,6 +25,7 @@ const magenta = color.magenta;
 // constants
 const ISAUTHENTICATED = '0x697361757468656e74696361746564';
 const FALSE = '0x66616c7365';
+const MAXRETRY = 3;
 
 // constants
 //
@@ -92,19 +93,33 @@ async function setAuthenticated(wallet, socket) {
       ); 
 
     // call doer transaction
-    await contractDoer(
-      api,
-      socket,
-      contract,
-      storageDepositLimit,
-      storageDeposit,
-      refTimeLimit,
-      proofSizeLimit,
-      gasRequired,
-      'setAuthenticated',
-      'setAuthenticated',
-      {u64: notAuthenticatedId}
-    );
+    let retry = 0;
+    while(retry <= MAXRETRY) {
+            
+      if((
+        await contractDoer(
+          api,
+          socket,
+          contract,
+          storageDepositLimit,
+          storageDeposit,
+          refTimeLimit,
+          proofSizeLimit,
+          gasRequired,
+          'setAuthenticated',
+          'setAuthenticated',
+          {u64: notAuthenticatedId}
+        ))) {
+
+        process.send('setAuthenticated-complete');
+        console.log(blue(`ACCESSNFT:`) +
+          ` ${origin} socket disconnecting, ID ` + cyan(`${socket.id}`));
+        socket.disconnect();
+        process.exit();
+      }
+
+      retry++;
+    }
       
   } catch(error) {
 
