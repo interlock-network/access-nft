@@ -28,7 +28,8 @@ import {
   contractGetter,
   setupSession,
   contractDoer,
-  returnToMain
+  returnToMain,
+  hasCollection
 } from "./utils";
 
 const OWNER_MNEMONIC = process.env.OWNER_MNEMONIC;

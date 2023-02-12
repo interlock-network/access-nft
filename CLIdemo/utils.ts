@@ -391,3 +391,15 @@ export function discoSocket(socket, origin) {
         ` ${origin} socket disconnecting, ID ` + cyan(`${socket.id}`));
       socket.disconnect();
 }
+
+// 
+// check if valid mnemonic
+//
+export function isValidMnemonic(mnemonic) {
+
+	var wordCount = mnemonic.trim().split(' ').length;
+
+	if (wordCount != 12) return false;
+
+	return true
+}

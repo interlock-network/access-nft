@@ -6,7 +6,7 @@
 // child process paths
 import * as path from 'path';
 const menu = path.resolve('client.js');
-const link = path.resolve('clientLink.js');
+const createWallet = path.resolve('clientCreateWallet.js');
 const mint = path.resolve('clientMint.js');
 const authenticate = path.resolve('clientAuthenticate.js');
 const display = path.resolve('clientDisplay.js');
@@ -19,7 +19,7 @@ import * as prompts from 'prompts';
 
 // start menu options
 const options = [
-  { title: 'link your wallet to this demo application', value: 'link'},
+  { title: 'create new wallet for this demo application', value: 'create'},
   { title: 'mint universal access NFT', value: 'mint' },
   { title: 'register universal access NFT', value: 'authenticate' },
   { title: 'display universal access NFT collection', value: 'display' },
@@ -42,12 +42,12 @@ async function mainMenu() {
 
     switch (response.choice) {
 
-      case 'link':
+      case 'create':
 
         // initiate minting process for wallet
-        const linkChild = fork(link);
+        const createWalletChild = fork(createWallet);
 
-        linkChild.on('message', () => {
+        createWalletChild.on('message', () => {
           
           const menuChild = fork(menu);
         });
