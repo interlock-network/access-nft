@@ -116,10 +116,8 @@ export async function contractDoer(
   socket: any,
   contract: any,
   storageMax: any,
-  storageMin: any,
   refTimeLimit: any,
   proofSizeLimit: any,
-  gasMin: any,
   origin: string,
   method: string,
   ...args: any[]
@@ -129,20 +127,43 @@ export async function contractDoer(
   const keyring = new Keyring({type: 'sr25519'});
   const OWNER_PAIR = keyring.addFromUri(OWNER_MNEMONIC);
 
-    // define special type for gas weights
-    type WeightV2 = InstanceType<typeof WeightV2>;
-    const gasLimit = api.registry.createType('WeightV2', {
-      refTime: refTimeLimit,
-      proofSize: proofSizeLimit,
-    }) as WeightV2;
+    // get attribute isauthenticated state
+  var [ gasRequired, storageDeposit, RESULT, OUTPUT ] =
+    await contractGetter(
+      api,
+      socket,
+      contract,
+      origin,
+      method,
+      ...args
+    ); 
+
+  // define special type for gas weights
+  type WeightV2 = InstanceType<typeof WeightV2>;
+  const gasLimit = api.registry.createType('WeightV2', {
+    refTime: refTimeLimit,
+    proofSize: proofSizeLimit,
+  }) as WeightV2;
 
   // too much gas required?
-  if (gasMin > gasLimit) {
+  if (gasRequired > gasLimit) {
   
     // emit error message with signature values to server
     console.log(red(`ACCESSNFT:`) +
       ' tx aborted, gas required is greater than the acceptable gas limit.');
-    socket.emit(`${origin}-${method}-gaslimit`, [...args], gasMin);
+    socket.emit(`${origin}-${method}-gaslimit`, [...args], gasRequired);
+    discoSocket(socket, origin);
+    process.send('gas-limit');
+    process.exit();
+  }
+
+  // too much storage required?
+  if (storageDeposit > storageMax) {
+  
+    // emit error message with signature values to server
+    console.log(red(`ACCESSNFT:`) +
+      ' tx aborted, storage required is greater than the acceptable storage limit.');
+    socket.emit(`${origin}-${method}-storagelimit`, [...args], storageDeposit);
     discoSocket(socket, origin);
     process.send('gas-limit');
     process.exit();

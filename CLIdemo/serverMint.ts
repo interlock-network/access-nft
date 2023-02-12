@@ -8,9 +8,9 @@ import { io } from 'socket.io-client';
 
 // utility functions
 import {
-  contractGetter,
   setupSession,
-  contractDoer
+  contractDoer,
+  discoSocket
 } from "./utils";
 
 // specify color formatting
@@ -40,61 +40,28 @@ async function setAuthenticated(recipient, socket) {
     // establish connection with blockchain
     const [ api, contract ] = await setupSession('setAuthenticated');
 
-    // get attribute isauthenticated state
-    var [ gasRequired, storageDeposit, RESULT_mint, OUTPUT_mint ] =
-      await contractGetter(
-        api,
-        socket,
-        contract,
-        'mint',
-        'mint',
-        recipient
-      ); 
+    console.log(green(`ACCESSNFT:`) +
+      ` minting new universal access NFT for recipient ` + magenta(` ${recipient}}`));
 
-    // call doer transaction
-    let retry = 0;
-    while(retry <= MAXRETRY) {
-            
-      if((
-        await contractDoer(
-          api,
-          socket,
-          contract,
-          storageDepositLimit,
-          storageDeposit,
-          refTimeLimit,
-          proofSizeLimit,
-          gasRequired,
-          'mint',
-          'mint',
-          recipient
-        ))) {
-
-        process.send('mint-complete');
-        console.log(blue(`ACCESSNFT:`) +
-          ` ${origin} socket disconnecting, ID ` + cyan(`${socket.id}`));
-        socket.disconnect();
-        process.exit();
-      }
-
-      retry++;
-    }
-
-    console.log(red(`ACCESSNFT:`) +
-      ` FATAL ERROR, UNABLE TO PROCESS MINT TRANSACTION`);
-    process.send('mint-complete');
-     console.log(blue(`ACCESSNFT:`) +
-      ` ${origin} socket disconnecting, ID ` + cyan(`${socket.id}`));
-    socket.disconnect();
-    process.exit();
+		// call mint tx
+    await contractDoer(
+      api,
+      socket,
+      contract,
+      storageDepositLimit,
+      refTimeLimit,
+      proofSizeLimit,
+      'mint',
+      'mint',
+			recipient
+   );
 
   } catch(error) {
 
     console.log(red(`ACCESSNFT: `) + error);
+
+    discoSocket(socket, 'serverMint')
     process.send('program-error');
-    console.log(blue(`ACCESSNFT:`) +
-      ` ${origin} socket disconnecting, ID ` + cyan(`${socket.id}`));
-    socket.disconnect();
     process.exit();
   }
 }

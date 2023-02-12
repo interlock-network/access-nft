@@ -39,29 +39,14 @@ async function setCredential(socket, message) {
     console.log(green(`ACCESSNFT:`) +
       ` setting username and password credentials for NFT ` + red(`ID ${message.id}`));
 
-    // check setWaiting contract call via dryrun
-    const [ gasRequired, storageDeposit, RESULT_dryrun, OUTPUT_dryrun ] =
-      await contractGetter(
-        api,
-        socket,
-        contract,
-        'setCredential',
-        'setCredential',
-        {u64: message.id},
-        '0x' + message.userhash,
-        '0x' + message.passhash,
-      );
-
     // call setCredential tx
     await contractDoer(
       api,
       socket,
       contract,
       storageDepositLimit,
-      storageDeposit,
       refTimeLimit,
       proofSizeLimit,
-      gasRequired,
       'setCredential',
       'setCredential',
       {u64: message.id},

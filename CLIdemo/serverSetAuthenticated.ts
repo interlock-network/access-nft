@@ -80,17 +80,6 @@ async function setAuthenticated(wallet, socket) {
         notAuthenticatedId = nft.u64;
       }
     }
-    
-    // get attribute isauthenticated state
-    var [ gasRequired, storageDeposit, RESULT_authenticated, OUTPUT_authenticated ] =
-      await contractGetter(
-        api,
-        socket,
-        contract,
-        'setAuthenticated',
-        'setAuthenticated',
-        {u64: notAuthenticatedId}
-      ); 
 
     // call setAuthenticated transaction
     await contractDoer(
@@ -98,14 +87,13 @@ async function setAuthenticated(wallet, socket) {
       socket,
       contract,
       storageDepositLimit,
-      storageDeposit,
       refTimeLimit,
       proofSizeLimit,
-      gasRequired,
       'setAuthenticated',
       'setAuthenticated',
       {u64: notAuthenticatedId}
     );
+
   } catch(error) {
 
     console.log(red(`ACCESSNFT: `) + error);
