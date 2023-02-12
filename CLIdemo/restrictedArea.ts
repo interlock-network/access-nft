@@ -99,25 +99,25 @@ io.on('connect', (socket) => {
 
                 somethingUseful = true;
                 console.log(magenta(`ACCESSNFT: `) +
-                  `${username} on socket ` + cyan(`ID ${socket.id}` +
-                  `just did something extremely useful`));
+                  `${username} on socket ` + cyan(`ID ${socket.id}`) +
+                  `just did something extremely useful`);
                 socket.emit('did-something-useful', somethingUseful);
 
               } else if (session == 'do-something-useless') {
 
                 somethingUseful = false;
                 console.log(magenta(`ACCESSNFT: `) +
-                  `${username} on socket ` + cyan(`ID ${socket.id}` +
-                  `just did something extremely useless`));
+                  `${username} on socket ` + cyan(`ID ${socket.id}`) +
+                  `just did something extremely useless`);
                 socket.emit('did-something-useless', somethingUseful);
 
               } else if (session == 'fetch-art') {
 
                 console.log(magenta(`ACCESSNFT: `) +
-                  `${username} on socket ` + cyan(`ID ${socket.id}` +
-                  `just fetched ascii art`));
+                  `${username} on socket ` + cyan(`ID ${socket.id}`) +
+                  `just fetched ascii art`);
 
-                figlet('(:  RESTRICTED AREA  :)', function(err, data) {
+                figlet('(:  RESTRICTED AREA  :)\n\n\n\n\n\n         YOU ROCK', function(err, data) {
                   
                   if (err) {
                     console.log('Something went wrong...');
@@ -130,8 +130,8 @@ io.on('connect', (socket) => {
               } else if (session == 'logout') {
 
                 console.log(magenta(`ACCESSNFT: `) +
-                  `${username} on socket ` + cyan(`ID ${socket.id}` +
-                  `just logged out`));
+                  `${username} on socket ` + cyan(`ID ${socket.id}`) +
+                  `just logged out`);
                 socket.disconnect();
               }
             //

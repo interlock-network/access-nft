@@ -110,8 +110,8 @@ async function createWallet() {
           mnemonic = responseMnemonic.mnemonic;
           console.log('');
   
-          fs.writeFileSync('.wallet', `{CLIENT_ADDRESS="${address}",\n` +
-                                      `CLIENT_MNEMONIC="${mnemonic}"}`);
+          fs.writeFileSync('.wallet.json', `{"CLIENT_ADDRESS":"${address}",\n` +
+                                      		 `"CLIENT_MNEMONIC":"${mnemonic}"}`);
 
           console.log(green(`ACCESSNFT: `) +
             color.bold(`You entered a valid address and mnemonic`));
