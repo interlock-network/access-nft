@@ -69,7 +69,7 @@ export async function contractGetter(
   const RESULT = JSON.parse(JSON.stringify(result));
 
   // check if the call was successful
-	let outputerror;
+  let outputerror;
   if (result.isOk) {
       
     // check if OK result is reverted contract that returned error
@@ -79,29 +79,29 @@ export async function contractGetter(
       if (OUTPUT.ok.err.hasOwnProperty('custom')) {
 
         // logging custom error
-				outputerror = hexToString(OUTPUT.ok.err.custom.toString().replace(/0x/, ''));
+        outputerror = hexToString(OUTPUT.ok.err.custom.toString().replace(/0x/, ''));
         console.log(red(`ACCESSNFT:`) +
           ` ${outputerror}`);
       } else {
           
         // if not custom then print Error enum type
-				outputerror = OUTPUT.ok.err
+        outputerror = OUTPUT.ok.err
         console.log(red(`ACCESSNFT:`) +
           ` ${outputerror}`);
       }
 
       // send message and signature values to servers
-			socket.emit(`${origin}-${method}-contract-error`, [...args, outputerror]);
-			return [ false, false, false, false ]
+      socket.emit(`${origin}-${method}-contract-error`, [...args, outputerror]);
+      return [ false, false, false, false ]
     }
   } else {
 
     // send calling error message
-		outputerror = result.asErr.toHuman();
+    outputerror = result.asErr.toHuman();
     console.log(red(`ACCESSNFT:`) +
       ` ${outputerror}`);
-		socket.emit(`${origin}-${method}-calling-error`, [...args, outputerror]);
-		return [ false, false, false, false ]
+    socket.emit(`${origin}-${method}-calling-error`, [...args, outputerror]);
+    return [ false, false, false, false ]
   }
 
   return [ gasRequired, storageDeposit, RESULT, OUTPUT ]
@@ -142,10 +142,10 @@ export async function contractDoer(
     // emit error message with signature values to server
     console.log(red(`ACCESSNFT:`) +
       ' tx aborted, gas required is greater than the acceptable gas limit.');
-		socket.emit(`${origin}-${method}-gaslimit`, [...args], gasMin);
-		discoSocket(socket, origin);
-		process.send('gas-limit');
-		process.exit();
+    socket.emit(`${origin}-${method}-gaslimit`, [...args], gasMin);
+    discoSocket(socket, origin);
+    process.send('gas-limit');
+    process.exit();
   }
 
   // submit doer tx
@@ -166,10 +166,10 @@ export async function contractDoer(
       console.log(green(`ACCESSNFT:`) +
         color.bold(` ${method} successful`));
 
-			// emit success message with signature values to server
-			socket.emit(`${method}-complete`, [...args]);
-			discoSocket(socket, origin);
-			process.send(`${method}-complete`);
+      // emit success message with signature values to server
+      socket.emit(`${method}-complete`, [...args]);
+      discoSocket(socket, origin);
+      process.send(`${method}-complete`);
       process.exit();
     }
   });

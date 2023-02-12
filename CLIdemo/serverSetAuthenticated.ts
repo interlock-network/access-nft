@@ -93,7 +93,7 @@ async function setAuthenticated(wallet, socket) {
       ); 
 
     // call setAuthenticated transaction
-  	await contractDoer(
+    await contractDoer(
       api,
       socket,
       contract,
@@ -110,7 +110,7 @@ async function setAuthenticated(wallet, socket) {
 
     console.log(red(`ACCESSNFT: `) + error);
 
-		discoSocket(socket, 'setCredential')
+    discoSocket(socket, 'setCredential')
     process.send('program-error');
     process.exit();
   }

@@ -11,7 +11,7 @@ import {
   contractGetter,
   setupSession,
   contractDoer,
-	discoSocket
+  discoSocket
 } from "./utils";
 
 // specify color formatting
@@ -52,7 +52,7 @@ async function setCredential(socket, message) {
         '0x' + message.passhash,
       );
 
-		// call setCredential tx
+    // call setCredential tx
     await contractDoer(
       api,
       socket,
@@ -73,7 +73,7 @@ async function setCredential(socket, message) {
 
     console.log(red(`ACCESSNFT: `) + error);
 
-		discoSocket(socket, 'setCredential');
+    discoSocket(socket, 'setCredential');
     process.send('setCredential-process-error');
     process.exit();
   }
