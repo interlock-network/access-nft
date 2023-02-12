@@ -69,14 +69,13 @@ export async function contractGetter(
   const RESULT = JSON.parse(JSON.stringify(result));
 
   // check if the call was successful
-	let outputerror = result.asErr.toHuman();
+	let outputerror;
   if (result.isOk) {
       
     // check if OK result is reverted contract that returned error
     if (RESULT.ok.flags == 'Revert') {
 
       // is this error a custom error?  
-			let outputerror;    
       if (OUTPUT.ok.err.hasOwnProperty('custom')) {
 
         // logging custom error
@@ -92,14 +91,15 @@ export async function contractGetter(
       }
 
       // send message and signature values to servers
-			socket.emit(`${origin}-${method}-contract-error`, [...args]);
+			socket.emit(`${origin}-${method}-contract-error`, [...args, outputerror]);
 			return [ false, false, false, false ]
     }
   } else {
 
     // send calling error message
+		outputerror = result.asErr.toHuman();
     console.log(red(`ACCESSNFT:`) +
-      ` ${result.asErr.toHuman()}`);
+      ` ${outputerror}`);
 		socket.emit(`${origin}-${method}-calling-error`, [...args, outputerror]);
 		return [ false, false, false, false ]
   }
@@ -143,7 +143,9 @@ export async function contractDoer(
     console.log(red(`ACCESSNFT:`) +
       ' tx aborted, gas required is greater than the acceptable gas limit.');
 		socket.emit(`${origin}-${method}-gaslimit`, [...args], gasMin);
-		return false
+		discoSocket(socket, origin);
+		process.send('gas-limit');
+		process.exit();
   }
 
   // submit doer tx
@@ -166,10 +168,11 @@ export async function contractDoer(
 
 			// emit success message with signature values to server
 			socket.emit(`${method}-complete`, [...args]);
-			return true
+			discoSocket(socket, origin);
+			process.send(`${method}-complete`);
+      process.exit();
     }
   });
-	return false
 }
 
 //
@@ -356,4 +359,14 @@ export async function hasCollection(api, contract, wallet) {
   } catch (error) {
     console.log(error)
   }
+}
+
+//
+// disconnect socket
+//
+export function discoSocket(socket, origin) {
+
+      console.log(blue(`ACCESSNFT:`) +
+        ` ${origin} socket disconnecting, ID ` + cyan(`${socket.id}`));
+      socket.disconnect();
 }

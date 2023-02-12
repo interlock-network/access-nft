@@ -280,7 +280,7 @@ socket.onAny(async (message, ...args) => {
     console.log(red(`ACCESSNFT: `) +
       color.bold(`All your NFTs are already authenticated.`));
     console.log(red(`ACCESSNFT: `) +
-      color.bold(`You need to buy a new universal access NFT to register and gain access to restricted area.`));
+      color.bold(`You need to buy a new universal access NFT to register and gain access to restricted area.\n`));
 
     await returnToMain('return to main menu to mint new nft');
   }

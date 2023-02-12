@@ -10,7 +10,8 @@ import { io } from 'socket.io-client';
 import {
   contractGetter,
   setupSession,
-  contractDoer
+  contractDoer,
+  discoSocket
 } from "./utils";
 
 // specify color formatting
@@ -25,7 +26,6 @@ const magenta = color.magenta;
 // constants
 const ISAUTHENTICATED = '0x697361757468656e74696361746564';
 const FALSE = '0x66616c7365';
-const MAXRETRY = 3;
 
 // constants
 //
@@ -92,42 +92,26 @@ async function setAuthenticated(wallet, socket) {
         {u64: notAuthenticatedId}
       ); 
 
-    // call doer transaction
-    let retry = 0;
-    while(retry <= MAXRETRY) {
-            
-      if((
-        await contractDoer(
-          api,
-          socket,
-          contract,
-          storageDepositLimit,
-          storageDeposit,
-          refTimeLimit,
-          proofSizeLimit,
-          gasRequired,
-          'setAuthenticated',
-          'setAuthenticated',
-          {u64: notAuthenticatedId}
-        ))) {
-
-        process.send('setAuthenticated-complete');
-        console.log(blue(`ACCESSNFT:`) +
-          ` ${origin} socket disconnecting, ID ` + cyan(`${socket.id}`));
-        socket.disconnect();
-        process.exit();
-      }
-
-      retry++;
-    }
-      
+    // call setAuthenticated transaction
+  	await contractDoer(
+      api,
+      socket,
+      contract,
+      storageDepositLimit,
+      storageDeposit,
+      refTimeLimit,
+      proofSizeLimit,
+      gasRequired,
+      'setAuthenticated',
+      'setAuthenticated',
+      {u64: notAuthenticatedId}
+    );
   } catch(error) {
 
     console.log(red(`ACCESSNFT: `) + error);
+
+		discoSocket(socket, 'setCredential')
     process.send('program-error');
-    console.log(blue(`ACCESSNFT:`) +
-      ` ${origin} socket disconnecting, ID ` + cyan(`${socket.id}`));
-    socket.disconnect();
     process.exit();
   }
 }
