@@ -132,7 +132,7 @@ socket.on('connect', async () => {
 
       console.log(red(`ACCESSNFT: `) +
         color.bold(`This collection has no universal access NFTs available to reset.`) +
-				color.bold(`They are all not authenticated.`));
+        color.bold(`They are all not authenticated.`));
 
       // if no collection propmt to return to main menu
       await returnToMain('return to main menu');
@@ -147,7 +147,7 @@ socket.on('connect', async () => {
         name: 'id',
         message: 'Now, enter the ID of the NFT credentials you would like to reset.\n',
         validate: id => !reset.includes(id) ?
-					red(`ACCESSNFT: `) + `Not a NFT you can reset right now. Reenter ID.` : true
+          red(`ACCESSNFT: `) + `Not a NFT you can reset right now. Reenter ID.` : true
       });
       const id = responseId.id;
       console.log('');
@@ -156,7 +156,7 @@ socket.on('connect', async () => {
       const keyring = new Keyring({type: 'sr25519'});
       const CLIENT_PAIR = keyring.addFromUri(CLIENT_MNEMONIC);
 
-			// define special type for gas weights
+      // define special type for gas weights
       type WeightV2 = InstanceType<typeof WeightV2>;
       const gasLimit = api.registry.createType('WeightV2', {
         refTime: refTimeLimit,
@@ -190,8 +190,8 @@ socket.on('connect', async () => {
           color.bold(`NFT reset successful\n`));
         console.log(color.bold.magenta(`ACCESSNFT: `) +
           color.bold(`To create new credentials for universal access NFT `) +
-					red(`ID ${id}`) + color.bold(` you will need to reauthenticate and register.\n
-																			 `));
+          red(`ID ${id}`) + color.bold(` you will need to reauthenticate and register.\n
+                                       `));
         await returnToMain('return to main menu to reregister NFT ' + red(`ID ${id}`));
       }
     });
