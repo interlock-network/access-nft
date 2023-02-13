@@ -22,7 +22,8 @@ const magenta = color.magenta;
 import {
   returnToMain,
   isValidSubstrateAddress,
-  isValidMnemonic
+  isValidMnemonic,
+  onCancel
 } from "./utils";
 
 var mnemonic;
@@ -42,26 +43,26 @@ async function addWallet() {
     console.log(red(`ACCESSNFT: `) +
       color.bold(`WE RECOMMEND YOU USE A THROW-AWAY ACCOUNT FOR CREATING THIS WALLET.\n`));
 
-    console.log(color.bold.magenta(`ACCESSNFT: `) +
+    console.log(green(`ACCESSNFT: `) +
+      color.bold(`IF YOU WISH, YOU MAY USE THE DEFAULT CLIENT WALLET.`));
+    console.log(green(`ACCESSNFT: `) +
+      color.bold(`PROVIDED BY US FOR DEMONSTRATION PURPOSES.\n`));
+
+    console.log(color.bold.magenta(`\nACCESSNFT: `) +
       color.bold(`Create a new account here:`));
     console.log(color.bold.magenta(`ACCESSNFT: `) +
-      color.bold(`https://test.azero.dev/#/accounts\n`));
+      color.bold.cyan(`https://test.azero.dev/#/accounts\n`));
 
     console.log(color.bold.magenta(`ACCESSNFT: `) +
       color.bold(`And if you do, please make sure it has enough TZERO by visiting the faucet here:`));
     console.log(color.bold.magenta(`ACCESSNFT: `) +
-      color.bold(`https://faucet.test.azero.dev\n`));
+      color.bold.cyan(`https://faucet.test.azero.dev\n`));
 
-    console.log(red(`ACCESSNFT: `) +
+    console.log(red(`\nACCESSNFT: `) +
       color.bold(`Please only add address containing real assets if you trust the machine or device`));
     console.log(red(`ACCESSNFT: `) +
       color.bold(`that this application is running on.\n`));
 
-    console.log(green(`\nACCESSNFT: `) +
-      color.bold(`IF YOU WISH, YOU MAY USE THE DEFAULT CLIENT WALLET.`));
-    console.log(green(`ACCESSNFT: `) +
-      color.bold(`PROVIDED BY US FOR DEMONSTRATION PURPOSES.\n`));
-            
     // prompt
     //
     // proceed to create new wallet?
@@ -72,7 +73,7 @@ async function addWallet() {
         type: 'confirm',
         name: 'choice',
         message: 'Do you wish to create your own account instead of using the default?',
-      });
+        }, { onCancel });
       const choice = responseChoice.choice
       console.log('');
 
@@ -90,9 +91,9 @@ async function addWallet() {
           type: 'text',
           name: 'address',
           message: 'Please enter the address for the account you wish to use.\n',
-          validate: address => (!isValidSubstrateAddress(address) && (address.length > 0)) ?
+          validate: address => !isValidSubstrateAddress(address) ?
             red(`ACCESSNFT: `) + `Invalid address` : true
-        });
+        }, { onCancel });
         address = responseAddress.address;
         console.log('');
 
@@ -106,7 +107,7 @@ async function addWallet() {
             message: 'Please enter the mnemonic for the account you wish to use.\n',
             validate: mnemonic => !isValidMnemonic(mnemonic) ?
               red(`ACCESSNFT: `) + `Invalid mnemonic` : true
-          });
+          }, { onCancel });
           mnemonic = responseMnemonic.mnemonic;
           console.log('');
   

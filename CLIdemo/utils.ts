@@ -315,7 +315,7 @@ export async function returnToMain(message: String) {
     type: 'select',
     name: 'return',
     message: 'Options:',
-    choices: [{ title: message, value: 'return' }]
+    choices: [{ title: color.bold(message), value: 'return' }]
   });
 
   process.send('done');
@@ -397,9 +397,30 @@ export function discoSocket(socket, origin) {
 //
 export function isValidMnemonic(mnemonic) {
 
-	var wordCount = mnemonic.trim().split(' ').length;
+  var wordCount = mnemonic.trim().split(' ').length;
 
-	if (wordCount != 12) return false;
+  if (wordCount != 12) return false;
 
-	return true
+  return true
 }
+
+//
+// prompt cancel action
+//
+export const onCancel = prompt => {
+
+  setTimeout( () => {
+
+    console.clear();
+    console.log(red(`\n     YOU ABORTED PROMPT ... RETURNING TO MAIN MENU`));
+
+    setTimeout( () => {
+
+      process.send('abort');
+      process.exit();
+
+    }, 2000);
+  }, 100);
+}
+
+

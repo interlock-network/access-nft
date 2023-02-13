@@ -150,7 +150,7 @@ console.clear();
 console.log(`\n`);
 console.log(blue(`Welcome to the Universal Access NFT demonstration application!\n`));
 
-console.log(red(`The value of this technology comes from being a blockchain-based secret`));
+console.log(red(`The value of this technology derives from being a blockchain-based secret`));
 console.log(red(`management system (eg for usernames/passwords) using NFTs and cryptographic hashing`));
 console.log(red(`to establish access permissions and credentials that are extremely resistant to compromise.\n`));
 
@@ -161,6 +161,7 @@ console.log(yellow(`. Secrets are at most as vulnerable as the https protocol an
 console.log(yellow(`  program runtime memory in the server verifying client access permission credentials`));
 console.log(yellow(`  (disregarding of course, the case of a compromised client device or phishing attack).`));
 console.log(yellow(`. NFTs provide holders with the right to establish access/permission credentials.\n`));
+console.log(yellow(`. All stored credential information--all identifying information--is kept secret.\n`));
 
 console.log(bold.magenta(`This is a proof of concept containing all the key pieces.`));
 console.log(bold.magenta(`Production implementations will vary.\n\n`));
