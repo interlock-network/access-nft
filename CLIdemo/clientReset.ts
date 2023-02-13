@@ -11,6 +11,7 @@ const WeightV2 = require('@polkadot/types/interfaces');
 
 // imports
 import { io } from 'socket.io-client';
+import { readFileSync } from "fs";
 import * as prompts from 'prompts';
 
 // environment constants
@@ -40,11 +41,16 @@ const OWNER_MNEMONIC = process.env.OWNER_MNEMONIC;
 const ISAUTHENTICATED = '0x697361757468656e74696361746564';
 const TRUE = '0x74727565';
 
+
+const WALLET = JSON.parse(readFileSync('.wallet.json').toString());
+const CLIENT_MNEMONIC = WALLET.CLIENT_MNEMONIC
+const CLIENT_ADDRESS = WALLET.CLIENT_ADDRESS;
+
 // constants
 //
 // null === no limit
 // refTime and proofSize determined by contracts-ui estimation plus fudge-factor
-const refTimeLimit = 650000000;
+const refTimeLimit = 9000000000;
 const proofSizeLimit = 150000;
 const storageDepositLimit = null;
 
@@ -58,36 +64,27 @@ socket.on('connect', async () => {
   console.log(green(`\nACCESSNFT: `) +
     color.bold(`In order to reset your universal access NFT credentials, you MUST know the NFT ID.\n`));
 
-  // begin prompt tree
-  //
-  // first prompt: wallet address
-  await (async () => {
+  console.log(green(`\nACCESSNFT: `) +
+    color.bold(`Resetting your username and password is a two step process.`));
+  console.log(green(`\nACCESSNFT: `) +
+    color.bold(`Step 1: reset your universal access NFT here.\n`));
+  console.log(green(`\nACCESSNFT: `) +
+    color.bold(`Step 2: redo the authentication and credential registration step from the main menu.\n`));
 
-    // get valid wallet address
-    let responseWallet = await prompts({
-      type: 'text',
-      name: 'wallet',
-      message: 'Please enter the wallet address for the NFT you would like to reset.\n',
-      validate: wallet => (!isValidSubstrateAddress(wallet) && (wallet.length > 0)) ?
-        red(`ACCESSNFT: `) + `Invalid address` : true
-    });
-    let wallet = responseWallet.wallet;
-    console.log('');
-
-    // if valid, check to see if wallet has nft collection
-    if (!(await hasCollection(api, contract, wallet))) {
+    // if valid, check to see if CLIENT_ADDRESS has nft collection
+    if (!(await hasCollection(api, contract, CLIENT_ADDRESS))) {
 
       console.log(red(`ACCESSNFT: `) +
-        color.bold(`This wallet has no universal access NFT collection.`) +
+        color.bold(`This CLIENT_ADDRESS has no universal access NFT collection.`) +
         color.bold(`  Please return to main menu to mint.\n`));
 
       // if no collection propmt to return to main menu
-      await returnToMain('return to main to restart the reset process with the correct wallet');
+      await returnToMain('return to main to restart the reset process with the correct CLIENT_ADDRESS');
     }
             
     // if collection exists, get array
     //
-    // get nft collection for wallet
+    // get nft collection for CLIENT_ADDRESS
     var [ gasRequired, storageDeposit, RESULT_collection, OUTPUT_collection ] =
       await contractGetter(
         api,
@@ -95,7 +92,7 @@ socket.on('connect', async () => {
         contract,
         'Authenticate',
         'getCollection',
-        wallet,
+        CLIENT_ADDRESS,
       );
     const collection = JSON.parse(JSON.stringify(OUTPUT_collection));
 
@@ -134,46 +131,33 @@ socket.on('connect', async () => {
     if (reset == []) {
 
       console.log(red(`ACCESSNFT: `) +
-        color.bold(`This collection has no universal access NFTs to reset. They are all not authenticated.`));
+        color.bold(`This collection has no universal access NFTs available to reset.`) +
+				color.bold(`They are all not authenticated.`));
 
       // if no collection propmt to return to main menu
       await returnToMain('return to main menu');
     }
 
-     // second prompt, get NFT ID
-     await (async () => {
+    // second prompt, get NFT ID
+    await (async () => {
 
-      // get valid wallet address
-       let responseId = await prompts({
-         type: 'number',
+      // get valid nft address
+      let responseId = await prompts({
+        type: 'number',
         name: 'id',
         message: 'Now, enter the ID of the NFT credentials you would like to reset.\n',
-         validate: id => !reset.includes(id) ?
-           red(`ACCESSNFT: `) + `Not a NFT you can reset right now. Reenter ID.` : true
+        validate: id => !reset.includes(id) ?
+					red(`ACCESSNFT: `) + `Not a NFT you can reset right now. Reenter ID.` : true
       });
-       const id = responseId.id;
-       console.log('');
-       /* 
-      // get attribute isauthenticated state
-      var [ gasRequired, storageDeposit, RESULT_authenticated, OUTPUT_authenticated ] =
-        await contractGetter(
-          api,
-          socket,
-          contract,
-          'Reset',
-          'psp34::transfer',
-          wallet,
-          {u64: id},
-          0
-        ); 
-*/
+      const id = responseId.id;
+      console.log('');
 
       // create key pair for owner
-       const keyring = new Keyring({type: 'sr25519'});
-      const OWNER_PAIR = keyring.addFromUri(OWNER_MNEMONIC);
+      const keyring = new Keyring({type: 'sr25519'});
+      const CLIENT_PAIR = keyring.addFromUri(CLIENT_MNEMONIC);
 
-      // define special type for gas weights
-       type WeightV2 = InstanceType<typeof WeightV2>;
+			// define special type for gas weights
+      type WeightV2 = InstanceType<typeof WeightV2>;
       const gasLimit = api.registry.createType('WeightV2', {
         refTime: refTimeLimit,
         proofSize: proofSizeLimit,
@@ -189,25 +173,28 @@ socket.on('connect', async () => {
 
       // submit doer tx
       let extrinsic = await contract.tx['psp34::transfer'](
-         { storageDepositLimit, gasLimit }, wallet, {u64: id}, 0)
-           .signAndSend(OWNER_PAIR, async result => {
+         { storageDepositLimit, gasLimit }, CLIENT_ADDRESS, {u64: id}, [0])
+           .signAndSend(CLIENT_PAIR, async result => {
 
-        // when tx hits block
-        if (result.status.isInBlock) {
+      // when tx hits block
+      if (result.status.isInBlock) {
   
-          // logging
-           console.log(yellow(`ACCESSNFT:`) + ` NFT transfer in a block`);
+        // logging
+        console.log(yellow(`ACCESSNFT:`) + ` NFT reset in a block`);
 
-        // when tx is finalized in block, tx is successful
-         } else if (result.status.isFinalized) {
+      // when tx is finalized in block, tx is successful
+      } else if (result.status.isFinalized) {
 
-          // logging and terminate
-           console.log(green(`ACCESSNFT: `) +
-              color.bold(`NFT transfer successful`));
-          await returnToMain('return to main menu to reregister NFT ' + red(`ID ${id}`));
-         }
-      });
-    })();
+        // logging and terminate
+        console.log(green(`ACCESSNFT: `) +
+          color.bold(`NFT reset successful\n`));
+        console.log(color.bold.magenta(`ACCESSNFT: `) +
+          color.bold(`To create new credentials for universal access NFT `) +
+					red(`ID ${id}`) + color.bold(` you will need to reauthenticate and register.\n
+																			 `));
+        await returnToMain('return to main menu to reregister NFT ' + red(`ID ${id}`));
+      }
+    });
   })();
 });
 
