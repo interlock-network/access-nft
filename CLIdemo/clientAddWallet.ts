@@ -33,7 +33,7 @@ async function createWallet() {
   try {
 
     console.log(green(`\nACCESSNFT: `) +
-      color.bold(`First we need to create a quick and dirty wallet for signing transactions.`));
+      color.bold(`First we need to add a quick and dirty wallet for signing transactions.`));
     console.log(green(`ACCESSNFT: `) +
       color.bold(`This wallet will be a file stored locally containing an account-mnemonic pair.\n`));
 
@@ -43,24 +43,24 @@ async function createWallet() {
       color.bold(`WE RECOMMEND YOU USE A THROW-AWAY ACCOUNT FOR CREATING THIS WALLET.\n`));
 
     console.log(color.bold.magenta(`ACCESSNFT: `) +
-      color.bold(`CREATE NEW ACCOUNT HERE:`));
+      color.bold(`Create a new account here:`));
     console.log(color.bold.magenta(`ACCESSNFT: `) +
       color.bold(`https://test.azero.dev/#/accounts\n`));
 
     console.log(color.bold.magenta(`ACCESSNFT: `) +
-      color.bold(`PLEASE MAKE SURE YOU HAVE ENOUGH TZERO BY VISITING FAUCET HERE:.`));
+      color.bold(`And if you do, please make sure it has enough TZERO by visiting the faucet here:`));
     console.log(color.bold.magenta(`ACCESSNFT: `) +
       color.bold(`https://faucet.test.azero.dev\n`));
 
     console.log(red(`ACCESSNFT: `) +
-      color.bold(`Please only link address containing real assets if you trust the machine or device`));
+      color.bold(`Please only add address containing real assets if you trust the machine or device`));
     console.log(red(`ACCESSNFT: `) +
       color.bold(`that this application is running on.\n`));
 
     console.log(green(`\nACCESSNFT: `) +
       color.bold(`IF YOU WISH, YOU MAY USE THE DEFAULT CLIENT WALLET.`));
     console.log(green(`ACCESSNFT: `) +
-      color.bold(`PROVIDED BY US FOR DEMONSTRATION..\n`));
+      color.bold(`PROVIDED BY US FOR DEMONSTRATION PURPOSES.\n`));
             
     // prompt
     //
@@ -71,7 +71,7 @@ async function createWallet() {
       var responseChoice = await prompts({
         type: 'confirm',
         name: 'choice',
-        message: 'Do you wish to create your own wallet instead of using the default?',
+        message: 'Do you wish to create your own account instead of using the default?',
       });
       const choice = responseChoice.choice
       console.log('');
@@ -111,18 +111,18 @@ async function createWallet() {
           console.log('');
   
           fs.writeFileSync('.wallet.json', `{"CLIENT_ADDRESS":"${address}",\n` +
-                                      		 `"CLIENT_MNEMONIC":"${mnemonic}"}`);
+                                           `"CLIENT_MNEMONIC":"${mnemonic}"}`);
 
           console.log(green(`ACCESSNFT: `) +
             color.bold(`You entered a valid address and mnemonic`));
           console.log(green(`ACCESSNFT: `) +
-             color.bold(`that is stored locally to sign for transaction.`));
+             color.bold(`that will be stored locally to sign for transaction.`));
           console.log(green(`ACCESSNFT: `) +
-            color.bold(`At no point will your mnemonic be transmitted somewhere.\n`));
+            color.bold(`At no point will your mnemonic be transmitted beyond this device.\n`));
 
 
           console.log(yellow(`ACCESSNFT: `) +
-            color.bold(`If you would like to purge your address information from this application,`));
+            color.bold(`If you would like to purge your address and mnemonic information from this application,`));
           console.log(yellow(`ACCESSNFT: `) +
             color.bold(`you may do so from the main menu.\n`));
   
