@@ -28,7 +28,7 @@ import {
 var mnemonic;
 var address;
 
-async function createWallet() {
+async function addWallet() {
 
   try {
 
@@ -139,7 +139,7 @@ async function createWallet() {
   }
 }
 
-createWallet();
+addWallet();
 
 
 

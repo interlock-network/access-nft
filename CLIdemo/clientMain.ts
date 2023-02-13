@@ -6,7 +6,8 @@
 // child process paths
 import * as path from 'path';
 const menu = path.resolve('clientMain.js');
-const createWallet = path.resolve('clientAddWallet.js');
+const addWallet = path.resolve('clientAddWallet.js');
+const deleteWallet = path.resolve('clientDeleteWallet.js');
 const mint = path.resolve('clientMint.js');
 const authenticate = path.resolve('clientAuthenticate.js');
 const display = path.resolve('clientDisplay.js');
@@ -35,6 +36,7 @@ const options = [
   { title: bold('display universal access NFT collection'), value: 'display' },
   { title: bold('login to restricted access area'), value: 'login' },
   { title: bold('reset username and password'), value: 'reset' },
+  { title: bold('delete wallet information'), value: 'delete' },
   { title: bold('quit application'), value: 'quit' }
 ];
 
@@ -57,9 +59,9 @@ async function mainMenu() {
       case 'add':
 
         // initiate minting process for wallet
-        const createWalletChild = fork(createWallet);
+        const addWalletChild = fork(addWallet);
 
-        createWalletChild.on('message', () => {
+        addWalletChild.on('message', () => {
           
           const menuChild = fork(menu);
         });
@@ -120,8 +122,21 @@ async function mainMenu() {
         });
         break;
 
-      case 'quit application':
+      case 'delete':
 
+        // reset username and password
+        const deleteWalletChild = fork(deleteWallet);
+
+        deleteWalletChild.on('message', () => {
+          
+          const menuChild = fork(menu);
+        });
+        break;
+
+      case 'quit':
+
+        console.clear();
+        console.log(red(`\n            GOODBYE!!!\n\n`));
         process.exit();
         break;
     }
