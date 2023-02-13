@@ -68,8 +68,8 @@ socket.on('connect', async () => {
     color.bold(`Resetting your username and password is a two step process.`));
   console.log(green(`\nACCESSNFT: `) +
     color.bold(`Step 1: reset your universal access NFT here.\n`));
-  console.log(green(`\nACCESSNFT: `) +
-    color.bold(`Step 2: redo the authentication and credential registration step from the main menu.\n`));
+  console.log(green(`ACCESSNFT: `) +
+    color.bold(`Step 2: redo the authentication and credential registration step from the main menu.\n\n`));
 
     // if valid, check to see if CLIENT_ADDRESS has nft collection
     if (!(await hasCollection(api, contract, CLIENT_ADDRESS))) {
