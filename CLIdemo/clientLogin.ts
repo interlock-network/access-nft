@@ -104,7 +104,7 @@ socket.on('connect', async () => {
             console.log(`\n\n\n\n\n\n\n`);
 
             // prompt
-             //
+            //
             // do something useful?
             (async () => {
 
@@ -114,7 +114,7 @@ socket.on('connect', async () => {
                 name: 'something',
                 message: 'do something useful?',
               });
-               const something = responseSomething.something;
+              const something = responseSomething.something;
               console.log('');
 
               if (something) {

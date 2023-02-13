@@ -10,7 +10,8 @@ import { io } from 'socket.io-client';
 import {
   contractGetter,
   setupSession,
-  contractDoer
+  contractDoer,
+  discoSocket
 } from "./utils";
 
 // specify color formatting
@@ -79,29 +80,26 @@ async function setAuthenticated(wallet, socket) {
         notAuthenticatedId = nft.u64;
       }
     }
-        
-    // call doer transaction
+
+    // call setAuthenticated transaction
     await contractDoer(
       api,
       socket,
       contract,
       storageDepositLimit,
-      storageDeposit,
       refTimeLimit,
       proofSizeLimit,
-      gasRequired,
       'setAuthenticated',
       'setAuthenticated',
       {u64: notAuthenticatedId}
     );
-      
+
   } catch(error) {
 
     console.log(red(`ACCESSNFT: `) + error);
+
+    discoSocket(socket, 'setCredential')
     process.send('program-error');
-    console.log(blue(`ACCESSNFT:`) +
-      ` ${origin} socket disconnecting, ID ` + cyan(`${socket.id}`));
-    socket.disconnect();
     process.exit();
   }
 }

@@ -11,6 +11,7 @@ const WeightV2 = require('@polkadot/types/interfaces');
 
 // imports
 import { io } from 'socket.io-client';
+import { readFileSync } from "fs";
 import * as prompts from 'prompts';
 
 // specify color formatting
@@ -24,156 +25,131 @@ const magenta = color.magenta;
 
 // utility functions
 import {
-  contractGetter,
   setupSession,
-  contractDoer,
   returnToMain
 } from "./utils";
 
-const OWNER_MNEMONIC = process.env.OWNER_MNEMONIC;
-
 // constants
-//
-// null === no limit
-// refTime and proofSize determined by contracts-ui estimation plus fudge-factor
-const refTimeLimit = 8000000000;
-const proofSizeLimit = 180000;
-const storageDepositLimit = null;
-  
-var wallet;
+const WALLET = JSON.parse(readFileSync('.wallet.json').toString());
+const CLIENT_MNEMONIC = WALLET.CLIENT_MNEMONIC
+const CLIENT_ADDRESS = WALLET.CLIENT_ADDRESS;
+const OWNER_ADDRESS = process.env.OWNER_ADDRESS;
 
 // setup socket connection with autheticateWallet script
 var socket = io('http://localhost:3000');
 socket.on('connect', async () => {
 
   console.log(blue(`ACCESSNFT:`) +
-    ` accessApp socket connected, ID ` + cyan(`${socket.id}`));
+    ` accessApp socket connected, ID ` + cyan(`${socket.id}\n`));
    
-  // establish connection with blockchain
-  const [ api, contract ] = await setupSession('setAuthenticated');
+  // confirm mint process begining
+  await (async () => {
 
-  console.log(magenta('\nYou will be minting this universal access NFT'));
-  console.log(magenta('as the owner of the NFT smart contract. In practice,'));
-  console.log(magenta('the client application will not have this privilege,'));
-  console.log(magenta('and the NFTs will be minted by the server that contains'));
-  console.log(magenta('the secret mnemonic key for the contract\'s owner account.'));
-  console.log(magenta('This functionality is up to the adopter to implement.\n'));
-
-  // begin prompt tree
-  //
-  // first prompt: wallet address
-  (async () => {
-
-    // get valid wallet address
-    let responseWallet = await prompts({
-      type: 'text',
-      name: 'wallet',
-      message: 'Please enter the wallet address that you would like to mint this NFT to.\n',
-      validate: wallet => (!isValidSubstrateAddress(wallet)) ?
-        red(`ACCESSNFT: `) + `Invalid address` : true
+    // get response
+    var responseChoice = await prompts({
+      type: 'confirm',
+      name: 'choice',
+      message: `Do wish to proceed minting a universal access NFT to your accout ${CLIENT_ADDRESS}?`,
     });
-    wallet = responseWallet.wallet;
+    const choice = responseChoice.choice
     console.log('');
 
-    await mint(api, contract, wallet);
+		// if cancel, exit
+    if (choice == false) {
 
-  })().catch(error => otherError());
+      process.send('done');
+      process.exit();
+    }
+      
+    socket.emit('mint-nft', [CLIENT_ADDRESS]);
+  })();
 });
 
-// Check address.
-const isValidSubstrateAddress = (wallet) => {
-  try {
+socket.onAny(async (message, ...args) => {
 
-    encodeAddress(decodeAddress(wallet))
+	// server received request and is waiting for payment from client
+  if (message == 'pay-to-mint') {
 
-    // address encodes/decodes wo error => valid address
-    return true
+    const price = args[0][0];
+		const adjustedPrice = price/1000000000000;
 
-  } catch (error) {
+    console.log(yellow(`ACCESSNFT: `) +
+      color.bold(`The current price of a universal access NFT to our restricted area is `) +
+			red(`${adjustedPrice} TZERO`));
+    console.log(yellow(`ACCESSNFT: `) +
+      color.bold(`Do you wish to proceed to purchase and transfer`) +
+			red(` ${adjustedPrice} TZERO `) + color.bold(`to NFT contract owner's account`));
+    console.log(yellow(`ACCESSNFT: `) +
+			color.bold.magenta(`${OWNER_ADDRESS}`) + `?\n`);
 
-    // encode/decode failure => invalid address
-    return false
-  }
-}
+		// verify mint intention, at given price
+    await (async () => {
 
-// Check if username is available
-const mint = async (api, contract, wallet)  => {
-  
-  try {
+    	var choice = await prompts({
+      	type: 'select',
+	      name: 'return',
+  	    message: 'Please confirm:',
+    	  choices: [
+      	  { title: `YES, transfer ${adjustedPrice} AZERO to mint my universal access NFT.`, value: 'mint' },
+        	{ title: 'NO, I do not wish to purchase a universal access NFT for this price.', value: 'cancel' },
+	      ]
+  	  });
+    	if (choice.return == 'cancel') {
 
-    // create keypair for owner
-    const keyring = new Keyring({type: 'sr25519'});
-    const OWNER_PAIR = keyring.addFromUri(OWNER_MNEMONIC);
+	      process.send('done');
+  	    process.exit();
+    	}
 
-    // define special type for gas weights
-    type WeightV2 = InstanceType<typeof WeightV2>;
-    const gasLimit = api.registry.createType('WeightV2', {
-      refTime: refTimeLimit,
-      proofSize: proofSizeLimit,
-    }) as WeightV2;
+	    // establish connection with blockchain
+  	  const [ api, contract ] = await setupSession('mint');
 
-    // get getter output
-    var { gasRequired, storageDeposit, result, output } =
-      await contract.query['mint'](
-        OWNER_PAIR.address, {gasLimit}, wallet);
+    	// create keypair for owner
+	    const keyring = new Keyring({type: 'sr25519'});
+  	  const CLIENT_PAIR = keyring.addFromUri(CLIENT_MNEMONIC);
 
-    // convert to JSON format for convenience
-    const RESULT = JSON.parse(JSON.stringify(result));
-    const OUTPUT = JSON.parse(JSON.stringify(output));
+    	const transfer = api.tx.balances.transfer(OWNER_ADDRESS, price);
 
-    // if this call reverts, then only possible error is 'credential nonexistent'
-    if (RESULT.ok.flags == 'Revert') {
+	    // Sign and send the transaction using our account
+  		const hash = await transfer.signAndSend(CLIENT_PAIR);
 
-      // logging custom error
-      let error = OUTPUT.ok.err.custom.toString().replace(/0x/, '')
-      console.log(red(`ACCESSNFT: `) + error);
-      process.send('error');
-      process.exit();
-    }
+  	  console.log(green(`ACCESSNFT: `) +
+      	color.bold(`Transfer transaction finalized.`));
+  	  console.log(green(`ACCESSNFT: `) +
+      	color.bold(`Transaction hash for record: `) + yellow(`${hash}\n`));
 
-    // too much gas required?
-    if (gasRequired > gasLimit) {
-  
-      // logging and terminate
-      console.log(red(`ACCESSNFT:`) +
-        ' tx aborted, gas required is greater than the acceptable gas limit.\n');
-      process.send('error');
-      process.exit();
-    }
+ 		})();
+	// payment received and mint in progress
+	} else if (message == 'minting-nft') {
 
-    // submit doer tx
-    let extrinsic = await contract.tx['mint'](
-      { storageDepositLimit, gasLimit }, wallet)
-        .signAndSend(OWNER_PAIR, async result => {
+		const price = args[0][0];
+		const adjustedPrice = price/1000000000000;
 
-      // when tx hits block
-      if (result.status.isInBlock) {
+		// minting tx is in progress
+    console.log(green(`ACCESSNFT: `) +
+      color.bold(`Payment received!!!`) +
+			red(` ${adjustedPrice} TZERO`));
+    console.log(yellow(`ACCESSNFT: `) +
+      color.bold(`Please stand by while we mint your new universal access NFT...\n`));
 
-        // logging
-        console.log(yellow(`ACCESSNFT:`) + ` mint tx in a block`);
+	// mint complete
+	} else if (message == 'mint-complete') {
 
-      // when tx is finalized in block, tx is successful
-      } else if (result.status.isFinalized) {
+		// newly minted nft
+		const nftId = args[0][0].u64;
 
-        // logging and terminate
-        console.log(green(`ACCESSNFT:`) +
-          color.bold(` mint tx successful\n`));
+		// success
+    console.log(green(`\n\nACCESSNFT: `) +
+      color.bold(`Universal Access NFT successfully minted!!!\n`));
 
-        await returnToMain('return to main menu');          
-      }
-    });
-  } catch (error) {
+    console.log(green(`ACCESSNFT: `) +
+      color.bold(`Your new Universal Access NFT is `) +
+			red(`ID ${nftId}`) + color.bold(`!\n`));
+    console.log(color.bold.magenta(`\n\nACCESSNFT: `) +
+      color.bold(`Check out your collection to see your NFT authentication status.\n`));
 
-    console.log(red(`ACCESSNFT: `) + 'failed to mint\n');
-    process.send('error');
-    process.exit();
-  }
-}
+		await returnToMain('return to main menu to authenticate or display your NFT');
+	}
+});
 
-// handle misc error
-const otherError = () => {
 
-  console.log(red(`ACCESSNFT: `) + 'failed to gather required information\n');
-  process.send('error');
-  process.exit();
-}
+

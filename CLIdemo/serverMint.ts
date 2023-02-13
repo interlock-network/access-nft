@@ -1,6 +1,6 @@
 //
 // INTERLOCK NETWORK & ALEPH ZERO
-// PSP34 UNIVERSAL ACCESS NFT - SERVER SET CREDENTIAL
+// PSP34 UNIVERSAL ACCESS NFT - SERVER MINT
 //
 
 // imports
@@ -8,7 +8,6 @@ import { io } from 'socket.io-client';
 
 // utility functions
 import {
-  contractGetter,
   setupSession,
   contractDoer,
   discoSocket
@@ -20,26 +19,31 @@ const red = color.red.bold;
 const green = color.green.bold;
 const blue = color.blue.bold;
 const cyan = color.cyan;
+const yellow = color.yellow.bold;
+const magenta = color.magenta;
+
+// constants
+const MAXRETRY = 3;
 
 // constants
 //
 // null === no limit
 // refTime and proofSize determined by contracts-ui estimation plus fudge-factor
-const refTimeLimit = 6050000000;
-const proofSizeLimit = 150000;
+const refTimeLimit = 8000000000;
+const proofSizeLimit = 180000;
 const storageDepositLimit = null;
 
-async function setCredential(socket, message) {
+async function setAuthenticated(recipient, socket) {
 
   try {
 
     // establish connection with blockchain
-    const [ api, contract ] = await setupSession('setCredential');
+    const [ api, contract ] = await setupSession('setAuthenticated');
 
     console.log(green(`ACCESSNFT:`) +
-      ` setting username and password credentials for NFT ` + red(`ID ${message.id}`));
+      ` minting new universal access NFT for recipient ` + magenta(` ${recipient}}`));
 
-    // call setCredential tx
+		// call mint tx
     await contractDoer(
       api,
       socket,
@@ -47,36 +51,35 @@ async function setCredential(socket, message) {
       storageDepositLimit,
       refTimeLimit,
       proofSizeLimit,
-      'setCredential',
-      'setCredential',
-      {u64: message.id},
-      '0x' + message.userhash,
-      '0x' + message.passhash,
-    );
+      'mint',
+      'mint',
+			recipient
+   );
 
   } catch(error) {
 
     console.log(red(`ACCESSNFT: `) + error);
 
-    discoSocket(socket, 'setCredential');
-    process.send('setCredential-process-error');
+    discoSocket(socket, 'serverMint')
+    process.send('program-error');
     process.exit();
   }
 }
 
-process.on('message', message => {
+process.on('message', wallet => {
 
   // setup socket connection with autheticateWallet script
   var socket = io('http://localhost:3000');
   socket.on('connect', () => {
 
     console.log(blue(`ACCESSNFT:`) +
-      ` setCredential socket connected, ID ` + cyan(`${socket.id}`));
+      ` setAuthenticated socket connected, ID ` + cyan(`${socket.id}`));
     
-    setCredential(socket, message).catch((error) => {
+    setAuthenticated(wallet, socket).catch((error) => {
 
       console.error(error);
       process.exit(-1);
     });
   });
 });
+

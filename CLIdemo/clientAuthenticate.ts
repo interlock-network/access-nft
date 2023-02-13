@@ -11,6 +11,7 @@ const WeightV2 = require('@polkadot/types/interfaces');
 // imports
 import { io } from 'socket.io-client';
 import { fork } from 'child_process';
+import { readFileSync } from "fs";
 import * as prompts from 'prompts';
 
 // environment constants
@@ -35,14 +36,15 @@ import {
   setupSession,
   getHash,
   returnToMain,
-	hasCollection,
-	isValidSubstrateAddress
+  hasCollection,
+  isValidSubstrateAddress
 } from "./utils";
 
+const WALLET = JSON.parse(readFileSync('.wallet.json').toString());
+const CLIENT_MNEMONIC = WALLET.CLIENT_MNEMONIC
+const CLIENT_ADDRESS = WALLET.CLIENT_ADDRESS;
 const OWNER_ADDRESS = process.env.OWNER_ADDRESS;
-const OWNER_MNEMONIC = process.env.OWNER_MNEMONIC;
   
-var wallet;
 var username;
 var password;
 var passwordVerify;
@@ -58,102 +60,107 @@ socket.on('connect', async () => {
   // establish connection with blockchain
   const [ api, contract ] = await setupSession('setAuthenticated');
 
-  // begin prompt tree
-  //
-  // first prompt: wallet address
+  // check to see if CLIENT_ADDRESS has nft collection
+  if (!(await hasCollection(api, contract, CLIENT_ADDRESS))) {
+        
+    console.log(red(`ACCESSNFT: `) +
+      color.bold(`Your address has no universal access NFT collection. Please return to main menu to mint.\n`));
+
+    // if no collection propmt to return to main menu      
+    await returnToMain('return to main menu to mint universal access NFT');
+  }
+
+  // second prompt: username
   (async () => {
 
-    // get valid wallet address
-    let responseWallet = await prompts({
-      type: 'text',
-      name: 'wallet',
-      message: 'Please enter the wallet address containing the NFT you would like to authenticate.\n',
-      validate: wallet => (!isValidSubstrateAddress(wallet)) ?
-        red(`ACCESSNFT: `) + `Invalid address` : true
-    });
-    wallet = responseWallet.wallet;
-    console.log('');
-    
-      // if valid, check to see if wallet has nft collection
-      if (!(await hasCollection(api, contract, wallet))) {
-        
+
+    console.log(red(`ACCESSNFT: `) +
+      color.bold(`!!! WARNING !!!\n`));
+
+    console.log(red(`ACCESSNFT: `) +
+      color.bold(`Because your credentials are anonymized, it is impossible for us to tell you your`));
+    console.log(red(`ACCESSNFT: `) +
+      color.bold(`username or password if you forget.`));
+    console.log(red(`ACCESSNFT: `) +
+
+      color.bold(`If you forget your username or password, you must repeat this registration process using`));
+    console.log(red(`ACCESSNFT: `) +
+      color.bold(`a DIFFERENT username. This is the only way to ensure that access credentials are`));
+    console.log(red(`ACCESSNFT: `) +
+      color.bold(`anonymized and secure in a blockchain environment. Maybe write them down somewhere...\n\n`));
+
+    console.log(color.bold.magenta(`ACCESSNFT: `) +
+      color.bold(`AT NO POINT ARE YOUR CREDENTIALS STORED IN A DATABASE.`));
+    console.log(color.bold.magenta(`ACCESSNFT: `) +
+      color.bold(`THEY ARE ANONYMIZED AND STORED ON THE BLOCKCHAIN.\n\n\n`));
+
+
+    // loop prompt until valid username
+    var isAvailable = false;
+    while (isAvailable == false) {
+
+      // get valid username
+      var responseUsername = await prompts({
+        type: 'text',
+        name: 'username',
+        message: 'Please choose a username with 5 or more characters and no spaces.',
+        validate: username => !isValidUsername(username) ?
+          red(`ACCESSNFT: `) + `Too short or contains spaces.` : true
+      });
+      username = responseUsername.username;
+      console.log('');
+
+      // if valid, check if username is available
+      if (await isAvailableUsername(api, contract, getHash(username))) {
+
+        // break the prompt loop
+        isAvailable = true;
+
+      } else {
+
         console.log(red(`ACCESSNFT: `) +
-           color.bold(`This wallet has no universal access NFT collection. Please return to main menu to mint.\n`));
-
-        // if no collection propmt to return to main menu      
-        await returnToMain('return to main menu to mint NFT');
+          `Username already taken. Choose a different username.\n`);
       }
-
-    // second prompt: username
+    }
+    
+    // third prompt: password
     (async () => {
+        
+      // loop prompt until valid password match
+      do {
 
-      // loop prompt until valid username
-      var isAvailable = false;
-      while (isAvailable == false) {
-
-        // get valid username
-        var responseUsername = await prompts({
-          type: 'text',
-          name: 'username',
-          message: 'Please choose a username with 5 or more characters and no spaces.',
-          validate: username => !isValidUsername(username) ?
-            red(`ACCESSNFT: `) + `Too short or contains spaces.` : true
-        });
-        username = responseUsername.username;
+        // get valid password
+        var responsePassword = await prompts([
+          {
+            type: 'password',
+            name: 'password',
+            message: 'Please choose a password with 8 or more characters.\nIt may contain whitespace.',
+            validate: password => (password.length < 8) ?
+              red(`ACCESSNFT: `) + `Password too short.` : true
+          },
+          {
+            type: 'password',
+            name: 'passwordVerify',
+            message: 'Please verify your password.',
+          }
+        ]);
+        passwordVerify = responsePassword.passwordVerify;
+        password = responsePassword.password;
         console.log('');
 
-        // if valid, check if username is available
-        if (await isAvailableUsername(api, contract, getHash(username))) {
-
-          // break the prompt loop
-          isAvailable = true;
-
-        } else {
-
-          console.log(red(`ACCESSNFT: `) +
-            `Username already taken. Choose a different username.\n`);
+        if (password != passwordVerify) {
+          console.log(red(`ACCESSNFT: `) + `Password mismatch.`);
         }
       }
-    
-      // third prompt: password
-      (async () => {
+      while (password != passwordVerify);
         
-        // loop prompt until valid password match
-        do {
+      console.log(green(`ACCESSNFT: `) +
+        color.bold(`You successfully entered your new user credentials. .`));
+      console.log(yellow(`ACCESSNFT: `) +
+        color.bold(`Wait while we transfer a micropayment of 1 pico TZERO to your address.\n`));
 
-          // get valid password
-          var responsePassword = await prompts([
-            {
-              type: 'password',
-              name: 'password',
-              message: 'Please choose a password with 8 or more characters.\nIt may contain whitespace.',
-              validate: password => (password.length < 8) ?
-                red(`ACCESSNFT: `) + `Password too short.` : true
-            },
-            {
-              type: 'password',
-              name: 'passwordVerify',
-              message: 'Please verify your password.',
-            }
-          ]);
-          passwordVerify = responsePassword.passwordVerify;
-          password = responsePassword.password;
-          console.log('');
+      socket.emit('authenticate-nft', [CLIENT_ADDRESS, getHash(username), getHash(password)]);
 
-          if (  password != passwordVerify) {
-            console.log(red(`ACCESSNFT: `) + `Password mismatch.`);
-          }
-        }
-        while (password != passwordVerify);
-        
-        console.log(green(`ACCESSNFT: `) +
-          color.bold(`You successfully entered credential and wallet information.`));
-        console.log(yellow(`ACCESSNFT: `) +
-          color.bold(`Wait while we transfer a micropayment to your wallet.\n`));
-
-        socket.emit('authenticate-nft', [wallet, getHash(username), getHash(password)]);
-
-      })().catch(error => otherError());
     })().catch(error => otherError());
   })().catch(error => otherError());
 });
@@ -166,9 +173,9 @@ socket.onAny(async (message, ...args) => {
     const transactionHash = args[0][1];
 
     console.log(yellow(`ACCESSNFT: `) +
-      color.bold(`We just transfered a verification micropayment of 1 pico AZERO to your wallet at`));
+      color.bold(`We just transfered a verification micropayment of 1 pico TZERO to your address at`));
     console.log(yellow(`ACCESSNFT: `) +
-      magenta(`${wallet}` + `\n`));
+      magenta(`${CLIENT_ADDRESS}` + `\n`));
     console.log(yellow(`ACCESSNFT: `) +
       color.bold(`You may confirm this via the transaction hash`));
   
@@ -176,28 +183,76 @@ socket.onAny(async (message, ...args) => {
       cyan(`0x${transactionHash}`) + `\n`);
 
     console.log(green(`ACCESSNFT: `) +
-      color.bold(`Please transfer 1 pico AZERO in return to complete`));
+      color.bold(`Please transfer 1 pico TZERO in return to complete`));
     console.log(green(`ACCESSNFT: `) +
       color.bold(`your registration for universal access NFT `) +
-      red(`ID ${nftId}`) + color.bold(` to our wallet:`)) 
+      red(`ID ${nftId}`) + color.bold(` to our address at:`)) 
     console.log(green(`ACCESSNFT: `) +
       magenta(`${OWNER_ADDRESS}\n`));
 
     console.log(yellow(`ACCESSNFT: `) +
-      color.bold(`The purpose of this is to make sure you actually own the wallet (and NFT) you claim to own.\n`));
+      color.bold(`The purpose of this is to make sure you actually own the address (and NFT) you claim.\n`));
 
+    // authorize micropayment?
+    await (async () => {
+
+      // get response
+      var responseChoice = await prompts({
+        type: 'confirm',
+        name: 'choice',
+        message: 'Do you authorize this application to transfer 1 pico TZERO for verification purposes?',
+      });
+      const choice = responseChoice.choice
+      console.log('');
+
+      if (choice == false) {
+
+        process.send('done');
+        process.exit();
+      }
+      
+      // establish connection with blockchain
+      const [ api, contract ] = await setupSession('authenticated');
+      
+      await transferMicropayment(api);
+    
+    })();
   } else if (message == 'already-waiting') {
 
     const nftId = args[0][0];
 
     console.log(red(`ACCESSNFT: `) +
-      color.bold(`We are still waiting on your wallet verification micropayment for NFT `) +
+      color.bold(`We are still waiting on your verification micropayment for NFT `) +
       red(`ID ${nftId}`) + `.\n`);
     console.log(yellow(`ACCESSNFT: `) +
-      color.bold(`Please transfer 1 pico AZERO to our wallet to complete your NFT registration:`));
+      color.bold(`Please transfer 1 pico TZERO to our address to complete your NFT registration:`));
     console.log(yellow(`ACCESSNFT: `) +
       magenta(`${OWNER_ADDRESS}\n`));
 
+    // authorize micropayment?
+    await (async () => {
+
+      // get response
+      var responseChoice = await prompts({
+        type: 'confirm',
+        name: 'choice',
+        message: 'Do you authorize this application to transfer 1 pico TZERO for verification purposes?',
+      });
+      const choice = responseChoice.choice
+      console.log('');
+
+      if (choice == false) {
+
+        process.send('done');
+        process.exit();
+      }
+      
+      // establish connection with blockchain
+      const [ api, contract ] = await setupSession('authenticate');
+      
+      await transferMicropayment(api);
+    
+    })();
   } else if (message == 'payment-received') {
 
     const nftId = args[0][0];
@@ -237,20 +292,24 @@ socket.onAny(async (message, ...args) => {
       color.bold(`and may now login to the restricted access area!!!\n\n\n`));
 
     console.log(red(`ACCESSNFT: `) +
-      color.bold(`!!! WARNING !!!\n`));
+      color.bold(`!!! REMINDER WARNING !!!\n`));
 
     console.log(red(`ACCESSNFT: `) +
       color.bold(`Because your credentials are anonymized, it is impossible for us to tell you your`));
     console.log(red(`ACCESSNFT: `) +
       color.bold(`username or password if you forget.`));
-
     console.log(red(`ACCESSNFT: `) +
+
       color.bold(`If you forget your username or password, you must repeat this registration process using`));
     console.log(red(`ACCESSNFT: `) +
       color.bold(`a DIFFERENT username. This is the only way to ensure that access credentials are`));
     console.log(red(`ACCESSNFT: `) +
-      color.bold(`anonymized and secure in a blockchain environment. Maybe write them down somewhere...\n\n`));
+      color.bold(`anonymized and secure in a blockchain environment. Maybe write them down somewhere...\n\n\n`));
 
+    console.log(color.bold.magenta(`ACCESSNFT: `) +
+      color.bold(`AT NO POINT ARE YOUR CREDENTIALS STORED IN A DATABASE.`));
+    console.log(color.bold.magenta(`ACCESSNFT: `) +
+      color.bold(`THEY ARE ANONYMIZED AND STORED ON THE BLOCKCHAIN.\n\n\n`));
 
     console.log(color.bold.magenta(`ACCESSNFT: `) +
       color.bold(`USERNAME STORED ON BLOCKCHAIN AS SHA256 HASH`));
@@ -280,7 +339,7 @@ socket.onAny(async (message, ...args) => {
     console.log(red(`ACCESSNFT: `) +
       color.bold(`All your NFTs are already authenticated.`));
     console.log(red(`ACCESSNFT: `) +
-      color.bold(`You need to buy a new universal access NFT to register and gain access to restricted area.`));
+      color.bold(`You need to buy a new universal access NFT to register and gain access to restricted area.\n`));
 
     await returnToMain('return to main menu to mint new nft');
   }
@@ -317,7 +376,7 @@ const isAvailableUsername = async (api, contract, usernameHash)  => {
 
   // create keypair for owner
   const keyring = new Keyring({type: 'sr25519'});
-  const OWNER_PAIR = keyring.addFromUri(OWNER_MNEMONIC);
+  const CLIENT_PAIR = keyring.addFromUri(CLIENT_MNEMONIC);
 
   // define special type for gas weights
   type WeightV2 = InstanceType<typeof WeightV2>;
@@ -329,7 +388,7 @@ const isAvailableUsername = async (api, contract, usernameHash)  => {
   // get getter output
   var { gasRequired, storageDeposit, result, output } =
     await contract.query['checkCredential'](
-      OWNER_PAIR.address, {gasLimit}, '0x' + usernameHash);
+      CLIENT_PAIR.address, {gasLimit}, '0x' + usernameHash);
 
   // convert to JSON format for convenience
   const RESULT = JSON.parse(JSON.stringify(result));
@@ -341,7 +400,7 @@ const isAvailableUsername = async (api, contract, usernameHash)  => {
       // logging custom error
       let error = OUTPUT.ok.err.custom.toString().replace(/0x/, '')
       console.log(green(`ACCESSNFT:`) +
-        color.bold(` username available`));
+        color.bold(` username available\n`));
 
       // username is available
       return true
@@ -351,9 +410,32 @@ const isAvailableUsername = async (api, contract, usernameHash)  => {
     return false
 
   } catch (error) {
-    console.log(error)
+    console.log(red(`ACCESSNFT: `) + error);
   }
 }
+
+// Check if username is available
+const transferMicropayment = async (api)  => {
+
+  try {
+
+    // create keypair for owner
+    const keyring = new Keyring({type: 'sr25519'});
+    const CLIENT_PAIR = keyring.addFromUri(CLIENT_MNEMONIC);
+
+    const transfer = api.tx.balances.transfer(OWNER_ADDRESS, 1);
+
+    // Sign and send the transaction using our account
+    const hash = await transfer.signAndSend(CLIENT_PAIR);
+
+    return hash
+
+  } catch (error) {
+
+    console.log(red(`ACCESSNFT: `) + error);
+  }
+}
+
 
 // handle misc error
 const otherError = () => {

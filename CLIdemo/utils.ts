@@ -69,34 +69,39 @@ export async function contractGetter(
   const RESULT = JSON.parse(JSON.stringify(result));
 
   // check if the call was successful
+  let outputerror;
   if (result.isOk) {
       
     // check if OK result is reverted contract that returned error
     if (RESULT.ok.flags == 'Revert') {
 
-      // is this error a custom error?      
+      // is this error a custom error?  
       if (OUTPUT.ok.err.hasOwnProperty('custom')) {
 
         // logging custom error
-        let error = OUTPUT.ok.err.custom.toString().replace(/0x/, '')
+        outputerror = hexToString(OUTPUT.ok.err.custom.toString().replace(/0x/, ''));
         console.log(red(`ACCESSNFT:`) +
-          ` ${hexToString(error)}`);
+          ` ${outputerror}`);
       } else {
           
         // if not custom then print Error enum type
+        outputerror = OUTPUT.ok.err
         console.log(red(`ACCESSNFT:`) +
-          ` ${OUTPUT.ok.err}`);
+          ` ${outputerror}`);
       }
 
-      // send message to App relay, and terminated process
-      terminateProcess(socket, origin, 'contract-error', [...args]);
+      // send message and signature values to servers
+      socket.emit(`${origin}-${method}-contract-error`, [...args, outputerror]);
+      return [ false, false, false, false ]
     }
   } else {
 
-    // loggin calling error and terminate
+    // send calling error message
+    outputerror = result.asErr.toHuman();
     console.log(red(`ACCESSNFT:`) +
-      ` ${result.asErr.toHuman()}`);
-    terminateProcess(socket, origin, 'calling-error', [result.asErr.toHuman()]);
+      ` ${outputerror}`);
+    socket.emit(`${origin}-${method}-calling-error`, [...args, outputerror]);
+    return [ false, false, false, false ]
   }
 
   return [ gasRequired, storageDeposit, RESULT, OUTPUT ]
@@ -111,10 +116,8 @@ export async function contractDoer(
   socket: any,
   contract: any,
   storageMax: any,
-  storageMin: any,
   refTimeLimit: any,
   proofSizeLimit: any,
-  gasMin: any,
   origin: string,
   method: string,
   ...args: any[]
@@ -124,20 +127,46 @@ export async function contractDoer(
   const keyring = new Keyring({type: 'sr25519'});
   const OWNER_PAIR = keyring.addFromUri(OWNER_MNEMONIC);
 
-    // define special type for gas weights
-    type WeightV2 = InstanceType<typeof WeightV2>;
-    const gasLimit = api.registry.createType('WeightV2', {
-      refTime: refTimeLimit,
-      proofSize: proofSizeLimit,
-    }) as WeightV2;
+    // get attribute isauthenticated state
+  var [ gasRequired, storageDeposit, RESULT, OUTPUT ] =
+    await contractGetter(
+      api,
+      socket,
+      contract,
+      origin,
+      method,
+      ...args
+    ); 
+
+  // define special type for gas weights
+  type WeightV2 = InstanceType<typeof WeightV2>;
+  const gasLimit = api.registry.createType('WeightV2', {
+    refTime: refTimeLimit,
+    proofSize: proofSizeLimit,
+  }) as WeightV2;
 
   // too much gas required?
-  if (gasMin > gasLimit) {
+  if (gasRequired > gasLimit) {
   
-    // logging and terminate
+    // emit error message with signature values to server
     console.log(red(`ACCESSNFT:`) +
       ' tx aborted, gas required is greater than the acceptable gas limit.');
-    terminateProcess(socket, origin, `${origin}-failure`, [...args]);
+    socket.emit(`${origin}-${method}-gaslimit`, [...args], gasRequired);
+    discoSocket(socket, origin);
+    process.send('gas-limit');
+    process.exit();
+  }
+
+  // too much storage required?
+  if (storageDeposit > storageMax) {
+  
+    // emit error message with signature values to server
+    console.log(red(`ACCESSNFT:`) +
+      ' tx aborted, storage required is greater than the acceptable storage limit.');
+    socket.emit(`${origin}-${method}-storagelimit`, [...args], storageDeposit);
+    discoSocket(socket, origin);
+    process.send('gas-limit');
+    process.exit();
   }
 
   // submit doer tx
@@ -157,7 +186,12 @@ export async function contractDoer(
       // logging and terminate
       console.log(green(`ACCESSNFT:`) +
         color.bold(` ${method} successful`));
-      terminateProcess(socket, origin, `${method}-complete`, [...args]);
+
+      // emit success message with signature values to server
+      socket.emit(`${method}-complete`, [...args]);
+      discoSocket(socket, origin);
+      process.send(`${method}-complete`);
+      process.exit();
     }
   });
 }
@@ -306,8 +340,9 @@ export function isValidSubstrateAddress(wallet: string) {
   }
 }
 
-
+//
 // Check if wallet has collection
+//
 export async function hasCollection(api, contract, wallet) {
   try {
 
@@ -345,4 +380,26 @@ export async function hasCollection(api, contract, wallet) {
   } catch (error) {
     console.log(error)
   }
+}
+
+//
+// disconnect socket
+//
+export function discoSocket(socket, origin) {
+
+      console.log(blue(`ACCESSNFT:`) +
+        ` ${origin} socket disconnecting, ID ` + cyan(`${socket.id}`));
+      socket.disconnect();
+}
+
+// 
+// check if valid mnemonic
+//
+export function isValidMnemonic(mnemonic) {
+
+	var wordCount = mnemonic.trim().split(' ').length;
+
+	if (wordCount != 12) return false;
+
+	return true
 }
