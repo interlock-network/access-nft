@@ -212,7 +212,7 @@ socket.onAny(async (message, ...args) => {
       }
       
       // establish connection with blockchain
-      const [ api, contract ] = await setupSession('setAuthenticated');
+      const [ api, contract ] = await setupSession('authenticated');
       
       await transferMicropayment(api);
     
@@ -248,7 +248,7 @@ socket.onAny(async (message, ...args) => {
       }
       
       // establish connection with blockchain
-      const [ api, contract ] = await setupSession('setAuthenticated');
+      const [ api, contract ] = await setupSession('authenticate');
       
       await transferMicropayment(api);
     
@@ -304,7 +304,7 @@ socket.onAny(async (message, ...args) => {
     console.log(red(`ACCESSNFT: `) +
       color.bold(`a DIFFERENT username. This is the only way to ensure that access credentials are`));
     console.log(red(`ACCESSNFT: `) +
-      color.bold(`anonymized and secure in a blockchain environment. Maybe write them down somewhere...\n\n`));
+      color.bold(`anonymized and secure in a blockchain environment. Maybe write them down somewhere...\n\n\n`));
 
     console.log(color.bold.magenta(`ACCESSNFT: `) +
       color.bold(`AT NO POINT ARE YOUR CREDENTIALS STORED IN A DATABASE.`));

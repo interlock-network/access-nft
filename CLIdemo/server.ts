@@ -19,7 +19,7 @@ import * as path from 'path';
 const verifyWallet = path.resolve('serverVerifyWallet.js');
 const setCredentials = path.resolve('serverSetCredential.js');
 const setAuthenticated = path.resolve('serverSetAuthenticated.js');
-const mint = path.resolve('mint.js');
+const mint = path.resolve('serverMint.js');
 
 // environment constants
 import * as dotenv from 'dotenv';
@@ -28,7 +28,7 @@ dotenv.config();
 // utility functions
 import {
   setupSession,
-	contractGetter
+  contractGetter
 } from "./utils";
 
 // specify color formatting
@@ -51,7 +51,7 @@ const io = new Server(httpServer);
 // constants
 const OWNER_ADDRESS = process.env.OWNER_ADDRESS;
 const AMOUNT = 1;
-const NFTPRICE = 1000000000000000; // pico TZERO = 10 TZERO
+const NFTPRICE = 10000000000000; // pico TZERO = 10 TZERO
 
 // map to keep track of waiting wallet transfers
 // mapping is [wallet -> socketID]
@@ -144,11 +144,11 @@ async function authenticateWallet(socket) {
             });
           });
         } else if (receivingWallet == OWNER_ADDRESS &&
-					mintQueue.has(sendingWallet.toHuman()) &&
-          transferAmount == mintQueue.get(sendingWallet.toHuman())) {
-                
+          mintQueue.has(sendingWallet.toHuman()) &&
+          transferAmount.toNumber() == mintQueue.get(sendingWallet.toHuman())[1]) {
+
           const recipient = sendingWallet.toHuman();
-          const clientSocketId = walletInfo.get(mintQueue)[0];
+          const clientSocketId = mintQueue.get(recipient)[0];
 
           console.log(green(`ACCESSNFT:`) +
             color.bold(` NFT payment transfer complete from wallet `) + magenta(`${recipient}`));
@@ -156,7 +156,7 @@ async function authenticateWallet(socket) {
             ` minting NFT for wallet ` +  magenta(`${recipient}`));
 
           // notify the client that their transfer was recorded
-          io.to(clientSocketId).emit('minting-nft', []);
+          io.to(clientSocketId).emit('minting-nft', [NFTPRICE]);
         
           // fire up minting script
           const mintChild = fork(mint);
@@ -165,28 +165,29 @@ async function authenticateWallet(socket) {
           // listen for results of setAuthenticated process child
           mintChild.on('message', async message => {
 
-        		// get new array of nfts
-		        //
-  		      // get nft collection for wallet
-    		    var [ gasRequired, storageDeposit, RESULT_collection, OUTPUT_collection ] =
-      		    await contractGetter(
-        		    api,
-          		  socket,
-            		contract,
-	            	'Main',
-	  	          'getCollection',
-  	  	        recipient,
-    	  	    );
-      		  const collection = JSON.parse(JSON.stringify(OUTPUT_collection));
+            // get new array of nfts
+            //
+            // get nft collection for wallet
+            var [ gasRequired, storageDeposit, RESULT_collection, OUTPUT_collection ] =
+              await contractGetter(
+                api,
+                socket,
+                contract,
+                'Main',
+                'getCollection',
+                recipient,
+              );
+            const collection = JSON.parse(JSON.stringify(OUTPUT_collection));
 
-		        // get the id of new nft (last in collection)
-    		    const nftId = Array.from(collection.ok.ok).pop();
+            // get the id of new nft (last in collection)
+            const nftId = Array.from(collection.ok.ok).pop();
 
             // communicate to client application that mint of nft ID successful
             io.to(clientSocketId).emit('mint-complete', [nftId]);
-						mintQueue.delete(recipient);
+            mintQueue.delete(recipient);
           });
-				}}
+        }
+			}
     });
   });
 }
@@ -195,7 +196,7 @@ async function authenticateWallet(socket) {
 io.on('connection', (socket) => {
 
   // relay all script events to application
-  socket.onAny((message, ...args) => {
+  socket.onAny( async (message, ...args) => {
 
     if (message == 'authenticate-nft') {
 
@@ -240,22 +241,26 @@ io.on('connection', (socket) => {
     } else if (message == 'mint-nft') {
 
       const recipient = args[0][0];
-			
-			// log that we are expecting payment of NFTPRICE from recipient in immediate future
-			//
-			// payments to OWNER account that have not requested an nft mint will not be honored
-			mintQueue.set(recipient, NFTPRICE);
+      
+      // log that we are expecting payment of NFTPRICE from recipient in immediate future
+      //
+      // payments to OWNER account that have not requested an nft mint will not be honored
+      mintQueue.set(recipient, [socket.id, NFTPRICE]);
 
-			io.to(socket.id).emit('pay-to-mint', [socket.id, NFTPRICE]);
+      io.to(socket.id).emit('pay-to-mint', [NFTPRICE]);
 
-			// remove recipient from mint queue after one minute of no payment receipt
-			//
-			// this is to avoid ddos type scenario where someone crashes server by flooding with mint requests
-			setTimeout( () => {
-				mintQueue.delete(recipient);
-				console.log(color.magenta.bold(`ACCESSNFT: `) + 
-					`mint recipient ${recipient} took too long to pay -- removed from mint queue`)
-			}, 100000);
+      // remove recipient from mint queue after one minute of no payment receipt
+      //
+      // this is to avoid ddos type scenario where someone crashes server by flooding with mint requests
+      await setTimeout( () => {
+
+				if (mintQueue.has(recipient)) {
+        
+					mintQueue.delete(recipient);
+        	console.log(color.magenta.bold(`ACCESSNFT: `) + 
+          	`mint recipient ${recipient} took too long to pay -- removed from mint queue`);
+				}
+      }, 60000); // one minute delay
 
     } else if (message == 'waiting') {
 
