@@ -137,10 +137,12 @@ async function mainMenu() {
 
         console.clear();
         console.log(red(`\n            GOODBYE!!!\n\n`));
-        process.exit();
-        break;
-    }
 
+        setTimeout( () => {
+          console.clear();
+          process.exit();
+        }, 2500);
+    }
   } catch (error) {
     console.log(error)
   }
@@ -164,6 +166,8 @@ console.log(yellow(`. NFTs provide holders with the right to establish access/pe
 console.log(yellow(`. All stored credential information--all identifying information--is kept secret.\n`));
 
 console.log(bold.magenta(`This is a proof of concept containing all the key pieces.`));
-console.log(bold.magenta(`Production implementations will vary.\n\n`));
+console.log(bold.magenta(`Production implementations will vary.\n`));
+
+console.log(blue(`~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n`));
 
 mainMenu();
