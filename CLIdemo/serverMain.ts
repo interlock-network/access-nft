@@ -187,7 +187,7 @@ async function authenticateWallet(socket) {
             mintQueue.delete(recipient);
           });
         }
-			}
+      }
     });
   });
 }
@@ -254,12 +254,12 @@ io.on('connection', (socket) => {
       // this is to avoid ddos type scenario where someone crashes server by flooding with mint requests
       await setTimeout( () => {
 
-				if (mintQueue.has(recipient)) {
+        if (mintQueue.has(recipient)) {
         
-					mintQueue.delete(recipient);
-        	console.log(color.magenta.bold(`ACCESSNFT: `) + 
-          	`mint recipient ${recipient} took too long to pay -- removed from mint queue`);
-				}
+          mintQueue.delete(recipient);
+          console.log(color.magenta.bold(`ACCESSNFT: `) + 
+            `mint recipient ${recipient} took too long to pay -- removed from mint queue`);
+        }
       }, 60000); // one minute delay
 
     } else if (message == 'waiting') {

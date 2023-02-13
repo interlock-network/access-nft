@@ -125,15 +125,14 @@ console.clear();
 console.log(`\n`);
 console.log(`Welcome to the Universal Access NFT demonstration application!\n`);
 
-console.log(`The value proposition for this technology is that it is a blockchain secret \n`);
-console.log(`(eg, username/passwords) management system (a form of proof of pseudo proof-of-knowledge)\n`);
+console.log(`The value proposition for this technology is that it is a blockchain secret`);
+console.log(`(eg, username/passwords) management system (a form of proof of pseudo proof-of-knowledge)`);
 console.log(`that is extremely resistant to compromise:\n`);
 
 
-console.log(`. At no point in the process are secrets stored in a database in recoverable form.\n`);
+console.log(`. At no point in the process are secrets stored in a database in recoverable form.`);
 console.log(`. Secrets are as vulnerable as the https protocol and cache level security of server and c\n`);
 
-console.log(`Welcome to the Universal Access NFT demonstration application!\n`);
 console.log(`This is just a proof of concept, containing all the key pieces.`);
 console.log(`Production implementations are left to the eyes of the beholder.`);
 

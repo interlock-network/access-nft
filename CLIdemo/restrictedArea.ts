@@ -55,8 +55,8 @@ io.on('connect', (socket) => {
     if (message == 'request-access') {
 
       // deal with cleartext credentials
-      const username = args[0];
-      const password = args[1];
+      let username = args[0];
+      let password = args[1];
 
       // get SHA256 hashes
       const userhash = getHash(username);
@@ -64,7 +64,7 @@ io.on('connect', (socket) => {
 
       // free and cleanup sensitive info
       username = 0;
-       password = 0;
+      password = 0;
       global.gc();
     
       // fetch the passhash corresponding to userhash from blockchain
