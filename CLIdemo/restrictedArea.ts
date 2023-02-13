@@ -117,7 +117,7 @@ io.on('connect', (socket) => {
                   `${username} on socket ` + cyan(`ID ${socket.id}`) +
                   `just fetched ascii art`);
 
-                figlet('(:  RESTRICTED AREA  :)\n\n\n\n\n\n         YOU ROCK', function(err, data) {
+                figlet('(:  RESTRICTED AREA  :)\n\n\n\n\n\n         ...YOU ROCK!!!', function(err, data) {
                   
                   if (err) {
                     console.log('Something went wrong...');
