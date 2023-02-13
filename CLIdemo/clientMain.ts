@@ -17,15 +17,25 @@ const login = path.resolve('clientLogin.js');
 import { fork } from 'child_process';
 import * as prompts from 'prompts';
 
+// specify color formatting
+import * as color from 'cli-color';
+const red = color.red.bold;
+const green = color.green.bold;
+const blue = color.blue.bold;
+const cyan = color.cyan;
+const yellow = color.yellow.bold;
+const magenta = color.magenta;
+const bold = color.bold;
+
 // start menu options
 const options = [
-  { title: 'create or add new wallet for this demo application', value: 'add'},
-  { title: 'mint universal access NFT', value: 'mint' },
-  { title: 'register universal access NFT', value: 'authenticate' },
-  { title: 'display universal access NFT collection', value: 'display' },
-  { title: 'login to restricted access area', value: 'login' },
-  { title: 'reset username and password', value: 'reset' },
-  { title: 'quit application', value: 'quit' }
+  { title: bold('create or add new wallet for this demo application'), value: 'add'},
+  { title: bold('mint universal access NFT'), value: 'mint' },
+  { title: bold('register universal access NFT'), value: 'authenticate' },
+  { title: bold('display universal access NFT collection'), value: 'display' },
+  { title: bold('login to restricted access area'), value: 'login' },
+  { title: bold('reset username and password'), value: 'reset' },
+  { title: bold('quit application'), value: 'quit' }
 ];
 
 async function mainMenu() {
@@ -37,7 +47,7 @@ async function mainMenu() {
       {
         type: 'select',
         name: 'choice',
-        message: '\nUNIVERSAL ACCESS NFT DEMO APP ~ Please choose an action:\n',
+        message: blue('\nUNIVERSAL ACCESS NFT DEMO APP ~ PLEASE CHOOSE AN ACTION!\n'),
         choices: options,
       }
     ]);
@@ -123,17 +133,21 @@ async function mainMenu() {
 
 console.clear();
 console.log(`\n`);
-console.log(`Welcome to the Universal Access NFT demonstration application!\n`);
+console.log(blue(`Welcome to the Universal Access NFT demonstration application!\n`));
 
-console.log(`The value proposition for this technology is that it is a blockchain secret`);
-console.log(`(eg, username/passwords) management system (a form of proof of pseudo proof-of-knowledge)`);
-console.log(`that is extremely resistant to compromise:\n`);
+console.log(red(`The value of this technology comes from being a blockchain-based secret`));
+console.log(red(`management system (eg for usernames/passwords) using NFTs and cryptographic hashing`));
+console.log(red(`to establish access permissions and credentials that are extremely resistant to compromise.\n`));
 
 
-console.log(`. At no point in the process are secrets stored in a database in recoverable form.`);
-console.log(`. Secrets are as vulnerable as the https protocol and cache level security of server and c\n`);
+console.log(yellow(`. Access permission secrets or identifying information are never stored in a database or in cleartext.`));
+console.log(yellow(`. Identifying information and secrets are stored on the blockchain as SHA256 hash digests.`));
+console.log(yellow(`. Secrets are at most as vulnerable as the https protocol and the root access to RAM `));
+console.log(yellow(`  program runtime memory in the server verifying client access permission credentials`));
+console.log(yellow(`  (disregarding of course, the case of a compromised client device or phishing attack).`));
+console.log(yellow(`. NFTs provide holders with the right to establish access/permission credentials.\n`));
 
-console.log(`This is just a proof of concept, containing all the key pieces.`);
-console.log(`Production implementations are left to the eyes of the beholder.`);
+console.log(bold.magenta(`This is a proof of concept containing all the key pieces.`));
+console.log(bold.magenta(`Production implementations will vary.\n\n`));
 
 mainMenu();
