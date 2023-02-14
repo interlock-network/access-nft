@@ -5,7 +5,7 @@
 
 // 
 // This is the parent script for the access NFT authentication process.
-// It runs persistently, and spawns a verifyWalletChild process each time somebody
+// It runs persistently, and spawns a verifyAddressChild process each time somebody
 // wishes to authenticate the fact that they possess an access NFT,
 // to establish access credentials of some sort. This script is meant to
 // be simple, limited to listening for requests to authenticate, and spawing
@@ -16,7 +16,7 @@ import { fork } from 'child_process';
 
 // child process paths
 import * as path from 'path';
-const verifyWallet = path.resolve('serverVerifyWallet.js');
+const verifyAddress = path.resolve('serverVerifyAddress.js');
 const setCredentials = path.resolve('serverSetCredential.js');
 const setAuthenticated = path.resolve('serverSetAuthenticated.js');
 const mint = path.resolve('serverMint.js');
@@ -132,7 +132,6 @@ async function transferListener(socket) {
             // fork process to set credentials provided at authenticate-address call
             const setCredentialsChild = fork(setCredentials);
             setCredentialsChild.send({
-              wallet: clientAddress,
               id: nftId,
               userhash: userhash,
               passhash: passhash
@@ -212,10 +211,10 @@ io.on('connection', (socket) => {
         waitingQueue.set(address, [socket.id, userhash, passhash, 0]);
 
         // initiate authentication process for address
-        const verifyWalletChild = fork(verifyWallet);
-        verifyWalletChild.send(address);
+        const verifyAddressChild = fork(verifyAddress);
+        verifyAddressChild.send(address);
 
-        verifyWalletChild.on('message', (contents) => {
+        verifyAddressChild.on('message', (contents) => {
 
           if (contents == 'all-nfts-authenticated') {
 
@@ -287,7 +286,7 @@ io.on('connection', (socket) => {
             
     }  else  {
 
-      // relay message to application
+      // relay message to applications
       socket.emit(`apprelay-${message}`, ...args);
     }
   });
@@ -296,7 +295,7 @@ io.on('connection', (socket) => {
 // fire up http server
 const PORT = 3000;
 httpServer.listen(PORT, () => {
-  console.log(blue(`UA-NFT:`) +
+  console.log(blue(`\nUA-NFT:`) +
     ` listening on ` + cyan(`*:${PORT}`));
 });
 
@@ -307,7 +306,7 @@ var socket = ioclient(`http://localhost:${PORT}`);
 socket.on('connect', () => {
 
   console.log(blue(`UA-NFT:`) +
-    ` verifyWallet socket connected, ID ` + cyan(`${socket.id}`));
+    ` transferListener socket connected, ID ` + cyan(`${socket.id}`));
     
   // initiate async function above that listens for transfer events
   transferListener(socket).catch((error) => {
