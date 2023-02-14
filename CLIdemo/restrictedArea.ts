@@ -165,11 +165,11 @@ io.on('connect', (socket) => {
             }
 
             // free and force cleanup sensitive info
-	    			socket.on('disconnect', () => {
-            	
-							username = 0;
-            	global.gc();
-						});
+            socket.on('disconnect', () => {
+              
+              username = 0;
+              global.gc();
+            });
             //
             //
             // RESTRICTED ACCESS AREA ABOVE!!!
