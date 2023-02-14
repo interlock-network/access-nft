@@ -26,7 +26,8 @@ const magenta = color.magenta;
 // utility functions
 import {
   setupSession,
-  returnToMain
+  returnToMain,
+  onCancel
 } from "./utils";
 
 // constants
@@ -50,11 +51,11 @@ socket.on('connect', async () => {
       type: 'confirm',
       name: 'choice',
       message: `Do wish to proceed minting a universal access NFT to your accout ${CLIENT_ADDRESS}?`,
-    });
+    }, { onCancel });
     const choice = responseChoice.choice
     console.log('');
 
-		// if cancel, exit
+    // if cancel, exit
     if (choice == false) {
 
       process.send('done');
@@ -67,89 +68,88 @@ socket.on('connect', async () => {
 
 socket.onAny(async (message, ...args) => {
 
-	// server received request and is waiting for payment from client
+  // server received request and is waiting for payment from client
   if (message == 'pay-to-mint') {
 
     const price = args[0][0];
-		const adjustedPrice = price/1000000000000;
+    const adjustedPrice = price/1000000000000;
 
     console.log(yellow(`ACCESSNFT: `) +
       color.bold(`The current price of a universal access NFT to our restricted area is `) +
-			red(`${adjustedPrice} TZERO`));
+      red(`${adjustedPrice} TZERO`));
     console.log(yellow(`ACCESSNFT: `) +
       color.bold(`Do you wish to proceed to purchase and transfer`) +
-			red(` ${adjustedPrice} TZERO `) + color.bold(`to NFT contract owner's account`));
+      red(` ${adjustedPrice} TZERO `) + color.bold(`to NFT contract owner's account`));
     console.log(yellow(`ACCESSNFT: `) +
-			color.bold.magenta(`${OWNER_ADDRESS}`) + `?\n`);
+      color.bold.magenta(`${OWNER_ADDRESS}`) + `?\n`);
 
-		// verify mint intention, at given price
+    // verify mint intention, at given price
     await (async () => {
 
-    	var choice = await prompts({
-      	type: 'select',
-	      name: 'return',
-  	    message: 'Please confirm:',
-    	  choices: [
-      	  { title: `YES, transfer ${adjustedPrice} AZERO to mint my universal access NFT.`, value: 'mint' },
-        	{ title: 'NO, I do not wish to purchase a universal access NFT for this price.', value: 'cancel' },
-	      ]
-  	  });
-    	if (choice.return == 'cancel') {
+      var choice = await prompts({
+        type: 'select',
+        name: 'return',
+        message: 'Please confirm:',
+        choices: [
+          { title: `YES, transfer ${adjustedPrice} AZERO to mint my universal access NFT.`, value: 'mint' },
+          { title: 'NO, I do not wish to purchase a universal access NFT for this price.', value: 'cancel' },
+        ]
+      }, { onCancel });
+      if (choice.return == 'cancel') {
 
-	      process.send('done');
-  	    process.exit();
-    	}
+        process.send('done');
+        process.exit();
+      }
 
-	    // establish connection with blockchain
-  	  const [ api, contract ] = await setupSession('mint');
+      if (choice.return == 'mint') {
+      
+        // establish connection with blockchain
+        const [ api, contract ] = await setupSession('mint');
 
-    	// create keypair for owner
-	    const keyring = new Keyring({type: 'sr25519'});
-  	  const CLIENT_PAIR = keyring.addFromUri(CLIENT_MNEMONIC);
+        // create keypair for owner
+        const keyring = new Keyring({type: 'sr25519'});
+        const CLIENT_PAIR = keyring.addFromUri(CLIENT_MNEMONIC);
 
-    	const transfer = api.tx.balances.transfer(OWNER_ADDRESS, price);
+        const transfer = api.tx.balances.transfer(OWNER_ADDRESS, price);
 
-	    // Sign and send the transaction using our account
-  		const hash = await transfer.signAndSend(CLIENT_PAIR);
+        // Sign and send the transaction using our account
+        const hash = await transfer.signAndSend(CLIENT_PAIR);
 
-  	  console.log(green(`ACCESSNFT: `) +
-      	color.bold(`Transfer transaction finalized.`));
-  	  console.log(green(`ACCESSNFT: `) +
-      	color.bold(`Transaction hash for record: `) + yellow(`${hash}\n`));
+        console.log(green(`ACCESSNFT: `) +
+          color.bold(`Transfer transaction finalized.`));
+        console.log(green(`ACCESSNFT: `) +
+          color.bold(`Transaction hash for record: `) + yellow(`${hash}\n`));
+      }
+     })();
+  // payment received and mint in progress
+  } else if (message == 'minting-nft') {
 
- 		})();
-	// payment received and mint in progress
-	} else if (message == 'minting-nft') {
+    const price = args[0][0];
+    const adjustedPrice = price/1000000000000;
 
-		const price = args[0][0];
-		const adjustedPrice = price/1000000000000;
-
-		// minting tx is in progress
+    // minting tx is in progress
     console.log(green(`ACCESSNFT: `) +
       color.bold(`Payment received!!!`) +
-			red(` ${adjustedPrice} TZERO`));
+      red(` ${adjustedPrice} TZERO`));
     console.log(yellow(`ACCESSNFT: `) +
       color.bold(`Please stand by while we mint your new universal access NFT...\n`));
 
-	// mint complete
-	} else if (message == 'mint-complete') {
+  // mint complete
+  } else if (message == 'mint-complete') {
 
-		// newly minted nft
-		const nftId = args[0][0].u64;
+    // newly minted nft
+    const nftId = args[0][0].u64;
 
-		// success
+    // success
     console.log(green(`\n\nACCESSNFT: `) +
       color.bold(`Universal Access NFT successfully minted!!!\n`));
 
     console.log(green(`ACCESSNFT: `) +
       color.bold(`Your new Universal Access NFT is `) +
-			red(`ID ${nftId}`) + color.bold(`!\n`));
+      red(`ID ${nftId}`) + color.bold(`!\n`));
     console.log(color.bold.magenta(`\n\nACCESSNFT: `) +
       color.bold(`Check out your collection to see your NFT authentication status.\n`));
 
-		await returnToMain('return to main menu to authenticate or display your NFT');
-	}
+    await returnToMain('return to main menu to authenticate or display your NFT');
+  }
 });
-
-
-

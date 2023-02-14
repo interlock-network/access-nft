@@ -162,7 +162,7 @@ console.log(yellow(`. Identifying information and secrets are stored on the bloc
 console.log(yellow(`. Secrets are at most as vulnerable as the https protocol and the root access to RAM `));
 console.log(yellow(`  program runtime memory in the server verifying client access permission credentials`));
 console.log(yellow(`  (disregarding of course, the case of a compromised client device or phishing attack).`));
-console.log(yellow(`. NFTs provide holders with the right to establish access/permission credentials.\n`));
+console.log(yellow(`. NFTs provide holders with the right to establish access/permission credentials.`));
 console.log(yellow(`. All stored credential information--all identifying information--is kept secret.\n`));
 
 console.log(bold.magenta(`This is a proof of concept containing all the key pieces.`));
