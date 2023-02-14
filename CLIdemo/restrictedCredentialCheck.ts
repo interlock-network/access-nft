@@ -71,8 +71,8 @@ async function credentialCheck(message) {
 
         // logging custom error
         let error = OUTPUT.ok.err.custom.toString().replace(/0x/, '')
-        console.log(red(`UA-NFT:`) +
-          ` ${hexToString(error)}`);
+        console.log(red(`UA-NFT`) + color.bold(`|RESTRICTED-AREA-SERVER: `) +
+          `${hexToString(error)}`);
         process.send('bad-username');
         process.exit();
 
@@ -86,8 +86,8 @@ async function credentialCheck(message) {
   } else {
 
     // loggin calling error and terminate
-    console.log(red(`UA-NFT:`) +
-      ` ${result.asErr.toHuman()}`);
+    console.log(red(`UA-NFT`) + color.bold(`|RESTRICTED-AREA-SERVER: `) +
+      `${result.asErr.toHuman()}`);
   }
 
   const onchainPasshash = OUTPUT.ok.ok[0];
@@ -119,23 +119,23 @@ async function credentialCheck(message) {
 
         // logging custom error
         let error = OUTPUT.ok.err.custom.toString().replace(/0x/, '')
-        console.log(red(`UA-NFT:`) +
-          ` ${hexToString(error)}`);
+        console.log(red(`UA-NFT`) + color.bold(`|RESTRICTED-AREA-SERVER: `) +
+          `${hexToString(error)}`);
         process.send('bad-username');
         process.exit();
 
       } else {
           
         // if not custom then print Error enum type
-        console.log(red(`UA-NFT:`) +
-          ` ${OUTPUT.ok.err}`);
+        console.log(red(`UA-NFT`) + color.bold(`|RESTRICTED-AREA-SERVER: `) +
+          `${OUTPUT.ok.err}`);
       }
     }
   } else {
 
     // loggin calling error and terminate
-    console.log(red(`UA-NFT:`) +
-      ` ${result.asErr.toHuman()}`);
+    console.log(red(`UA-NFT`) + color.bold(`|RESTRICTED-AREA-SERVER: `) +
+      `${result.asErr.toHuman()}`);
   }
 
   const authStatus = OUTPUT.ok;
@@ -152,7 +152,7 @@ async function credentialCheck(message) {
       
   } catch(error) {
 
-    console.log(red(`UA-NFT: `) + error);
+    console.log(red(`UA-NFT`) + color.bold(`|RESTRICTED-AREA-SERVER: `) + error);
   }
 }
 
@@ -164,3 +164,5 @@ process.on('message', message => {
     process.exit(-1);
   });
 });
+
+

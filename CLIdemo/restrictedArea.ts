@@ -48,7 +48,8 @@ const io = new Server(httpsServer);
 
 io.on('connect', (socket) => {
 
-  console.log(blue(`\nUA-NFT: `) + `client application connected`);  
+  console.log(blue(`\nUA-NFT`) + color.bold(`|RESTRICTED-AREA-SERVER: `) +
+    `client application connected`);  
 
   socket.onAny((message, ...args) => {
 
@@ -74,28 +75,28 @@ io.on('connect', (socket) => {
 
         if (results == 'bad-username') {
 
-          console.log(red(`\nUA-NFT: `) +
+          console.log(red(`\nUA-NFT`) + color.bold(`|RESTRICTED-AREA-SERVER: `) +
             `login fail bad username for client on socket ` + cyan(`ID ${socket.id}`));
           socket.emit('bad-username');
           socket.disconnect();
 
         } else if (results == 'bad-password') {
 
-          console.log(red(`\nUA-NFT: `) +
+          console.log(red(`\nUA-NFT`) + color.bold(`|RESTRICTED-AREA-SERVER: `) +
             `login fail bad password for client on socket ` + cyan(`ID ${socket.id}`));
           socket.emit('bad-password');
           socket.disconnect();
 
         } else if (results == 'not-authenticated') {
 
-          console.log(red(`\nUA-NFT: `) +
+          console.log(red(`\nUA-NFT`) + color.bold(`|RESTRICTED-AREA-SERVER: `) +
             `login fail NFT not authenticated` + cyan(`ID ${socket.id}`));
           socket.emit('not-authenticated');
           socket.disconnect();
 
         } else if (results == 'access-granted') {
 
-          console.log(green(`\nUA-NFT: `) +
+          console.log(green(`\nUA-NFT`) + color.bold(`|RESTRICTED-AREA-SERVER: `) +
             `login success for client on socket ` + cyan(`ID ${socket.id}`));
           socket.emit('access-granted');
 
@@ -117,10 +118,10 @@ io.on('connect', (socket) => {
 
               somethingUseful = true;
 
-              console.log(magenta(`\nUA-NFT: `) +
+              console.log(magenta(`\nUA-NFT`) + color.bold(`|RESTRICTED-AREA-SERVER: `) +
                 cyan(`${username}`) + ` on socket ` + cyan(`ID ${socket.id}`) +
                 ` just did something extremely useful`);
-              console.log(magenta(`UA-NFT: `) +
+              console.log(magenta(`UA-NFT`) + color.bold(`|RESTRICTED-AREA-SERVER: `) +
                 color.bold(`somethingUseful = `) + green(`${somethingUseful}`));
 
               socket.emit('did-something-useful', somethingUseful);
@@ -130,10 +131,10 @@ io.on('connect', (socket) => {
 
               somethingUseful = false;
 
-              console.log(magenta(`\nUA-NFT: `) +
+              console.log(magenta(`\nUA-NFT`) + color.bold(`|RESTRICTED-AREA-SERVER: `) +
                 cyan(`${username}`) + ` on socket ` + cyan(`ID ${socket.id}`) +
                 ` just did something extremely useless`);
-              console.log(magenta(`UA-NFT: `) +
+              console.log(magenta(`UA-NFT`) + color.bold(`|RESTRICTED-AREA-SERVER: `) +
                 color.bold(`somethingUseful = `) + red(`${somethingUseful}`));
 
               socket.emit('did-something-useless', somethingUseful);
@@ -141,7 +142,7 @@ io.on('connect', (socket) => {
             // serve the client some cool graphics
             } else if (session == 'fetch-art') {
 
-              console.log(magenta(`\nUA-NFT: `) +
+              console.log(magenta(`\nUA-NFT`) + color.bold(`|RESTRICTED-AREA-SERVER: `) +
                 cyan(`${username}`) + ` on socket ` + cyan(`ID ${socket.id}`) +
                 ` just fetched ascii art`);
 
@@ -158,9 +159,9 @@ io.on('connect', (socket) => {
 
             } else if (session == 'logout') {
 
-              console.log(magenta(`\nUA-NFT: `) +
+              console.log(magenta(`\nUA-NFT`) + color.bold(`|RESTRICTED-AREA-SERVER: `) +
                 cyan(`${username}`) + ` on socket ` + cyan(`ID ${socket.id}`) +
-                `just logged out`);
+                ` just logged out`);
               socket.disconnect();
             }
 
@@ -182,6 +183,6 @@ io.on('connect', (socket) => {
 
 httpsServer.listen(SERVERPORT, () => {
   
-  console.log(blue(`\nUA-NFT: `) +
+  console.log(blue(`\nUA-NFT`) + color.bold(`|RESTRICTED-AREA-SERVER: `) +
     color.bold(`secure https server running from restricted area, ready for connecting applications`));  
 });
