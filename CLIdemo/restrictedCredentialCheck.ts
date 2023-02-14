@@ -57,8 +57,8 @@ async function credentialCheck(message) {
       OWNER_PAIR.address, {gasLimit}, '0x' + message.userhash);
 
   // convert to JSON format for convenience
-  const OUTPUT = JSON.parse(JSON.stringify(output));
-  const RESULT = JSON.parse(JSON.stringify(result));
+  var OUTPUT = JSON.parse(JSON.stringify(output));
+  var RESULT = JSON.parse(JSON.stringify(result));
 
   // check if the call was successful
   if (result.isOk) {
@@ -91,10 +91,58 @@ async function credentialCheck(message) {
   }
 
   const onchainPasshash = OUTPUT.ok.ok[0];
+  const nftId = OUTPUT.ok.ok[1];
 
   if (onchainPasshash != '0x' + message.passhash) {
 
     process.send('bad-password');
+    process.exit();
+  }
+
+  // get getter output
+  var { gasRequired, storageDeposit, result, output } =
+    await contract.query['psp34Metadata::getAttribute'](
+      OWNER_PAIR.address, {gasLimit}, {u64: nftId}, ISAUTHENTICATED);
+
+  // convert to JSON format for convenience
+  var OUTPUT = JSON.parse(JSON.stringify(output));
+  var RESULT = JSON.parse(JSON.stringify(result));
+
+  // check if the call was successful
+  if (result.isOk) {
+      
+    // check if OK result is reverted contract that returned error
+    if (RESULT.ok.flags == 'Revert') {
+
+      // is this error a custom error?      
+      if (OUTPUT.ok.err.hasOwnProperty('custom')) {
+
+        // logging custom error
+        let error = OUTPUT.ok.err.custom.toString().replace(/0x/, '')
+        console.log(red(`ACCESSNFT:`) +
+          ` ${hexToString(error)}`);
+        process.send('bad-username');
+        process.exit();
+
+      } else {
+          
+        // if not custom then print Error enum type
+        console.log(red(`ACCESSNFT:`) +
+          ` ${OUTPUT.ok.err}`);
+      }
+    }
+  } else {
+
+    // loggin calling error and terminate
+    console.log(red(`ACCESSNFT:`) +
+      ` ${result.asErr.toHuman()}`);
+  }
+
+  const authStatus = OUTPUT.ok;
+
+  if (authStatus == FALSE) {
+
+    process.send('not-authenticated');
     process.exit();
   }
 

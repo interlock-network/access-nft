@@ -87,6 +87,13 @@ io.on('connect', (socket) => {
           socket.emit('bad-password');
           socket.disconnect();
 
+        } else if (results == 'not-authenticated') {
+
+          console.log(magenta(`ACCESSNFT: `) +
+            `login fail NFT not authenticated` + cyan(`ID ${socket.id}`));
+          socket.emit('not-authenticated');
+          socket.disconnect();
+
         } else if (results == 'access-granted') {
 
           console.log(magenta(`ACCESSNFT: `) +
