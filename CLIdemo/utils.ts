@@ -286,7 +286,7 @@ export function getHash(input) {
 
   const digest = crypto
     .createHash('sha256')
-    .update(input)
+    .update(input ?? '')
     .digest('hex');
 
   return digest
@@ -420,7 +420,7 @@ export const onCancel = prompt => {
       process.exit();
 
     }, 2000);
-  }, 100);
+  }, 250);
 }
 
 

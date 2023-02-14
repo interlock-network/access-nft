@@ -204,7 +204,6 @@ io.on('connection', (socket) => {
       const userhash = args[0][1];
       const passhash = args[0][2];
 
-
       // store wallet -> socketID in working memory
       if (!walletInfo.has(wallet)) {
       
@@ -230,13 +229,13 @@ io.on('connection', (socket) => {
 
       } else {
 
-        const waitingWallet = walletInfo.get(wallet);
+        let waitingWallet = walletInfo.get(wallet);
         const waitingNftId = waitingWallet[3];
+        waitingWallet = [socket.id, userhash, passhash, waitingNftId];
+        walletInfo.set(wallet, waitingWallet);
         io.to(socket.id).emit('already-waiting', [waitingNftId]);
-        socket.disconnect();
         console.log(red(`ACCESSNFT:`) +
           ` already waiting for wallet ` + magenta(`${wallet}`) + ` to return micropayment`);
-        return
       }
     } else if (message == 'mint-nft') {
 

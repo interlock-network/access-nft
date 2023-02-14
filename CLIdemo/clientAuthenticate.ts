@@ -37,7 +37,8 @@ import {
   getHash,
   returnToMain,
   hasCollection,
-  isValidSubstrateAddress
+  isValidSubstrateAddress,
+  onCancel
 } from "./utils";
 
 const WALLET = JSON.parse(readFileSync('.wallet.json').toString());
@@ -71,7 +72,7 @@ socket.on('connect', async () => {
   }
 
   // second prompt: username
-  (async () => {
+  await (async () => {
 
 
     console.log(red(`ACCESSNFT: `) +
@@ -92,7 +93,7 @@ socket.on('connect', async () => {
     console.log(color.bold.magenta(`ACCESSNFT: `) +
       color.bold(`AT NO POINT ARE YOUR CREDENTIALS STORED IN A DATABASE.`));
     console.log(color.bold.magenta(`ACCESSNFT: `) +
-      color.bold(`THEY ARE ANONYMIZED AND STORED ON THE BLOCKCHAIN.\n\n\n`));
+      color.bold(`THEY ARE ANONYMIZED AND STORED ON THE BLOCKCHAIN.\n\n`));
 
 
     // loop prompt until valid username
@@ -106,7 +107,7 @@ socket.on('connect', async () => {
         message: 'Please choose a username with 5 or more characters and no spaces.',
         validate: username => !isValidUsername(username) ?
           red(`ACCESSNFT: `) + `Too short or contains spaces.` : true
-      });
+      }, { onCancel });
       username = responseUsername.username;
       console.log('');
 
@@ -143,9 +144,9 @@ socket.on('connect', async () => {
             name: 'passwordVerify',
             message: 'Please verify your password.',
           }
-        ]);
-        passwordVerify = responsePassword.passwordVerify;
-        password = responsePassword.password;
+        ], { onCancel });
+        passwordVerify = responsePassword.passwordVerify ?? 'passwordVerify';
+        password = responsePassword.password ?? 'password';
         console.log('');
 
         if (password != passwordVerify) {
@@ -201,21 +202,32 @@ socket.onAny(async (message, ...args) => {
         type: 'confirm',
         name: 'choice',
         message: 'Do you authorize this application to transfer 1 pico TZERO for verification purposes?',
-      });
+      }, { onCancel });
       const choice = responseChoice.choice
       console.log('');
 
       if (choice == false) {
 
-        process.send('done');
-        process.exit();
+        console.clear();
+        console.log(red(`\n       ABORTING REGISTRATION. WE WILL NEED YOU TO RETURN THE VERIFICATION `));
+        console.log(red(`       MICROPAYMENT BEFORE YOU TRY TO REGISTER A DIFFERENT NFT. REPEAT THE`));
+        console.log(red(`       REGISTRATION PROCESS WHEN READY. YOU MAY CHOOSE A DIFFERENT USERNAME`));
+        console.log(red(`       AND PASSWORD IF YOU PLEASE.`));
+
+        setTimeout( () => {
+
+          process.send('done');
+          process.exit();
+      
+        }, 10000);
       }
+      if (choice == true) {
+
+        // establish connection with blockchain
+        const [ api, contract ] = await setupSession('authenticated');
       
-      // establish connection with blockchain
-      const [ api, contract ] = await setupSession('authenticated');
-      
-      await transferMicropayment(api);
-    
+        await transferMicropayment(api);
+      }
     })();
   } else if (message == 'already-waiting') {
 
@@ -237,21 +249,32 @@ socket.onAny(async (message, ...args) => {
         type: 'confirm',
         name: 'choice',
         message: 'Do you authorize this application to transfer 1 pico TZERO for verification purposes?',
-      });
+      }, { onCancel });
       const choice = responseChoice.choice
       console.log('');
 
       if (choice == false) {
 
-        process.send('done');
-        process.exit();
+        console.clear();
+        console.log(red(`\n       ABORTING REGISTRATION. WE WILL NEED YOU TO RETURN THE VERIFICATION `));
+        console.log(red(`       MICROPAYMENT BEFORE YOU TRY TO REGISTER A DIFFERENT NFT. REPEAT THE`));
+        console.log(red(`       REGISTRATION PROCESS WHEN READY. YOU MAY CHOOSE A DIFFERENT USERNAME`));
+        console.log(red(`       AND PASSWORD IF YOU PLEASE.`));
+
+        setTimeout( () => {
+
+          process.send('done');
+          process.exit();
+      
+        }, 10000);
       }
+      if (choice == true) {
+
+        // establish connection with blockchain
+        const [ api, contract ] = await setupSession('authenticated');
       
-      // establish connection with blockchain
-      const [ api, contract ] = await setupSession('authenticate');
-      
-      await transferMicropayment(api);
-    
+        await transferMicropayment(api);
+      }
     })();
   } else if (message == 'payment-received') {
 
@@ -284,12 +307,12 @@ socket.onAny(async (message, ...args) => {
     const passhash = args[0][2];
     
     console.log(green(`ACCESSNFT: `) +
-      color.bold(`Your anonymized NFT access credentials have been stored on the blockchain.\n\n\n`));
+      color.bold(`Your anonymized NFT access credentials have been stored on the blockchain.\n\n\n\n\n`));
 
     console.log(green(`ACCESSNFT: `) +
       color.bold(`You have successfully registered your universal access NFT`) + red(` ID ${nftId}`));
     console.log(green(`ACCESSNFT: `) +
-      color.bold(`and may now login to the restricted access area!!!\n\n\n`));
+      color.bold(`and may now login to the restricted access area!!!\n`));
 
     console.log(red(`ACCESSNFT: `) +
       color.bold(`!!! REMINDER WARNING !!!\n`));
@@ -309,7 +332,7 @@ socket.onAny(async (message, ...args) => {
     console.log(color.bold.magenta(`ACCESSNFT: `) +
       color.bold(`AT NO POINT ARE YOUR CREDENTIALS STORED IN A DATABASE.`));
     console.log(color.bold.magenta(`ACCESSNFT: `) +
-      color.bold(`THEY ARE ANONYMIZED AND STORED ON THE BLOCKCHAIN.\n\n\n`));
+      color.bold(`THEY ARE ANONYMIZED AND STORED ON THE BLOCKCHAIN.\n\n`));
 
     console.log(color.bold.magenta(`ACCESSNFT: `) +
       color.bold(`USERNAME STORED ON BLOCKCHAIN AS SHA256 HASH`));
@@ -330,7 +353,7 @@ socket.onAny(async (message, ...args) => {
       color.bold(`STORED ON BLOCKCHAIN THAT WE GENERATED IN THIS REGISTRATION SESSION.`));
 
     console.log(color.bold.magenta(`ACCESSNFT: `) +
-      color.bold(`AT NO POINT ARE YOUR CREDENTIALS STORED IN A DATABASE.\n\n\n`));
+      color.bold(`AT NO POINT ARE YOUR CREDENTIALS STORED IN A DATABASE.\n\n`));
 
     await returnToMain('return to main menu');
 
