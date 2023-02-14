@@ -50,7 +50,7 @@ socket.on('connect', async () => {
     var responseUsername = await prompts({
       type: 'text',
       name: 'username',
-      message: 'Please enter your username.',
+      message: 'Please enter your username to log into restricted area.',
       validate: username => !isValidUsername(username) ?
         red(`UA-NFT: `) + `Too short or contains spaces.` : true
     }, { onCancel });
@@ -146,8 +146,8 @@ socket.on('connect', async () => {
             socket.on('did-something-useful', (result) => {
 
               console.log(
-                green(`You just did something useful by setting `) +
-                blue(`somethingUseful = true`) + green(` in the restricted area!!!\n`));
+                color.bold(`You just did something useful by setting `) +
+                blue(`somethingUseful = `) + green(`${result}`) + color.bold(` in the restricted area!!!\n`));
 
               (async () => {
 
@@ -158,9 +158,7 @@ socket.on('connect', async () => {
                   choices: [{ title: 'logout now', value: 'logout' }]
                 });
                
-                console.log('');
                 socket.emit('logout');
-                console.log('goodbye\n');
                 process.send('done');
                 process.exit();
               })();
@@ -169,8 +167,8 @@ socket.on('connect', async () => {
             socket.on('did-something-useless', (result) => {
 
               console.log(
-                red(`You just did something useless by setting `) +
-                blue(`somethingUseful = false`) + red(` in the restricted area!!!\n`));
+                color.bold(`You just did something useless by setting `) +
+                blue(`somethingUseful = `) + red(`${result}`) + color.bold(` in the restricted area!!!\n`));
 
               (async () => {
 
@@ -181,9 +179,7 @@ socket.on('connect', async () => {
                   choices: [{ title: 'logout now', value: 'logout' }]
                 });
                
-                console.log('');
                 socket.emit('logout');
-                console.log('goodbye\n');
                 process.send('done');
                 process.exit();
               })();
