@@ -31,9 +31,9 @@ async function deleteWallet() {
 
   try {
 
-    console.log(red(`\nUA-NFT: `) +
+    console.log(red(`\nUA-NFT`) + color.bold(`|CLIENT-APP: `) +
       color.bold(`Do you really wish to delete the wallet you associated with account address`));
-    console.log(red(`UA-NFT: `) +
+    console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
       magenta(`${CLIENT_ADDRESS}\n`) + `?\n`);
             
     // prompt
@@ -58,9 +58,9 @@ async function deleteWallet() {
   
       fs.writeFileSync('.wallet.json', '');
 
-      console.log(green(`UA-NFT: `) +
+      console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
         color.bold(`You deleted your wallet.`));
-      console.log(green(`UA-NFT: `) +
+      console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
         color.bold(`You will need to re-add a wallet if you want to continue using this application.\n`));
   
       await returnToMain('return to main menu to add new wallet or quit');
@@ -68,7 +68,7 @@ async function deleteWallet() {
     })();
   } catch(error) {
 
-    console.log(red(`UA-NFT: `) + error);
+    console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) + error);
 
     process.send('program-error');
     process.exit();
