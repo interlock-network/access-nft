@@ -36,8 +36,8 @@ async function setCredential(socket, message) {
     // establish connection with blockchain
     const [ api, contract ] = await setupSession('setCredential');
 
-    console.log(green(`UA-NFT:`) +
-      ` setting username and password credentials for NFT ` + red(`ID ${message.id}`));
+    console.log(green(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
+      `setting username and password credentials for NFT ` + red(`ID ${message.id}`));
 
     // call setCredential tx
     await contractDoer(
@@ -56,7 +56,7 @@ async function setCredential(socket, message) {
 
   } catch(error) {
 
-    console.log(red(`UA-NFT: `) + error);
+    console.log(red(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) + error);
 
     discoSocket(socket, 'setCredential');
     process.send('setCredential-process-error');
@@ -70,8 +70,8 @@ process.on('message', message => {
   var socket = io('http://localhost:3000');
   socket.on('connect', () => {
 
-    console.log(blue(`UA-NFT:`) +
-      ` setCredential socket connected, ID ` + cyan(`${socket.id}`));
+    console.log(blue(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
+      `setCredential socket connected, ID ` + cyan(`${socket.id}`));
     
     setCredential(socket, message).catch((error) => {
 

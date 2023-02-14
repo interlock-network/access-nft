@@ -34,8 +34,8 @@ async function verifyAddress(address, socket) {
 
   try {
 
-    console.log(green(`UA-NFT:`) +
-      ` initiating authentication process for address ` + magenta(`${address}`));
+    console.log(green(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
+      `initiating authentication process for address ` + magenta(`${address}`));
 
     // establish connection with blockchain
     const [ api, contract ] = await setupSession('verifyAddress');
@@ -44,10 +44,10 @@ async function verifyAddress(address, socket) {
     let notAuthenticated = false;
     let notAuthenticatedId;
 
-    console.log(yellow(`UA-NFT:`) +
-      ` checking if waiting for micropayment from address ` + magenta(`${address}`));
-    console.log(yellow(`UA-NFT:`) +
-      ` and checking that address contains unauthenticated nfts`);
+    console.log(yellow(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
+      `checking if waiting for micropayment from address ` + magenta(`${address}`));
+    console.log(yellow(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
+      `and checking that address contains unauthenticated nfts`);
 
     // get nft collection for address
     var [ gasRequired, storageDepositRequired, RESULT_collection, OUTPUT_collection ] =
@@ -88,8 +88,8 @@ async function verifyAddress(address, socket) {
     // if after checking OUTPUT_collection there are no nfts to authenticate
     if (notAuthenticated == false) {
 
-      console.log(red(`UA-NFT:`) +
-        ` all nfts in address ` + magenta(`${address}`) + ` already authenticated`);
+      console.log(red(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
+        `all nfts in address ` + magenta(`${address}`) + ` already authenticated`);
 
       terminateProcess(socket, 'verifyAddress', 'all-nfts-authenticated', []);
 
@@ -106,7 +106,7 @@ async function verifyAddress(address, socket) {
     }
   } catch(error) {
 
-    console.log(red(`UA-NFT: `) + error);
+    console.log(red(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) + error);
     terminateProcess(socket, 'verifyAddress', 'program-error', []);
   }
 }
@@ -118,8 +118,8 @@ process.on('message', address => {
   var socket = io('http://localhost:3000');
   socket.on('connect', () => {
 
-    console.log(blue(`UA-NFT:`) +
-      ` verifyAddress socket connected, ID ` + cyan(`${socket.id}`));
+    console.log(blue(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
+      `verifyAddress socket connected, ID ` + cyan(`${socket.id}`));
     
     verifyAddress(address, socket).catch((error) => {
 
