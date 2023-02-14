@@ -40,7 +40,7 @@ const OWNER_ADDRESS = process.env.OWNER_ADDRESS;
 var socket = io('http://localhost:3000');
 socket.on('connect', async () => {
 
-  console.log(blue(`ACCESSNFT:`) +
+  console.log(blue(`UA-NFT:`) +
     ` accessApp socket connected, ID ` + cyan(`${socket.id}\n`));
    
   // confirm mint process begining
@@ -74,16 +74,16 @@ socket.onAny(async (message, ...args) => {
     const price = args[0][0];
     const adjustedPrice = price/1000000000000;
 
-    console.log(red(`ACCESSNFT: `) +
+    console.log(red(`UA-NFT: `) +
       color.bold(`Server is waiting on your payment.\n`));
 
-    console.log(yellow(`ACCESSNFT: `) +
+    console.log(yellow(`UA-NFT: `) +
       color.bold(`The current price of a universal access NFT to our restricted area is `) +
       red(`${adjustedPrice} TZERO`));
-    console.log(yellow(`ACCESSNFT: `) +
+    console.log(yellow(`UA-NFT: `) +
       color.bold(`Do you still wish to proceed, to purchase and transfer`) +
       red(` ${adjustedPrice} TZERO `) + color.bold(`to NFT contract owner's account`));
-    console.log(yellow(`ACCESSNFT: `) +
+    console.log(yellow(`UA-NFT: `) +
       color.bold.magenta(`${OWNER_ADDRESS}`) + `?\n`);
 
     // verify mint intention, at given price
@@ -118,9 +118,9 @@ socket.onAny(async (message, ...args) => {
         // Sign and send the transaction using our account
         const hash = await transfer.signAndSend(CLIENT_PAIR);
 
-        console.log(green(`ACCESSNFT: `) +
+        console.log(green(`UA-NFT: `) +
           color.bold(`Transfer transaction finalized.`));
-        console.log(green(`ACCESSNFT: `) +
+        console.log(green(`UA-NFT: `) +
           color.bold(`Transaction hash for record: `) + yellow(`${hash}\n`));
       }
      })();
@@ -131,10 +131,10 @@ socket.onAny(async (message, ...args) => {
     const adjustedPrice = price/1000000000000;
 
     // minting tx is in progress
-    console.log(green(`ACCESSNFT: `) +
+    console.log(green(`UA-NFT: `) +
       color.bold(`Payment received!!!`) +
       red(` ${adjustedPrice} TZERO`));
-    console.log(yellow(`ACCESSNFT: `) +
+    console.log(yellow(`UA-NFT: `) +
       color.bold(`Please stand by while we mint your new universal access NFT...\n`));
 
   // mint complete
@@ -144,13 +144,13 @@ socket.onAny(async (message, ...args) => {
     const nftId = args[0][0].u64;
 
     // success
-    console.log(green(`\n\nACCESSNFT: `) +
+    console.log(green(`\n\nUA-NFT: `) +
       color.bold(`Universal Access NFT successfully minted!!!\n`));
 
-    console.log(green(`ACCESSNFT: `) +
+    console.log(green(`UA-NFT: `) +
       color.bold(`Your new Universal Access NFT is `) +
       red(`ID ${nftId}`) + color.bold(`!\n`));
-    console.log(color.bold.magenta(`\n\nACCESSNFT: `) +
+    console.log(color.bold.magenta(`\n\nUA-NFT: `) +
       color.bold(`Check out your collection to see your NFT authentication status.\n`));
 
     await returnToMain('return to main menu to authenticate or display your NFT');

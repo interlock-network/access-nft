@@ -38,7 +38,7 @@ var socket = io('https://localhost:8443', {
 });
 socket.on('connect', async () => {
 
-  console.log(blue(`\nACCESSNFT:`) +
+  console.log(blue(`\nUA-NFT:`) +
     ` accessApp socket connected, ID ` + cyan(`${socket.id}\n`));
 
   // begin prompt tree
@@ -52,7 +52,7 @@ socket.on('connect', async () => {
       name: 'username',
       message: 'Please enter your username.',
       validate: username => !isValidUsername(username) ?
-        red(`ACCESSNFT: `) + `Too short or contains spaces.` : true
+        red(`UA-NFT: `) + `Too short or contains spaces.` : true
     }, { onCancel });
     const username = responseUsername.username;
     console.log('');
@@ -66,13 +66,13 @@ socket.on('connect', async () => {
         name: 'password',
         message: 'Please enter your password.',
         validate: password => (password.length < 8) ?
-          red(`ACCESSNFT: `) + `Password invalid.` : true
+          red(`UA-NFT: `) + `Password invalid.` : true
       }, { onCancel });
       const password = responsePassword.password;
       console.log('');
       
       if (password != undefined) {
-        console.log(green(`ACCESSNFT: `) +
+        console.log(green(`UA-NFT: `) +
           color.bold(`submitting login information over secure connection for verification\n`));
 
         socket.emit('request-access', username, password);
@@ -81,7 +81,7 @@ socket.on('connect', async () => {
 
           if (message == 'bad-username') {
 
-            console.log(red(`ACCESSNFT: `) +
+            console.log(red(`UA-NFT: `) +
               `username is incorrect or does not exist...please try again`);
 
             setTimeout( () => {
@@ -92,7 +92,7 @@ socket.on('connect', async () => {
   
           } else if (message == 'bad-password') {
 
-            console.log(red(`ACCESSNFT: `) +
+            console.log(red(`UA-NFT: `) +
                `password is incorrect...please try again`);
 
             setTimeout( () => {
@@ -103,9 +103,9 @@ socket.on('connect', async () => {
 
           } else if (message == 'not-authenticated') {
 
-            console.log(red(`\nACCESSNFT: `) +
+            console.log(red(`\nUA-NFT: `) +
               color.bold(`NFT must be authenticated and credentials reregistered first.`));
-            console.log(red(`ACCESSNFT: `) +
+            console.log(red(`UA-NFT: `) +
               color.bold(`This means the NFT was either transfered to new owner, or reset.\n`));
 
             await returnToMain('If you own NFT, return to main to authenticate');

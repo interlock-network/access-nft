@@ -34,7 +34,7 @@ async function verifyWallet(wallet, socket) {
 
   try {
 
-    console.log(green(`ACCESSNFT:`) +
+    console.log(green(`UA-NFT:`) +
       ` initiating authentication process for wallet ` + magenta(`${wallet}`));
 
     // establish connection with blockchain
@@ -44,9 +44,9 @@ async function verifyWallet(wallet, socket) {
     let notAuthenticated = false;
     let notAuthenticatedId;
 
-    console.log(yellow(`ACCESSNFT:`) +
+    console.log(yellow(`UA-NFT:`) +
       ` checking if waiting for micropayment from wallet ` + magenta(`${wallet}`));
-    console.log(yellow(`ACCESSNFT:`) +
+    console.log(yellow(`UA-NFT:`) +
       ` and checking that wallet contains unauthenticated nfts`);
 
     // get nft collection for wallet
@@ -88,7 +88,7 @@ async function verifyWallet(wallet, socket) {
     // if after checking OUTPUT_collection there are no nfts to authenticate
     if (notAuthenticated == false) {
 
-      console.log(red(`ACCESSNFT:`) +
+      console.log(red(`UA-NFT:`) +
         ` all nfts in wallet ` + magenta(`${wallet}`) + ` already authenticated`);
 
       terminateProcess(socket, 'verifyWallet', 'all-nfts-authenticated', []);
@@ -106,7 +106,7 @@ async function verifyWallet(wallet, socket) {
     }
   } catch(error) {
 
-    console.log(red(`ACCESSNFT: `) + error);
+    console.log(red(`UA-NFT: `) + error);
     terminateProcess(socket, 'verifyWallet', 'program-error', []);
   }
 }
@@ -118,7 +118,7 @@ process.on('message', wallet => {
   var socket = io('http://localhost:3000');
   socket.on('connect', () => {
 
-    console.log(blue(`ACCESSNFT:`) +
+    console.log(blue(`UA-NFT:`) +
       ` verifyWallet socket connected, ID ` + cyan(`${socket.id}`));
     
     verifyWallet(wallet, socket).catch((error) => {

@@ -47,23 +47,23 @@ socket.on('connect', async () => {
   // establish connection with blockchain
   const [ api, contract ] = await setupSession('setAuthenticated');
 
-  console.log(color.bold.magenta(`ACCESSNFT: `) +
+  console.log(color.bold.magenta(`UA-NFT: `) +
     color.bold(`Reminder... You are responsible for remembering the username password pairs`));
-  console.log(color.bold.magenta(`ACCESSNFT: `) +
+  console.log(color.bold.magenta(`UA-NFT: `) +
     color.bold(`associated with each authenticated universal access NFT.\n`));
-  console.log(color.bold.magenta(`ACCESSNFT: `) +
+  console.log(color.bold.magenta(`UA-NFT: `) +
     color.bold(`This is because username password pairs are not stored in a traditional database.`));
-  console.log(color.bold.magenta(`ACCESSNFT: `) +
+  console.log(color.bold.magenta(`UA-NFT: `) +
     color.bold(`We only store the obfuscated anonymized username and password hashes on the blockchain`));
-  console.log(color.bold.magenta(`ACCESSNFT: `) +
+  console.log(color.bold.magenta(`UA-NFT: `) +
     color.bold(`for the purpose of comparing the hashes of credentials you provide to our secure restricted`));
-  console.log(color.bold.magenta(`ACCESSNFT: `) +
+  console.log(color.bold.magenta(`UA-NFT: `) +
     color.bold(`access area server when you log in.\n`));
     
   // if valid, check to see if wallet has nft collection
   if (!(await hasCollection(api, contract, CLIENT_ADDRESS))) {
         
-    console.log(red(`ACCESSNFT: `) +
+    console.log(red(`UA-NFT: `) +
       color.bold(`This wallet has no universal access NFT collection.`) +
       color.bold(`  Please return to main menu to mint.\n`));
 

@@ -71,7 +71,7 @@ async function credentialCheck(message) {
 
         // logging custom error
         let error = OUTPUT.ok.err.custom.toString().replace(/0x/, '')
-        console.log(red(`ACCESSNFT:`) +
+        console.log(red(`UA-NFT:`) +
           ` ${hexToString(error)}`);
         process.send('bad-username');
         process.exit();
@@ -79,14 +79,14 @@ async function credentialCheck(message) {
       } else {
           
         // if not custom then print Error enum type
-        console.log(red(`ACCESSNFT:`) +
+        console.log(red(`UA-NFT:`) +
           ` ${OUTPUT.ok.err}`);
       }
     }
   } else {
 
     // loggin calling error and terminate
-    console.log(red(`ACCESSNFT:`) +
+    console.log(red(`UA-NFT:`) +
       ` ${result.asErr.toHuman()}`);
   }
 
@@ -119,7 +119,7 @@ async function credentialCheck(message) {
 
         // logging custom error
         let error = OUTPUT.ok.err.custom.toString().replace(/0x/, '')
-        console.log(red(`ACCESSNFT:`) +
+        console.log(red(`UA-NFT:`) +
           ` ${hexToString(error)}`);
         process.send('bad-username');
         process.exit();
@@ -127,14 +127,14 @@ async function credentialCheck(message) {
       } else {
           
         // if not custom then print Error enum type
-        console.log(red(`ACCESSNFT:`) +
+        console.log(red(`UA-NFT:`) +
           ` ${OUTPUT.ok.err}`);
       }
     }
   } else {
 
     // loggin calling error and terminate
-    console.log(red(`ACCESSNFT:`) +
+    console.log(red(`UA-NFT:`) +
       ` ${result.asErr.toHuman()}`);
   }
 
@@ -152,7 +152,7 @@ async function credentialCheck(message) {
       
   } catch(error) {
 
-    console.log(red(`ACCESSNFT: `) + error);
+    console.log(red(`UA-NFT: `) + error);
   }
 }
 

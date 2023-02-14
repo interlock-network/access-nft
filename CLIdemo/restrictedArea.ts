@@ -48,7 +48,7 @@ const io = new Server(httpsServer);
 
 io.on('connect', (socket) => {
 
-  console.log(magenta(`ACCESSNFT: `) + `client application connected`);  
+  console.log(magenta(`UA-NFT: `) + `client application connected`);  
 
   socket.onAny((message, ...args) => {
 
@@ -75,28 +75,28 @@ io.on('connect', (socket) => {
 
         if (results == 'bad-username') {
 
-          console.log(magenta(`ACCESSNFT: `) +
+          console.log(magenta(`UA-NFT: `) +
             `login fail bad username for client on socket ` + cyan(`ID ${socket.id}`));
           socket.emit('bad-username');
           socket.disconnect();
 
         } else if (results == 'bad-password') {
 
-          console.log(magenta(`ACCESSNFT: `) +
+          console.log(magenta(`UA-NFT: `) +
             `login fail bad password for client on socket ` + cyan(`ID ${socket.id}`));
           socket.emit('bad-password');
           socket.disconnect();
 
         } else if (results == 'not-authenticated') {
 
-          console.log(magenta(`ACCESSNFT: `) +
+          console.log(magenta(`UA-NFT: `) +
             `login fail NFT not authenticated` + cyan(`ID ${socket.id}`));
           socket.emit('not-authenticated');
           socket.disconnect();
 
         } else if (results == 'access-granted') {
 
-          console.log(magenta(`ACCESSNFT: `) +
+          console.log(magenta(`UA-NFT: `) +
             `login success for client on socket ` + cyan(`ID ${socket.id}`));
           socket.emit('access-granted');
 
@@ -117,7 +117,7 @@ io.on('connect', (socket) => {
               if (session == 'do-something-useful') {
 
                 somethingUseful = true;
-                console.log(magenta(`ACCESSNFT: `) +
+                console.log(magenta(`UA-NFT: `) +
                   `${username} on socket ` + cyan(`ID ${socket.id}`) +
                   `just did something extremely useful`);
                 socket.emit('did-something-useful', somethingUseful);
@@ -126,7 +126,7 @@ io.on('connect', (socket) => {
               } else if (session == 'do-something-useless') {
 
                 somethingUseful = false;
-                console.log(magenta(`ACCESSNFT: `) +
+                console.log(magenta(`UA-NFT: `) +
                   `${username} on socket ` + cyan(`ID ${socket.id}`) +
                   `just did something extremely useless`);
                 socket.emit('did-something-useless', somethingUseful);
@@ -134,7 +134,7 @@ io.on('connect', (socket) => {
               // serve the client some cool graphics
               } else if (session == 'fetch-art') {
 
-                console.log(magenta(`ACCESSNFT: `) +
+                console.log(magenta(`UA-NFT: `) +
                   `${username} on socket ` + cyan(`ID ${socket.id}`) +
                   `just fetched ascii art`);
 
@@ -151,7 +151,7 @@ io.on('connect', (socket) => {
 
               } else if (session == 'logout') {
 
-                console.log(magenta(`ACCESSNFT: `) +
+                console.log(magenta(`UA-NFT: `) +
                   `${username} on socket ` + cyan(`ID ${socket.id}`) +
                   `just logged out`);
                 socket.disconnect();
@@ -168,6 +168,6 @@ io.on('connect', (socket) => {
 
 httpsServer.listen(SERVERPORT, () => {
   
-  console.log(magenta(`ACCESSNFT: `) +
+  console.log(magenta(`UA-NFT: `) +
     color.bold(`https server running from restricted area`));  
 });

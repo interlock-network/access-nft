@@ -66,7 +66,7 @@ async function transferListener(socket) {
   const [ api, contract ] = await setupSession('authenticateWallet');
   
   // successful authenticateWallet initialization
-  console.log(green(`ACCESSNFT:`) +
+  console.log(green(`UA-NFT:`) +
     color.bold(` core access authentication service initialized`));
   console.log('');
   console.log(color.bold(`           ! please initialize or connect NFT access application`));
@@ -96,9 +96,9 @@ async function transferListener(socket) {
         if ( sendingAddress == OWNER_ADDRESS &&
           transferAmount == AMOUNT) {
 
-          console.log(green(`ACCESSNFT:`) +
+          console.log(green(`UA-NFT:`) +
             color.bold(` authentication transfer complete to address `) + magenta(`${event.data[1]}`));
-          console.log(yellow(`ACCESSNFT:`) +
+          console.log(yellow(`UA-NFT:`) +
             ` waiting on returning verification transfer to address ` + magenta(`${event.data[1]}`));
         //
         // from verifying address
@@ -111,9 +111,9 @@ async function transferListener(socket) {
           const passhash = waitingQueue.get(clientAddress)[2];
           const nftId = waitingQueue.get(clientAddress)[3];
 
-          console.log(green(`ACCESSNFT:`) +
+          console.log(green(`UA-NFT:`) +
             color.bold(` verification transfer complete from address `) + magenta(`${clientAddress}`));
-          console.log(green(`ACCESSNFT:`) +
+          console.log(green(`UA-NFT:`) +
             ` address ` +  magenta(`${clientAddress}`) + ` is verified`);
 
           // notify the client that their transfer was recorded
@@ -152,9 +152,9 @@ async function transferListener(socket) {
           const recipient = sendingAddress.toHuman();
           const clientSocketId = mintQueue.get(recipient)[0];
 
-          console.log(green(`ACCESSNFT:`) +
+          console.log(green(`UA-NFT:`) +
             color.bold(` NFT payment transfer complete from address `) + magenta(`${recipient}`));
-          console.log(green(`ACCESSNFT:`) +
+          console.log(green(`UA-NFT:`) +
             ` minting NFT for address ` +  magenta(`${recipient}`));
 
           // notify the client that their transfer was recorded
@@ -222,7 +222,7 @@ io.on('connection', (socket) => {
             io.to(socket.id).emit('all-nfts-authenticated');
             waitingQueue.delete(address);
 
-            console.log(red(`ACCESSNFT:`) +
+            console.log(red(`UA-NFT:`) +
               magenta(`${address} `) + `has no unauthenticated nfts`);
 
           } else {
@@ -242,7 +242,7 @@ io.on('connection', (socket) => {
 
         io.to(socket.id).emit('already-waiting', [waitingNftId]);
 
-        console.log(red(`ACCESSNFT:`) +
+        console.log(red(`UA-NFT:`) +
           ` already waiting for address ` + magenta(`${address}`) + ` to return micropayment`);
       }
     } else if (message == 'mint-nft') {
@@ -256,7 +256,7 @@ io.on('connection', (socket) => {
 
       io.to(socket.id).emit('pay-to-mint', [NFTPRICE]);
 
-      console.log(green(`ACCESSNFT:`) +
+      console.log(green(`UA-NFT:`) +
         ` added ` + magenta(`${recipient} `) + `to mintQueue...waiting on payment`);
 
       // remove recipient from mint queue after one minute of no payment receipt
@@ -267,8 +267,8 @@ io.on('connection', (socket) => {
         if (mintQueue.has(recipient)) {
         
           mintQueue.delete(recipient);
-          console.log(red(`ACCESSNFT: `) + 
-            `mint recipient ${recipient} took too long to pay -- removed from mint queue`);
+          console.log(red(`UA-NFT: `) + 
+            `mint recipient ` + magenta(`${recipient}`) + ` took too long to pay -- removed from mint queue`);
         }
       }, 60000); // one minute delay
 
@@ -296,7 +296,7 @@ io.on('connection', (socket) => {
 // fire up http server
 const PORT = 3000;
 httpServer.listen(PORT, () => {
-  console.log(blue(`ACCESSNFT:`) +
+  console.log(blue(`UA-NFT:`) +
     ` listening on ` + cyan(`*:${PORT}`));
 });
 
@@ -306,7 +306,7 @@ var ioclient = require('socket.io-client');
 var socket = ioclient(`http://localhost:${PORT}`);
 socket.on('connect', () => {
 
-  console.log(blue(`ACCESSNFT:`) +
+  console.log(blue(`UA-NFT:`) +
     ` verifyWallet socket connected, ID ` + cyan(`${socket.id}`));
     
   // initiate async function above that listens for transfer events

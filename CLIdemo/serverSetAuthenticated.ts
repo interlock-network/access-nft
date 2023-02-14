@@ -96,7 +96,7 @@ async function setAuthenticated(wallet, socket) {
 
   } catch(error) {
 
-    console.log(red(`ACCESSNFT: `) + error);
+    console.log(red(`UA-NFT: `) + error);
 
     discoSocket(socket, 'setCredential')
     process.send('program-error');
@@ -110,7 +110,7 @@ process.on('message', wallet => {
   var socket = io('http://localhost:3000');
   socket.on('connect', () => {
 
-    console.log(blue(`ACCESSNFT:`) +
+    console.log(blue(`UA-NFT:`) +
       ` setAuthenticated socket connected, ID ` + cyan(`${socket.id}`));
     
     setAuthenticated(wallet, socket).catch((error) => {
