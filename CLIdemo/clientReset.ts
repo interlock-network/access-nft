@@ -24,7 +24,8 @@ import {
   returnToMain,
   contractGetter,
   isValidSubstrateAddress,
-  hasCollection
+  hasCollection,
+  onCancel
 } from "./utils";
 
 // specify color formatting
@@ -148,53 +149,56 @@ socket.on('connect', async () => {
         message: 'Now, enter the ID of the NFT credentials you would like to reset.\n',
         validate: id => !reset.includes(id) ?
           red(`ACCESSNFT: `) + `Not a NFT you can reset right now. Reenter ID.` : true
-      });
+      }, { onCancel });
       const id = responseId.id;
       console.log('');
 
-      // create key pair for owner
-      const keyring = new Keyring({type: 'sr25519'});
-      const CLIENT_PAIR = keyring.addFromUri(CLIENT_MNEMONIC);
+      if (id != undefined) {
+      
+        // create key pair for owner
+        const keyring = new Keyring({type: 'sr25519'});
+        const CLIENT_PAIR = keyring.addFromUri(CLIENT_MNEMONIC);
 
-      // define special type for gas weights
-      type WeightV2 = InstanceType<typeof WeightV2>;
-      const gasLimit = api.registry.createType('WeightV2', {
-        refTime: refTimeLimit,
-        proofSize: proofSizeLimit,
-      }) as WeightV2;
+        // define special type for gas weights
+        type WeightV2 = InstanceType<typeof WeightV2>;
+        const gasLimit = api.registry.createType('WeightV2', {
+          refTime: refTimeLimit,
+          proofSize: proofSizeLimit,
+        }) as WeightV2;
 
-      // too much gas required?
-      if (gasRequired > gasLimit) {
+        // too much gas required?
+        if (gasRequired > gasLimit) {
 
-         // logging and terminate
-         console.log(red(`ACCESSNFT:`) +
-           ' tx aborted, gas required is greater than the acceptable gas limit.');
-      }
+           // logging and terminate
+           console.log(red(`ACCESSNFT:`) +
+             ' tx aborted, gas required is greater than the acceptable gas limit.');
+        }
 
-      // submit doer tx
-      let extrinsic = await contract.tx['psp34::transfer'](
-         { storageDepositLimit, gasLimit }, CLIENT_ADDRESS, {u64: id}, [0])
-           .signAndSend(CLIENT_PAIR, async result => {
+        // submit doer tx
+        let extrinsic = await contract.tx['psp34::transfer'](
+           { storageDepositLimit, gasLimit }, CLIENT_ADDRESS, {u64: id}, [0])
+             .signAndSend(CLIENT_PAIR, async result => {
 
-      // when tx hits block
-      if (result.status.isInBlock) {
+          // when tx hits block
+          if (result.status.isInBlock) {
   
-        // logging
-        console.log(yellow(`ACCESSNFT:`) + ` NFT reset in a block`);
+            // logging
+            console.log(yellow(`ACCESSNFT:`) + ` NFT reset in a block`);
 
-      // when tx is finalized in block, tx is successful
-      } else if (result.status.isFinalized) {
+          // when tx is finalized in block, tx is successful
+          } else if (result.status.isFinalized) {
 
-        // logging and terminate
-        console.log(green(`ACCESSNFT: `) +
-          color.bold(`NFT reset successful\n`));
-        console.log(color.bold.magenta(`ACCESSNFT: `) +
-          color.bold(`To create new credentials for universal access NFT `) +
-          red(`ID ${id}`) + color.bold(` you will need to reauthenticate and register.\n
+            // logging and terminate
+            console.log(green(`ACCESSNFT: `) +
+              color.bold(`NFT reset successful\n`));
+            console.log(color.bold.magenta(`ACCESSNFT: `) +
+              color.bold(`To create new credentials for universal access NFT `) +
+              red(`ID ${id}`) + color.bold(` you will need to reauthenticate and register.\n
                                        `));
-        await returnToMain('return to main menu to reregister NFT ' + red(`ID ${id}`));
-      }
-    });
+            await returnToMain('return to main menu to reregister NFT ' + red(`ID ${id}`));
+          }
+      });
+    }
   })();
 });
 
