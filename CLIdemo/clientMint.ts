@@ -74,11 +74,14 @@ socket.onAny(async (message, ...args) => {
     const price = args[0][0];
     const adjustedPrice = price/1000000000000;
 
+    console.log(red(`ACCESSNFT: `) +
+      color.bold(`Server is waiting on your payment.\n`));
+
     console.log(yellow(`ACCESSNFT: `) +
       color.bold(`The current price of a universal access NFT to our restricted area is `) +
       red(`${adjustedPrice} TZERO`));
     console.log(yellow(`ACCESSNFT: `) +
-      color.bold(`Do you wish to proceed to purchase and transfer`) +
+      color.bold(`Do you still wish to proceed, to purchase and transfer`) +
       red(` ${adjustedPrice} TZERO `) + color.bold(`to NFT contract owner's account`));
     console.log(yellow(`ACCESSNFT: `) +
       color.bold.magenta(`${OWNER_ADDRESS}`) + `?\n`);

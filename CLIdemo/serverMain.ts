@@ -220,6 +220,9 @@ io.on('connection', (socket) => {
             io.to(socket.id).emit('all-nfts-authenticated');
             walletInfo.delete(wallet);
 
+            console.log(red(`ACCESSNFT:`) +
+              magenta(`${wallet} `) + `has no unauthenticated nfts`);
+
           } else {
 
             io.to(socket.id).emit(`${contents}`);
@@ -248,6 +251,9 @@ io.on('connection', (socket) => {
 
       io.to(socket.id).emit('pay-to-mint', [NFTPRICE]);
 
+      console.log(green(`ACCESSNFT:`) +
+        ` added ` + magenta(`${recipient} `) + `to mintQueue...waiting on payment`);
+
       // remove recipient from mint queue after one minute of no payment receipt
       //
       // this is to avoid ddos type scenario where someone crashes server by flooding with mint requests
@@ -256,7 +262,7 @@ io.on('connection', (socket) => {
         if (mintQueue.has(recipient)) {
         
           mintQueue.delete(recipient);
-          console.log(color.magenta.bold(`ACCESSNFT: `) + 
+          console.log(red(`ACCESSNFT: `) + 
             `mint recipient ${recipient} took too long to pay -- removed from mint queue`);
         }
       }, 60000); // one minute delay
