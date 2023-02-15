@@ -30,7 +30,7 @@ const bold = color.bold;
 
 // start menu options
 const options = [
-  { title: bold('create or add new wallet for this demo application'), value: 'add'},
+  { title: bold('create or add wallet for demo app'), value: 'add'},
   { title: bold('mint universal access NFT'), value: 'mint' },
   { title: bold('register universal access NFT'), value: 'authenticate' },
   { title: bold('display universal access NFT collection'), value: 'display' },
@@ -49,7 +49,7 @@ async function mainMenu() {
       {
         type: 'select',
         name: 'choice',
-        message: blue('\nUNIVERSAL ACCESS NFT DEMO APP ~ PLEASE CHOOSE AN ACTION!\n'),
+        message: blue('\nUNIVERSAL ACCESS NFT DEMO APP ~ CHOOSE AN ACTION!\n'),
         choices: options,
       }
     ]);
@@ -150,20 +150,20 @@ async function mainMenu() {
 
 console.clear();
 console.log(`\n`);
-console.log(blue(`Welcome to the Universal Access NFT demonstration application!\n`));
+console.log(blue(`Welcome to the Universal Access NFT demo app!\n`));
 
-console.log(red(`The value of this technology derives from being a blockchain-based secret`));
-console.log(red(`management system (eg for usernames/passwords) using NFTs and cryptographic hashing`));
-console.log(red(`to establish access permissions and credentials that are extremely resistant to compromise.\n`));
+console.log(red(`The value of this tech is as a blockchain-based secret/access`));
+console.log(red(`management system using NFTs and crypto hashing to establish`));
+console.log(red(`access permissions/credentials highly resistant to compromise.\n`));
 
-
-console.log(yellow(`. Access permission secrets or identifying information are never stored in a database or in cleartext.`));
-console.log(yellow(`. Identifying information and secrets are stored on the blockchain as SHA256 hash digests.`));
-console.log(yellow(`. Secrets are at most as vulnerable as the https protocol and the root access to RAM `));
-console.log(yellow(`  program runtime memory in the server verifying client access permission credentials`));
-console.log(yellow(`  (disregarding of course, the case of a compromised client device or phishing attack).`));
-console.log(yellow(`. NFTs provide holders with the right to establish access/permission credentials.`));
-console.log(yellow(`. All stored credential information--all identifying information--is kept secret.\n`));
+console.log(yellow(`. NFT provides holder right to register one set of access credentials.`));
+console.log(yellow(`. All stored credential info--all id info--is kept secret.`));
+console.log(yellow(`. Never are access permission secrets or id info stored in database.`));
+console.log(yellow(`. Id info and secrets are stored on blockchain as SHA256 hash digests.`));
+console.log(yellow(`. Secrets are only as vulnerable as the https protocol and root ability`));
+console.log(yellow(`  to scrape program runtime memory in the server responsible for granting`));
+console.log(yellow(`  client applications auth token or access to restricted area`));
+console.log(yellow(`  (disregarding of course, case of compromised client device or phish).\n`));
 
 console.log(bold.magenta(`This is a proof of concept containing all the key pieces.`));
 console.log(bold.magenta(`Production implementations will vary.\n`));

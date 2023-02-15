@@ -206,7 +206,7 @@ export async function setupSession(
   // setup session
   //
   // logging
-  console.log(blue(`\nUA-NFT`) + color.bold(`|BLOCKCHAIN: `) +
+  console.log(blue(`UA-NFT`) + color.bold(`|BLOCKCHAIN: `) +
     color.bold(`${origin} websocket connecting to ` + magenta(`Aleph Zero blockchain`)));
 
   // create api object
@@ -387,7 +387,7 @@ export async function hasCollection(api, contract, wallet) {
 export function discoSocket(socket, origin) {
 
       console.log(blue(`UA-NFT`) + color.bold(`|SOCKET: `) +
-        `${origin} socket disconnecting, ID ` + cyan(`${socket.id}`));
+        `${origin} socket disconnecting, ID ` + cyan(`${socket.id}\n`));
       socket.disconnect();
 }
 

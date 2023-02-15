@@ -71,7 +71,7 @@ async function credentialCheck(message) {
 
         // logging custom error
         let error = OUTPUT.ok.err.custom.toString().replace(/0x/, '')
-        console.log(red(`UA-NFT`) + color.bold(`|RESTRICTED-AREA-SERVER: `) +
+        console.log(red(`UA-NFT`) + color.bold(`|RESTRICTED-AREA: `) +
           `${hexToString(error)}`);
         process.send('bad-username');
         process.exit();
@@ -86,7 +86,7 @@ async function credentialCheck(message) {
   } else {
 
     // loggin calling error and terminate
-    console.log(red(`UA-NFT`) + color.bold(`|RESTRICTED-AREA-SERVER: `) +
+    console.log(red(`UA-NFT`) + color.bold(`|RESTRICTED-AREA: `) +
       `${result.asErr.toHuman()}`);
   }
 
@@ -119,7 +119,7 @@ async function credentialCheck(message) {
 
         // logging custom error
         let error = OUTPUT.ok.err.custom.toString().replace(/0x/, '')
-        console.log(red(`UA-NFT`) + color.bold(`|RESTRICTED-AREA-SERVER: `) +
+        console.log(red(`UA-NFT`) + color.bold(`|RESTRICTED-AREA: `) +
           `${hexToString(error)}`);
         process.send('bad-username');
         process.exit();
@@ -127,14 +127,14 @@ async function credentialCheck(message) {
       } else {
           
         // if not custom then print Error enum type
-        console.log(red(`UA-NFT`) + color.bold(`|RESTRICTED-AREA-SERVER: `) +
+        console.log(red(`UA-NFT`) + color.bold(`|RESTRICTED-AREA: `) +
           `${OUTPUT.ok.err}`);
       }
     }
   } else {
 
     // loggin calling error and terminate
-    console.log(red(`UA-NFT`) + color.bold(`|RESTRICTED-AREA-SERVER: `) +
+    console.log(red(`UA-NFT`) + color.bold(`|RESTRICTED-AREA: `) +
       `${result.asErr.toHuman()}`);
   }
 
@@ -152,7 +152,7 @@ async function credentialCheck(message) {
       
   } catch(error) {
 
-    console.log(red(`UA-NFT`) + color.bold(`|RESTRICTED-AREA-SERVER: `) + error);
+    console.log(red(`UA-NFT`) + color.bold(`|RESTRICTED-AREA: `) + error);
   }
 }
 

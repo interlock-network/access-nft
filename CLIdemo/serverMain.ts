@@ -99,7 +99,7 @@ async function transferListener(socket) {
           console.log(green(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
             color.bold(`auth transfer complete  `));
           console.log(yellow(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
-            `need return transfer to ` + magenta(`${event.data[1]}`));
+            `need return transfer to ` + magenta(`${event.data[1]}\n`));
         //
         // from verifying address
         } else if (receivingAddress == OWNER_ADDRESS &&
@@ -242,7 +242,7 @@ io.on('connection', (socket) => {
         io.to(socket.id).emit('already-waiting', [waitingNftId]);
 
         console.log(red(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
-          magenta(`${address}`) + ` owes micropayment`);
+          magenta(`${address}`) + ` owes micropayment\n`);
       }
     } else if (message == 'mint-nft') {
 
@@ -296,7 +296,7 @@ io.on('connection', (socket) => {
 const PORT = 3000;
 httpServer.listen(PORT, () => {
   console.log(blue(`\nUA-NFT`) + color.bold(`|AUTH-SERVER: `) +
-    `server listening on ` + cyan(`*:${PORT}`));
+    `server listening on ` + cyan(`*:${PORT}\n`));
 });
 
 // setup socket connection to server with listenting
