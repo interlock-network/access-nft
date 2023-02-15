@@ -37,7 +37,7 @@ async function setCredential(socket, message) {
     const [ api, contract ] = await setupSession('setCredential');
 
     console.log(green(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
-      `setting username and password credentials for NFT ` + red(`ID ${message.id}`));
+      `setting credentials for NFT ` + red(`ID ${message.id}`));
 
     // call setCredential tx
     await contractDoer(

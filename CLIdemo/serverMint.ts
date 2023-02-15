@@ -41,7 +41,7 @@ async function setAuthenticated(recipient, socket) {
     const [ api, contract ] = await setupSession('setAuthenticated');
 
     console.log(green(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
-      `minting new universal access NFT for recipient ` + magenta(` ${recipient}}`));
+      `minting NFT for ` + magenta(` ${recipient}`));
 
     // call mint tx
     await contractDoer(
@@ -60,7 +60,7 @@ async function setAuthenticated(recipient, socket) {
 
     console.log(red(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) + error);
 
-    discoSocket(socket, 'serverMint')
+    discoSocket(socket, 'mint')
     process.send('program-error');
     process.exit();
   }
@@ -73,7 +73,7 @@ process.on('message', wallet => {
   socket.on('connect', () => {
 
     console.log(blue(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
-      `setAuthenticated socket connected, ID ` + cyan(`${socket.id}`));
+      `mint socket connected, ID ` + cyan(`${socket.id}`));
     
     setAuthenticated(wallet, socket).catch((error) => {
 

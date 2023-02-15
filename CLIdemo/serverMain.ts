@@ -63,13 +63,13 @@ var mintQueue = new Map();
 async function transferListener(socket) {
 
   // establish connection with blockchain
-  const [ api, contract ] = await setupSession('authenticateWallet');
+  const [ api, contract ] = await setupSession('transferListener');
   
-  // successful authenticateWallet initialization
+  // successful transferListener initialization
   console.log(green(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
-    color.bold(`core access authentication service initialized`));
+    color.bold(`authentication and registration service initialized`));
   console.log('');
-  console.log(color.bold(`           ! please initialize or connect NFT access application`));
+  console.log(color.bold(`           ! please connect universal access NFT application`));
   console.log('');
   let notAuthenticatedId;
 
@@ -97,9 +97,9 @@ async function transferListener(socket) {
           transferAmount == AMOUNT) {
 
           console.log(green(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
-            color.bold(`authentication transfer complete to address `) + magenta(`${event.data[1]}`));
+            color.bold(`auth transfer complete  `));
           console.log(yellow(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
-            `waiting on returning verification transfer to address ` + magenta(`${event.data[1]}`));
+            `need return transfer to ` + magenta(`${event.data[1]}`));
         //
         // from verifying address
         } else if (receivingAddress == OWNER_ADDRESS &&
@@ -112,9 +112,9 @@ async function transferListener(socket) {
           const nftId = waitingQueue.get(clientAddress)[3];
 
           console.log(green(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
-            color.bold(`verification transfer complete from address `) + magenta(`${clientAddress}`));
+            color.bold(`received transfer from `) + magenta(`${clientAddress}`));
           console.log(green(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
-            `address ` +  magenta(`${clientAddress}`) + ` is verified`);
+            magenta(`${clientAddress}`) + ` authenticated`);
 
           // notify the client that their transfer was recorded
           io.to(clientSocketId).emit('payment-received', [nftId]);
@@ -152,9 +152,9 @@ async function transferListener(socket) {
           const clientSocketId = mintQueue.get(recipient)[0];
 
           console.log(green(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
-            color.bold(`NFT payment transfer complete from address `) + magenta(`${recipient}`));
+            color.bold(`Got NFT pay from `) + magenta(`${recipient}`));
           console.log(green(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
-            `minting NFT for address ` +  magenta(`${recipient}`));
+            `minting NFT!`);
 
           // notify the client that their transfer was recorded
           io.to(clientSocketId).emit('minting-nft', [NFTPRICE]);
@@ -222,7 +222,7 @@ io.on('connection', (socket) => {
             waitingQueue.delete(address);
 
             console.log(red(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
-              magenta(`${address} `) + `has no unauthenticated nfts`);
+              magenta(`${address} `) + `needs unauth nft`);
 
           } else {
 
@@ -242,7 +242,7 @@ io.on('connection', (socket) => {
         io.to(socket.id).emit('already-waiting', [waitingNftId]);
 
         console.log(red(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
-          `already waiting for address ` + magenta(`${address}`) + ` to return micropayment`);
+          magenta(`${address}`) + ` owes micropayment`);
       }
     } else if (message == 'mint-nft') {
 
@@ -256,7 +256,7 @@ io.on('connection', (socket) => {
       io.to(socket.id).emit('pay-to-mint', [NFTPRICE]);
 
       console.log(green(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
-        `added ` + magenta(`${recipient} `) + `to mintQueue...waiting on payment`);
+        magenta(`${recipient} `) + `...waiting on payment`);
 
       // remove recipient from mint queue after one minute of no payment receipt
       //
@@ -267,7 +267,7 @@ io.on('connection', (socket) => {
         
           mintQueue.delete(recipient);
           console.log(red(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) + 
-            `mint recipient ` + magenta(`${recipient}`) + ` took too long to pay -- removed from mint queue`);
+            magenta(`${recipient}`) + `...payment timeout`);
         }
       }, 60000); // one minute delay
 
@@ -296,17 +296,17 @@ io.on('connection', (socket) => {
 const PORT = 3000;
 httpServer.listen(PORT, () => {
   console.log(blue(`\nUA-NFT`) + color.bold(`|AUTH-SERVER: `) +
-    `listening on ` + cyan(`*:${PORT}`));
+    `server listening on ` + cyan(`*:${PORT}`));
 });
 
 // setup socket connection to server with listenting
-// part of the autheticateWallet script
+// part of the script
 var ioclient = require('socket.io-client');
 var socket = ioclient(`http://localhost:${PORT}`);
 socket.on('connect', () => {
 
   console.log(blue(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
-    `transferListener socket connected, ID ` + cyan(`${socket.id}`));
+    `transferListener connected, socket ` + cyan(`${socket.id}`));
     
   // initiate async function above that listens for transfer events
   transferListener(socket).catch((error) => {

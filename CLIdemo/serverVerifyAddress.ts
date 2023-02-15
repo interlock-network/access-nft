@@ -35,7 +35,7 @@ async function verifyAddress(address, socket) {
   try {
 
     console.log(green(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
-      `initiating authentication process for address ` + magenta(`${address}`));
+      `authenticating address ` + magenta(`${address}`));
 
     // establish connection with blockchain
     const [ api, contract ] = await setupSession('verifyAddress');
@@ -45,9 +45,9 @@ async function verifyAddress(address, socket) {
     let notAuthenticatedId;
 
     console.log(yellow(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
-      `checking if waiting for micropayment from address ` + magenta(`${address}`));
+      magenta(`${address}`) + ` owes micropayment?`);
     console.log(yellow(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
-      `and checking that address contains unauthenticated nfts`);
+      magenta(`${address}`) + ` has valid nft?`);
 
     // get nft collection for address
     var [ gasRequired, storageDepositRequired, RESULT_collection, OUTPUT_collection ] =
@@ -89,7 +89,7 @@ async function verifyAddress(address, socket) {
     if (notAuthenticated == false) {
 
       console.log(red(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
-        `all nfts in address ` + magenta(`${address}`) + ` already authenticated`);
+        magenta(`${address}`) + ` needs unauth nft`);
 
       terminateProcess(socket, 'verifyAddress', 'all-nfts-authenticated', []);
 
