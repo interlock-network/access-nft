@@ -33,7 +33,7 @@ const refTimeLimit = 8000000000;
 const proofSizeLimit = 180000;
 const storageDepositLimit = null;
 
-async function setAuthenticated(recipient, socket) {
+async function mint(recipient, socket) {
 
   try {
 
@@ -41,7 +41,9 @@ async function setAuthenticated(recipient, socket) {
     const [ api, contract ] = await setupSession('setAuthenticated');
 
     console.log(green(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
-      `minting NFT for` + magenta(` ${recipient}`));
+      `minting UA-NFT for`);
+    console.log(green(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
+      magenta(`${recipient}\n`));
 
     // call mint tx
     await contractDoer(
@@ -73,9 +75,9 @@ process.on('message', wallet => {
   socket.on('connect', () => {
 
     console.log(blue(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
-      `mint socket connected, ID ` + cyan(`${socket.id}`));
+      `mint connected, SID ` + cyan(`${socket.id}`));
     
-    setAuthenticated(wallet, socket).catch((error) => {
+    mint(wallet, socket).catch((error) => {
 
       console.error(error);
       process.exit(-1);

@@ -150,7 +150,7 @@ export async function contractDoer(
   
     // emit error message with signature values to server
     console.log(red(`UA-NFT`) + color.bold(`|BLOCKCHAIN: `) +
-      'gas required greater than limit.');
+      'tx needs too much gas');
     socket.emit(`${origin}-${method}-gaslimit`, [...args], gasRequired);
     discoSocket(socket, origin);
     process.send('gas-limit');
@@ -162,7 +162,7 @@ export async function contractDoer(
   
     // emit error message with signature values to server
     console.log(red(`UA-NFT`) + color.bold(`|BLOCKCHAIN: `) +
-      'storage required greater than limit.');
+      'tx needs too much storage');
     socket.emit(`${origin}-${method}-storagelimit`, [...args], storageDeposit);
     discoSocket(socket, origin);
     process.send('gas-limit');
@@ -207,7 +207,7 @@ export async function setupSession(
   //
   // logging
   console.log(blue(`UA-NFT`) + color.bold(`|BLOCKCHAIN: `) +
-    color.bold(`${origin} websocket connecting to ` + magenta(`Aleph Zero blockchain`)));
+    color.bold(`${origin} connecting to ` + magenta(`Aleph Zero blockchain`)));
 
   // create api object
   const wsProvider = new WsProvider(WEB_SOCKET);
@@ -215,7 +215,7 @@ export async function setupSession(
 
   // logging
   console.log(blue(`UA-NFT`) + color.bold(`|BLOCKCHAIN: `) +
-    color.bold(`${origin} secured websocket with ` + magenta(`Aleph Zero blockchain `)));
+    color.bold(`secured websocket with ` + magenta(`Aleph Zero blockchain `)));
   console.log(blue(`UA-NFT`) + color.bold(`|BLOCKCHAIN: `) +
     color.bold(`at ` + cyan(`${WEB_SOCKET}\n`)));
 
@@ -239,10 +239,12 @@ export async function sendMicropayment(
   const OWNER_PAIR = keyring.addFromUri(OWNER_MNEMONIC);
 
   // logging transfer intention
-  console.log(green(`\nUA-NFT`) + color.bold(`|AUTH-SERVER: `) +
+  console.log(green(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
     color.bold(`address contains valid nft: `) + red(`ID ${id}`));
   console.log(yellow(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
-    `transferring micropayment to ` + magenta(`${address}\n`));
+    `transferring micropayment to`);
+  console.log(yellow(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
+    magenta(`${address}\n`));
 
   // create transfer object
   const transfer = api.tx.balances.transfer(address, AMOUNT);
@@ -252,9 +254,12 @@ export async function sendMicropayment(
 
   // loggin transfer success
   console.log(green(`UA-NFT`) + color.bold(`|BLOCKCHAIN: `) +
-    color.bold(`micropayment complete for `) + magenta(`${address}`));
+    color.bold(`micropayment complete to address`));
   console.log(green(`UA-NFT`) + color.bold(`|BLOCKCHAIN: `) +
-    color.yellow(`${hash.toHex()}\n`));
+    magenta(`${address}`));
+  console.log(green(`UA-NFT`) + color.bold(`|BLOCKCHAIN: `) +
+    color.bold(`txhash:`));
+  console.log(color.yellow(`${hash.toHex()}\n`));
 
   return hash.toHex()
 }
@@ -273,7 +278,7 @@ export function terminateProcess(
   process.send(message);
   socket.emit(message, values);
   console.log(blue(`UA-NFT`) + color.bold(`|SOCKET: `) +
-    `${origin} socket disconnecting, ID ` + cyan(`${socket.id}\n`));
+    `${origin} disconnecting, SID ` + cyan(`${socket.id}\n`));
   socket.disconnect();
   process.exit();
 }
@@ -387,7 +392,7 @@ export async function hasCollection(api, contract, wallet) {
 export function discoSocket(socket, origin) {
 
       console.log(blue(`UA-NFT`) + color.bold(`|SOCKET: `) +
-        `${origin} socket disconnecting, ID ` + cyan(`${socket.id}\n`));
+        `${origin} disconnect, SID ` + cyan(`${socket.id}\n`));
       socket.disconnect();
 }
 

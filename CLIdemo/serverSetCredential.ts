@@ -20,6 +20,7 @@ const red = color.red.bold;
 const green = color.green.bold;
 const blue = color.blue.bold;
 const cyan = color.cyan;
+const magenta = color.magenta;
 
 // constants
 //
@@ -38,6 +39,10 @@ async function setCredential(socket, message) {
 
     console.log(green(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
       `setting credentials for NFT ` + red(`ID ${message.id}`));
+    console.log(green(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
+      `owned by address`);
+    console.log(green(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
+      magenta(`${message.address}\n`));
 
     // call setCredential tx
     await contractDoer(
@@ -71,7 +76,7 @@ process.on('message', message => {
   socket.on('connect', () => {
 
     console.log(blue(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
-      `setCredential socket connected, ID ` + cyan(`${socket.id}`));
+      `setCred connect, SID ` + cyan(`${socket.id}`));
     
     setCredential(socket, message).catch((error) => {
 

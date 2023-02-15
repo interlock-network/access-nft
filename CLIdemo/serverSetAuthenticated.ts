@@ -111,7 +111,7 @@ process.on('message', wallet => {
   socket.on('connect', () => {
 
     console.log(blue(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
-      `setAuthenticated socket connected, ID ` + cyan(`${socket.id}`));
+      `setAuth connect, SID ` + cyan(`${socket.id}`));
     
     setAuthenticated(wallet, socket).catch((error) => {
 

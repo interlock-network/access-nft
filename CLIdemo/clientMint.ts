@@ -99,8 +99,8 @@ socket.onAny(async (message, ...args) => {
         name: 'return',
         message: 'Please confirm:',
         choices: [
-          { title: `YES, transfer ${adjustedPrice} AZERO to mint my NFT.`, value: 'mint' },
-          { title: 'NO, I do not wish to purchase an NFT for this price.', value: 'cancel' },
+          { title: `YES, transfer ${adjustedPrice} AZERO to mint my NFT.\n`, value: 'mint' },
+          { title: 'NO, I do not wish to purchase an NFT for this price.\n', value: 'cancel' },
         ]
       }, { onCancel });
       if (choice.return == 'cancel') {
@@ -127,7 +127,8 @@ socket.onAny(async (message, ...args) => {
           color.bold(`Transfer transaction finalized.`));
         console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
           color.bold(`Transaction hash for record: `));
-        console.log(color.yellow(`${hash}\n`));
+        console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
+        color.yellow(`${hash}\n`));
       }
      })();
   // payment received and mint in progress
