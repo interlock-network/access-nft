@@ -40,8 +40,8 @@ const OWNER_ADDRESS = process.env.OWNER_ADDRESS;
 var socket = io('http://localhost:3000');
 socket.on('connect', async () => {
 
-  console.log(blue(`UA-NFT:`) +
-    ` accessApp socket connected, ID ` + cyan(`${socket.id}\n`));
+  console.log(blue(`\nUA-NFT`) + color.bold(`|CLIENT-APP: `) +
+    `accessApp socket connected, ID ` + cyan(`${socket.id}\n`));
    
   // confirm mint process begining
   await (async () => {
@@ -50,7 +50,8 @@ socket.on('connect', async () => {
     var responseChoice = await prompts({
       type: 'confirm',
       name: 'choice',
-      message: `Do wish to proceed minting a universal access NFT to your accout ${CLIENT_ADDRESS}?`,
+      message: `Do wish to proceed minting a universal access NFT to your\n` +
+        `account ` + color.bold.magenta(`${CLIENT_ADDRESS}`) +`?`,
     }, { onCancel });
     const choice = responseChoice.choice
     console.log('');
@@ -78,13 +79,17 @@ socket.onAny(async (message, ...args) => {
       color.bold(`Server is waiting on your payment.\n`));
 
     console.log(yellow(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-      color.bold(`The current price of a universal access NFT to our restricted area is `) +
-      red(`${adjustedPrice} TZERO`));
+      color.bold(`The current price of one universal access NFT to`));
     console.log(yellow(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-      color.bold(`Do you still wish to proceed, to purchase and transfer`) +
-      red(` ${adjustedPrice} TZERO `) + color.bold(`to NFT contract owner's account`));
+      color.bold(`our restricted area is `) + red(`${adjustedPrice} TZERO\n`));
     console.log(yellow(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-      color.bold.magenta(`${OWNER_ADDRESS}`) + `?\n`);
+      color.bold(`Do you still wish to proceed, to purchase and`));
+    console.log(yellow(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
+      color.bold(`transfer`) + red(` ${adjustedPrice} TZERO `) +
+      color.bold(`to NFT contract owner's account`));
+
+    console.log(yellow(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
+      color.bold.magenta(`${OWNER_ADDRESS}`) + color.bold(` ?\n`));
 
     // verify mint intention, at given price
     await (async () => {
@@ -94,8 +99,8 @@ socket.onAny(async (message, ...args) => {
         name: 'return',
         message: 'Please confirm:',
         choices: [
-          { title: `YES, transfer ${adjustedPrice} AZERO to mint my universal access NFT.`, value: 'mint' },
-          { title: 'NO, I do not wish to purchase a universal access NFT for this price.', value: 'cancel' },
+          { title: `YES, transfer ${adjustedPrice} AZERO to mint my NFT.`, value: 'mint' },
+          { title: 'NO, I do not wish to purchase an NFT for this price.', value: 'cancel' },
         ]
       }, { onCancel });
       if (choice.return == 'cancel') {
@@ -121,7 +126,8 @@ socket.onAny(async (message, ...args) => {
         console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
           color.bold(`Transfer transaction finalized.`));
         console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-          color.bold(`Transaction hash for record: `) + yellow(`${hash}\n`));
+          color.bold(`Transaction hash for record: `));
+        console.log(color.yellow(`${hash}\n`));
       }
      })();
   // payment received and mint in progress
@@ -135,7 +141,7 @@ socket.onAny(async (message, ...args) => {
       color.bold(`Payment received!!!`) +
       red(` ${adjustedPrice} TZERO`));
     console.log(yellow(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-      color.bold(`Please stand by while we mint your new universal access NFT...\n`));
+      color.bold(`Please stand by while we mint your NFT...\n`));
 
   // mint complete
   } else if (message == 'mint-complete') {
@@ -151,8 +157,8 @@ socket.onAny(async (message, ...args) => {
       color.bold(`Your new Universal Access NFT is `) +
       red(`ID ${nftId}`) + color.bold(`!\n`));
     console.log(color.bold.magenta(`\n\nUA-NFT`) + color.bold(`|CLIENT-APP: `) +
-      color.bold(`Check out your collection to see your NFT authentication status.\n`));
+      color.bold(`Check out your collection to see your NFT status.\n`));
 
-    await returnToMain('return to main menu to authenticate or display your NFT');
+    await returnToMain('return to main menu to authenticate or display NFT');
   }
 });

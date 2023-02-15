@@ -57,7 +57,7 @@ socket.on('connect', async () => {
   console.log(blue(`\nUA-NFT`) + color.bold(`|CLIENT-APP: `) +
     color.bold(`UNIVERSAL ACCESS NFT APP, ID` + cyan(` ${socket.id}`)));
   console.log(blue(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-    color.bold(`connected to the secure registration server.`));
+    color.bold(`connected to the secure registration server.\n`));
    
   // establish connection with blockchain
   const [ api, contract ] = await setupSession('setAuthenticated');
@@ -465,7 +465,7 @@ const isAvailableUsername = async (api, contract, usernameHash)  => {
       // logging custom error
       let error = OUTPUT.ok.err.custom.toString().replace(/0x/, '')
       console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-        color.bold(`username available\n`));
+        color.bold(`username  available\n`));
 
       // username is available
       return true

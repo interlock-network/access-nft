@@ -114,7 +114,7 @@ async function transferListener(socket) {
           console.log(green(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
             color.bold(`received transfer from `) + magenta(`${clientAddress}`));
           console.log(green(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
-            magenta(`${clientAddress}`) + ` authenticated`);
+            magenta(`${clientAddress}`) + ` authenticated\n`);
 
           // notify the client that their transfer was recorded
           io.to(clientSocketId).emit('payment-received', [nftId]);
@@ -154,7 +154,7 @@ async function transferListener(socket) {
           console.log(green(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
             color.bold(`Got NFT pay from `) + magenta(`${recipient}`));
           console.log(green(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
-            `minting NFT!`);
+            `minting NFT!\n`);
 
           // notify the client that their transfer was recorded
           io.to(clientSocketId).emit('minting-nft', [NFTPRICE]);
@@ -256,7 +256,7 @@ io.on('connection', (socket) => {
       io.to(socket.id).emit('pay-to-mint', [NFTPRICE]);
 
       console.log(green(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
-        magenta(`${recipient} `) + `...waiting on payment`);
+        magenta(`${recipient} `) + `...waiting on payment\n`);
 
       // remove recipient from mint queue after one minute of no payment receipt
       //
@@ -296,7 +296,7 @@ io.on('connection', (socket) => {
 const PORT = 3000;
 httpServer.listen(PORT, () => {
   console.log(blue(`\nUA-NFT`) + color.bold(`|AUTH-SERVER: `) +
-    `server listening on ` + cyan(`*:${PORT}\n`));
+    `server listening on ` + cyan(`*:${PORT}`));
 });
 
 // setup socket connection to server with listenting

@@ -41,7 +41,7 @@ async function setAuthenticated(recipient, socket) {
     const [ api, contract ] = await setupSession('setAuthenticated');
 
     console.log(green(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
-      `minting NFT for ` + magenta(` ${recipient}`));
+      `minting NFT for` + magenta(` ${recipient}`));
 
     // call mint tx
     await contractDoer(
