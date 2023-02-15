@@ -31,9 +31,9 @@ const bold = color.bold;
 // start menu options
 const options = [
   { title: bold('create or add wallet for demo app'), value: 'add'},
-  { title: bold('mint universal access NFT'), value: 'mint' },
+  { title: bold('mint new universal access NFT'), value: 'mint' },
   { title: bold('register universal access NFT'), value: 'authenticate' },
-  { title: bold('display universal access NFT collection'), value: 'display' },
+  { title: bold('see universal access NFT collection'), value: 'display' },
   { title: bold('login to restricted access area'), value: 'login' },
   { title: bold('reset username and password'), value: 'reset' },
   { title: bold('delete wallet information'), value: 'delete' },
@@ -49,7 +49,7 @@ async function mainMenu() {
       {
         type: 'select',
         name: 'choice',
-        message: blue('\nUNIVERSAL ACCESS NFT DEMO APP ~ CHOOSE AN ACTION!\n'),
+        message: blue('\n UNIVERSAL ACCESS NFT DEMO APP ~ PLEASE CHOOSE AN ACTION!\n'),
         choices: options,
       }
     ]);
@@ -136,7 +136,7 @@ async function mainMenu() {
       case 'quit':
 
         console.clear();
-        console.log(red(`\n            GOODBYE!!!\n\n`));
+        console.log(red(`\n\n GOODBYE!!!\n\n`));
 
         setTimeout( () => {
           console.clear();
@@ -149,24 +149,23 @@ async function mainMenu() {
 }
 
 console.clear();
-console.log(`\n`);
-console.log(blue(`Welcome to the Universal Access NFT demo app!\n`));
+console.log(blue(`\n\n Welcome to the Universal Access NFT demo app!\n\n`));
 
-console.log(red(`The value of this tech is as a blockchain-based secret/access`));
-console.log(red(`management system using NFTs and crypto hashing to establish`));
-console.log(red(`access permissions/credentials highly resistant to compromise.\n`));
+console.log(red(` The value of this tech is as a blockchain-based secret/access`));
+console.log(red(` management system using NFTs and crypto hashing to establish`));
+console.log(red(` access permissions/credentials highly resistant to compromise.\n`));
 
-console.log(yellow(`. NFT provides holder right to register one set of access credentials.`));
+console.log(yellow(`. NFT provides owner right to register one set of access credentials.`));
 console.log(yellow(`. All stored credential info--all id info--is kept secret.`));
 console.log(yellow(`. Never are access permission secrets or id info stored in database.`));
-console.log(yellow(`. Id info and secrets are stored on blockchain as SHA256 hash digests.`));
-console.log(yellow(`. Secrets are only as vulnerable as the https protocol and root ability`));
-console.log(yellow(`  to scrape program runtime memory in the server responsible for granting`));
+console.log(yellow(`. Id info and secrets stored on blockchain as SHA256 hash digests.`));
+console.log(yellow(`. Secrets are only as vulnerable as https protocol or root ability`));
+console.log(yellow(`  to scrape runtime memory in the server responsible for granting`));
 console.log(yellow(`  client applications auth token or access to restricted area`));
-console.log(yellow(`  (disregarding of course, case of compromised client device or phish).\n`));
+console.log(yellow(`  (that is, disregarding cases of compromised client device or phish).\n`));
 
-console.log(bold.magenta(`This is a proof of concept containing all the key pieces.`));
-console.log(bold.magenta(`Production implementations will vary.\n`));
+console.log(bold.magenta(` This is a proof of concept containing all the key pieces.`));
+console.log(bold.magenta(` Production implementations will vary.\n\n`));
 
 console.log(blue(`~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n`));
 

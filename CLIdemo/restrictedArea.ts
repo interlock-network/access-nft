@@ -48,8 +48,8 @@ const io = new Server(httpsServer);
 
 io.on('connect', (socket) => {
 
-  console.log(blue(`\nUA-NFT`) + color.bold(`|RESTRICTED-AREA: `) +
-    `client application connected`);  
+  console.log(blue(`UA-NFT`) + color.bold(`|RESTRICTED-AREA: `) +
+    `client connected, SID ` + cyan(`${socket.id}\n`));  
 
   socket.onAny((message, ...args) => {
 
@@ -75,29 +75,37 @@ io.on('connect', (socket) => {
 
         if (results == 'bad-username') {
 
-          console.log(red(`\nUA-NFT`) + color.bold(`|RESTRICTED-AREA: `) +
-            `login fail bad username for client on socket ` + cyan(`ID ${socket.id}`));
+          console.log(red(`UA-NFT`) + color.bold(`|RESTRICTED-AREA: `) +
+            `login fail bad username for client`);
+          console.log(red(`UA-NFT`) + color.bold(`|RESTRICTED-AREA: `) +
+            `on socket ` + cyan(`ID ${socket.id}\n`));
           socket.emit('bad-username');
           socket.disconnect();
 
         } else if (results == 'bad-password') {
 
-          console.log(red(`\nUA-NFT`) + color.bold(`|RESTRICTED-AREA: `) +
-            `login fail bad password for client on socket ` + cyan(`ID ${socket.id}`));
+          console.log(red(`UA-NFT`) + color.bold(`|RESTRICTED-AREA: `) +
+            `login fail bad password for client`);
+          console.log(red(`UA-NFT`) + color.bold(`|RESTRICTED-AREA: `) +
+            `on socket ` + cyan(`ID ${socket.id}\n`));
           socket.emit('bad-password');
           socket.disconnect();
 
         } else if (results == 'not-authenticated') {
 
-          console.log(red(`\nUA-NFT`) + color.bold(`|RESTRICTED-AREA: `) +
-            `login fail NFT not authenticated` + cyan(`ID ${socket.id}`));
+          console.log(red(`UA-NFT`) + color.bold(`|RESTRICTED-AREA: `) +
+            `login fail NFT not authenticated for client`);
+          console.log(red(`UA-NFT`) + color.bold(`|RESTRICTED-AREA: `) +
+            `on socket ` + cyan(`ID ${socket.id}\n`));
           socket.emit('not-authenticated');
           socket.disconnect();
 
         } else if (results == 'access-granted') {
 
-          console.log(green(`\nUA-NFT`) + color.bold(`|RESTRICTED-AREA: `) +
-            `login success for client on socket ` + cyan(`ID ${socket.id}`));
+          console.log(green(`UA-NFT`) + color.bold(`|RESTRICTED-AREA: `) +
+            `login success for client`);
+          console.log(green(`UA-NFT`) + color.bold(`|RESTRICTED-AREA: `) +
+            `on socket ` + cyan(`ID ${socket.id}\n`));
           socket.emit('access-granted');
 
           // any further messages are client requests to restricted area server
@@ -118,11 +126,12 @@ io.on('connect', (socket) => {
 
               somethingUseful = true;
 
-              console.log(magenta(`\nUA-NFT`) + color.bold(`|RESTRICTED-AREA: `) +
-                cyan(`${username}`) + ` on socket ` + cyan(`ID ${socket.id}`) +
-                ` just did something extremely useful`);
               console.log(magenta(`UA-NFT`) + color.bold(`|RESTRICTED-AREA: `) +
-                color.bold(`somethingUseful = `) + green(`${somethingUseful}`));
+                cyan(`${username}`) + ` on socket ` + cyan(`ID ${socket.id}`));
+              console.log(magenta(`UA-NFT`) + color.bold(`|RESTRICTED-AREA: `) +
+                `just did something extremely useful`);
+              console.log(magenta(`UA-NFT`) + color.bold(`|RESTRICTED-AREA: `) +
+                color.bold(`somethingUseful = `) + green(`${somethingUseful}\n`));
 
               socket.emit('did-something-useful', somethingUseful);
 
@@ -131,23 +140,25 @@ io.on('connect', (socket) => {
 
               somethingUseful = false;
 
-              console.log(magenta(`\nUA-NFT`) + color.bold(`|RESTRICTED-AREA: `) +
-                cyan(`${username}`) + ` on socket ` + cyan(`ID ${socket.id}`) +
-                ` just did something extremely useless`);
               console.log(magenta(`UA-NFT`) + color.bold(`|RESTRICTED-AREA: `) +
-                color.bold(`somethingUseful = `) + red(`${somethingUseful}`));
+                cyan(`${username}`) + ` on socket ` + cyan(`ID ${socket.id}`));
+              console.log(magenta(`UA-NFT`) + color.bold(`|RESTRICTED-AREA: `) +
+                `just did something extremely useless`);
+              console.log(magenta(`UA-NFT`) + color.bold(`|RESTRICTED-AREA: `) +
+                color.bold(`somethingUseful = `) + red(`${somethingUseful}\n`));
 
               socket.emit('did-something-useless', somethingUseful);
 
             // serve the client some cool graphics
             } else if (session == 'fetch-art') {
 
-              console.log(magenta(`\nUA-NFT`) + color.bold(`|RESTRICTED-AREA: `) +
-                cyan(`${username}`) + ` on socket ` + cyan(`ID ${socket.id}`) +
-                ` just fetched ascii art`);
+              console.log(magenta(`UA-NFT`) + color.bold(`|RESTRICTED-AREA: `) +
+                cyan(`${username}`) + ` on socket ` + cyan(`ID ${socket.id}`));
+              console.log(magenta(`UA-NFT`) + color.bold(`|RESTRICTED-AREA: `) +
+                `just fetched ascii art\n`);
 
               // generate ascii art
-              figlet('(:  RESTRICTED AREA  :)\n\n\n\n\n\n         ...YOU ROCK!!!', function(err, data) {
+              figlet('RESTRICTED\n\n\nAREA\n\n\n\n\n\n     ...YOU ROCK!!!  :)', function(err, data) {
                   
                 if (err) {
                   console.log('Something went wrong...');
@@ -159,9 +170,10 @@ io.on('connect', (socket) => {
 
             } else if (session == 'logout') {
 
-              console.log(magenta(`\nUA-NFT`) + color.bold(`|RESTRICTED-AREA: `) +
-                cyan(`${username}`) + ` on socket ` + cyan(`ID ${socket.id}`) +
-                ` just logged out`);
+              console.log(magenta(`UA-NFT`) + color.bold(`|RESTRICTED-AREA: `) +
+                cyan(`${username}`) + ` on socket ` + cyan(`ID ${socket.id}`));
+              console.log(magenta(`UA-NFT`) + color.bold(`|RESTRICTED-AREA: `) +
+                `just logged out\n`);
               socket.disconnect();
             }
 
@@ -184,5 +196,7 @@ io.on('connect', (socket) => {
 httpsServer.listen(SERVERPORT, () => {
   
   console.log(blue(`\nUA-NFT`) + color.bold(`|RESTRICTED-AREA: `) +
-    color.bold(`secure https server running from restricted area, ready for connecting applications`));  
+    color.bold(`secure https server running from restricted`));  
+  console.log(blue(`UA-NFT`) + color.bold(`|RESTRICTED-AREA: `) +
+    color.bold(`area, ready for connecting applications\n`));  
 });

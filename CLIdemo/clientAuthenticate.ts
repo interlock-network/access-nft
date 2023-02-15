@@ -55,7 +55,7 @@ var socket = io('http://localhost:3000');
 socket.on('connect', async () => {
 
   console.log(blue(`\nUA-NFT`) + color.bold(`|CLIENT-APP: `) +
-    color.bold(`UNIVERSAL ACCESS NFT APP, ID` + cyan(` ${socket.id}`)));
+    color.bold(`demoApp, SID` + cyan(` ${socket.id}`)));
   console.log(blue(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
     color.bold(`connected to the secure registration server.\n`));
    
@@ -148,7 +148,7 @@ socket.on('connect', async () => {
           {
             type: 'password',
             name: 'password',
-            message: 'Please choose password with 8+ characters.\nWhitespace ok, no length limit.\n',
+            message: 'Please choose password with 8+ characters.\n  Whitespace ok, no length limit.\n',
             validate: password => (password.length < 8) ?
               red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) + color.bold(`Password too short.\n`) : true
           },
@@ -188,22 +188,21 @@ socket.onAny(async (message, ...args) => {
     const nftId = args[0][0];
     const transactionHash = args[0][1];
 
-    console.log(yellow(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-      color.bold(`We just transfered a verification micropayment of`));
-    console.log(yellow(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
+    console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
+      color.bold(`We transfered a verification micropayment of`));
+    console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
       color.bold(`1 pico TZERO to your address at`));
-    console.log(yellow(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
+    console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
       magenta(`${CLIENT_ADDRESS}` + `\n`));
+
     console.log(yellow(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
       color.bold(`You may confirm this via transaction hash`));
-  
-    console.log(yellow(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-      color.yellow(`0x${transactionHash}`) + `\n`);
+    console.log(color.yellow(`0x${transactionHash}\n`));
 
     console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-      color.bold(`Please return transfer 1 pico TZERO to complete`));
+      color.bold(`Please return 1 pico TZERO to fully`));
     console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-      color.bold(`your registration for universal access NFT `) +
+      color.bold(`authenticate universal access NFT `) +
       red(`ID ${nftId}`) + color.bold(` to`)) 
     console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
       magenta(`${OWNER_ADDRESS}\n`));
@@ -220,7 +219,7 @@ socket.onAny(async (message, ...args) => {
       var responseChoice = await prompts({
         type: 'confirm',
         name: 'choice',
-        message: 'Do you authorize this application to transfer\n1 pico TZERO for verification purposes?',
+        message: 'Do you authorize this application to transfer\n  1 pico TZERO for verification purposes?',
       }, { onCancel });
       const choice = responseChoice.choice
       console.log('');
@@ -240,7 +239,7 @@ socket.onAny(async (message, ...args) => {
           process.send('done');
           process.exit();
       
-        }, 10000);
+        }, 7500);
       }
       if (choice == true) {
 
@@ -255,10 +254,9 @@ socket.onAny(async (message, ...args) => {
     const nftId = args[0][0];
 
     console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-      color.bold(`Waiting on NFT `) + red(`${nftId}`) + color.bold(` micropayment`) +
-      red(`ID ${nftId}`) + `.\n`);
+      color.bold(`Waiting on NFT `) + red(`ID ${nftId}`) + color.bold(` micropayment`));
     console.log(yellow(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-      color.bold(`Please transfer authorize transfer of 1 pico TZERO.`));
+      color.bold(`Please authorize transfer of 1 pico TZERO.`));
     console.log(yellow(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
       magenta(`${OWNER_ADDRESS}\n`));
 
@@ -269,7 +267,7 @@ socket.onAny(async (message, ...args) => {
       var responseChoice = await prompts({
         type: 'confirm',
         name: 'choice',
-        message: 'Do you authorize transfer of 1 pico TZERO\nfor verification purposes?',
+        message: 'Do you authorize this application to transfer\n  1 pico TZERO for verification purposes?',
       }, { onCancel });
       const choice = responseChoice.choice
       console.log('');
@@ -289,7 +287,7 @@ socket.onAny(async (message, ...args) => {
           process.send('done');
           process.exit();
       
-        }, 10000);
+        }, 7500);
       }
       if (choice == true) {
 
@@ -309,7 +307,7 @@ socket.onAny(async (message, ...args) => {
     console.log(yellow(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
       color.bold(`Stand by while we set your NFT `) + red(`ID ${nftId} `));
     console.log(yellow(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-      color.bold(`to 'authenticated' and store your`));
+      color.bold(`to 'authenticated' then store your`));
     console.log(yellow(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
       color.bold(`anonymized credentials on the blockchain!\n`));
 
@@ -341,7 +339,7 @@ socket.onAny(async (message, ...args) => {
     console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
       color.bold(`Universal access NFT`) + red(` ID ${nftId}`) + color.bold(` authenticated!!!`));
     console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-      color.bold(`You may now login to the restricted access area!!!\n\n\n\n\n`));
+      color.bold(`You may now login to the restricted access area!!!\n\n`));
 
     console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
       color.bold(`!!! REMINDER WARNING !!!\n`));
@@ -352,48 +350,47 @@ socket.onAny(async (message, ...args) => {
       color.bold(`it is impossible for us to reveal your`));
     console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
       color.bold(`username or password if you forget.\n`));
+
     console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
       color.bold(`If you forget your username or password, you`));
     console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
       color.bold(`must repeat this registration process with`));
     console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
       color.bold(`a DIFFERENT username.\n`));
+
     console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
       color.bold(`(This is the only way we can ensure access`));   
     console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
       color.bold(`credentials are anonymized and secure in a`));   
     console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
       color.bold(`transparent blockchain environment.\n`));   
-    console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-      color.bold(`Maybe WRITE THEM DOWN somewhere...?\n`));
 
-    console.log(color.bold.magenta(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-      color.bold(`CREDENTIALS ARE NEVER STORED IN A DATABASE.`));
-    console.log(color.bold.magenta(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-      color.bold(`THEY ARE ANONYMIZED & STORED ON BLOCKCHAIN.\n\n`));
+    console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
+      color.bold(`Maybe WRITE THEM DOWN somewhere...?\n\n`));
 
     console.log(color.bold.magenta(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
       color.bold(`USERNAME STORED ON BLOCKCHAIN AS SHA256 HASH`));
-    console.log(color.bold.magenta(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-      color.yellow(`0x${userhash}`));
+    console.log(color.yellow(`0x${userhash}`));
     console.log(color.bold.magenta(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
       color.bold(`PASSWORD STORED ON BLOCKCHAIN AS SHA256 HASH `));
-    console.log(color.bold.magenta(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-      color.yellow(`0x${passhash}\n\n`));
+    console.log(color.yellow(`0x${passhash}\n\n`));
 
     console.log(color.bold.magenta(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-      color.bold(`USERNAME AND PASSWORD IMPOSSIBLE TO DERIVE FROM HASH. `));
+      color.bold(`USERNAME/PASSWORD IMPOSSIBLE TO DERIVE FROM HASH. `));
     console.log(color.bold.magenta(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-      color.bold(`SHA256 HASH NUMBERS VERIFY YOU POSSESS CREDENTIALS`));
+      color.bold(`SHA256 HASHES VERIFY YOU POSSESS CREDENTIALS`));
     console.log(color.bold.magenta(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-      color.bold(`BY COMPARING LOCAL HASH OF CREDENTIALS YOU PROVIDE ON`));
+      color.bold(`BY COMPARING LOCAL HASH OF CREDENTIALS YOU PROVIDE`));
     console.log(color.bold.magenta(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-      color.bold(`ANY LOGIN, WITH HASHES WE JUST GENERATED DURING REGISTRATION`));
+      color.bold(`ON LOGIN WITH THE HASHES WE JUST GENERATED`));
     console.log(color.bold.magenta(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
       color.bold(`AND STORED ON THE BLOCKCHAIN.\n`));
 
     console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-      color.bold(`YOUR CREDENTIALS ARE NEVER STORED IN A DATABASE.\n\n`));
+      color.bold(`YOUR CREDENTIALS ARE NEVER STORED IN A DATABASE.`));
+    console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
+      color.bold(`THEY ARE ANONYMIZED & STORED ON BLOCKCHAIN.\n`));
+
 
     await returnToMain('return to main menu');
 
@@ -465,7 +462,7 @@ const isAvailableUsername = async (api, contract, usernameHash)  => {
       // logging custom error
       let error = OUTPUT.ok.err.custom.toString().replace(/0x/, '')
       console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-        color.bold(`username  available\n`));
+        color.bold(`username available!\n`));
 
       // username is available
       return true

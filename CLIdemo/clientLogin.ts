@@ -38,8 +38,10 @@ var socket = io('https://localhost:8443', {
 });
 socket.on('connect', async () => {
 
-  console.log(blue(`\nUA-NFT:`) +
-    ` accessApp socket connected, ID ` + cyan(`${socket.id}\n`));
+  console.log(blue(`\nUA-NFT`) + color.bold(`|CLIENT-APP: `) +
+    color.bold(`demoApp, SID` + cyan(` ${socket.id}`) + ` connected`));
+  console.log(blue(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
+    color.bold(`to secure restricted access area server via https.\n`));
 
   // begin prompt tree
   //
@@ -50,7 +52,7 @@ socket.on('connect', async () => {
     var responseUsername = await prompts({
       type: 'text',
       name: 'username',
-      message: 'Please enter your username to log into restricted area.',
+      message: 'Please enter your username to log into restricted area.\n',
       validate: username => !isValidUsername(username) ?
         red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) + `Too short or contains spaces.` : true
     }, { onCancel });
@@ -73,7 +75,12 @@ socket.on('connect', async () => {
       
       if (password != undefined) {
         console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-          color.bold(`submitting login information over secure connection for verification\n`));
+          color.bold(`submitting login information over secure`));
+        console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
+          color.bold(`https connection for SHA256 hash verification`));
+        console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
+          color.bold(`against blockchain credential hash record.\n`));
+
 
         socket.emit('request-access', username, password);
 
@@ -82,7 +89,9 @@ socket.on('connect', async () => {
           if (message == 'bad-username') {
 
             console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-              `username is incorrect or does not exist...please try again`);
+              color.bold(`username is incorrect or does not exist...`));
+            console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
+              color.bold(`...please try again\n`));
 
             setTimeout( () => {
 
@@ -93,7 +102,9 @@ socket.on('connect', async () => {
           } else if (message == 'bad-password') {
 
             console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-               `password is incorrect...please try again`);
+              color.bold(`password is incorrect...`));
+            console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
+              color.bold(`...please try again\n`));
 
             setTimeout( () => {
 
@@ -103,17 +114,21 @@ socket.on('connect', async () => {
 
           } else if (message == 'not-authenticated') {
 
-            console.log(red(`\nUA-NFT`) + color.bold(`|CLIENT-APP: `) +
-              color.bold(`NFT must be authenticated and credentials reregistered first.`));
             console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-              color.bold(`This means the NFT was either transfered to new owner, or reset.\n`));
+              color.bold(`NFT is not authenticated...`));
+            console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
+              color.bold(`This means the NFT was either transfered`));
+            console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
+              color.bold(`to new owner, or is was reset by you and`));
+            console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
+              color.bold(`needs reauthenticaion for new credentials.\n`));
 
-            await returnToMain('If you own NFT, return to main to authenticate');
+            await returnToMain('If you own NFT, goto main to authenticate');
 
           } else if (message == 'access-granted') {
 
             console.clear();
-            console.log(green(`\n    SUCCESS!!!\n\n\n\n\n\n\n`));
+            console.log(green(`\n LOGIN SUCCESS!!!\n\n\n\n\n\n\n`));
             socket.emit('fetch-art');
 
             socket.on('ascii-art', (art) => {
@@ -145,17 +160,17 @@ socket.on('connect', async () => {
 
             socket.on('did-something-useful', (result) => {
 
-              console.log(
-                color.bold(`You just did something useful by setting `) +
-                blue(`somethingUseful = `) + green(`${result}`) + color.bold(` in the restricted area!!!\n`));
+              console.log(color.bold(` You just did something useful by setting`));
+              console.log(blue(` somethingUseful = `) + green(`${result}`));
+              console.log(color.bold(` in the restricted area!!!\n`));
 
               (async () => {
 
                 var choice = await prompts({
                   type: 'select',
                   name: 'logout',
-                  message: 'Now choose one of the following options:',
-                  choices: [{ title: 'logout now', value: 'logout' }]
+                  message: 'Next options:',
+                  choices: [{ title: 'logout', value: 'logout' }]
                 });
                
                 socket.emit('logout');
@@ -166,17 +181,17 @@ socket.on('connect', async () => {
 
             socket.on('did-something-useless', (result) => {
 
-              console.log(
-                color.bold(`You just did something useless by setting `) +
-                blue(`somethingUseful = `) + red(`${result}`) + color.bold(` in the restricted area!!!\n`));
+              console.log(color.bold(` You just did something useless by setting`));
+              console.log(blue(` somethingUseful = `) + red(`${result}`));
+              console.log(color.bold(` in the restricted area!!!\n`));
 
               (async () => {
 
                 var choice = await prompts({
                   type: 'select',
                   name: 'logout',
-                  message: 'Now choose one of the following options:',
-                  choices: [{ title: 'logout now', value: 'logout' }]
+                  message: 'Next options:',
+                  choices: [{ title: 'logout', value: 'logout' }]
                 });
                
                 socket.emit('logout');

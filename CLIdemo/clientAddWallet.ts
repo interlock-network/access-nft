@@ -34,19 +34,23 @@ async function addWallet() {
   try {
 
     console.log(green(`\nUA-NFT`) + color.bold(`|CLIENT-APP: `) +
-      color.bold(`First we need to add a quick and dirty wallet for signing transactions.`));
+      color.bold(`We need a wallet to sign transactions.`));
     console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-      color.bold(`This wallet will be a file stored locally containing an account-mnemonic pair.\n`));
+      color.bold(`This wallet will be the simplest kind:`));
+    console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
+      color.bold(`local file with address-mnemonic pair.\n\n`));
 
-    console.log(red(`\nUA-NFT`) + color.bold(`|CLIENT-APP: `) +
-      color.bold(`THIS APPLICATION IS FOR DEMONSTRATION PURPOSES ONLY.`));
     console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-      color.bold(`WE RECOMMEND YOU USE A THROW-AWAY ACCOUNT FOR CREATING THIS WALLET.\n`));
+      color.bold(`THIS APP IS FOR DEMO PURPOSES ONLY.`));
+    console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
+      color.bold(`WE RECOMMEND YOU USE THROW-AWAY ACCOUNT`));
+    console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
+      color.bold(`IF YOU WITH TO CREATE A NEW WALLET.\n`));
 
     console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-      color.bold(`IF YOU WISH, YOU MAY USE THE DEFAULT CLIENT WALLET.`));
+      color.bold(`OR, YOU MAY USE DEFAULT CLIENT WALLET.`));
     console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-      color.bold(`PROVIDED BY US FOR DEMONSTRATION PURPOSES.\n`));
+      color.bold(`PROVIDED BY US FOR DEMO PURPOSES.\n`));
 
     console.log(color.bold.magenta(`\nUA-NFT`) + color.bold(`|CLIENT-APP: `) +
       color.bold(`Create a new account here:`));
@@ -54,12 +58,14 @@ async function addWallet() {
       color.bold.cyan(`https://test.azero.dev/#/accounts\n`));
 
     console.log(color.bold.magenta(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-      color.bold(`And if you do, please make sure it has enough TZERO by visiting the faucet here:`));
+      color.bold(`And if so, add TZERO by visiting faucet:`));
     console.log(color.bold.magenta(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-      color.bold.cyan(`https://faucet.test.azero.dev\n`));
+      color.bold.cyan(`https://faucet.test.azero.dev\n\n`));
 
-    console.log(red(`\nUA-NFT`) + color.bold(`|CLIENT-APP: `) +
-      color.bold(`Please only add address containing real assets if you trust the machine or device`));
+    console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
+      color.bold(`Please only add wallet holding real assets`));
+    console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
+      color.bold(`if you trust the machine or device`));
     console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
       color.bold(`that this application is running on.\n`));
 
@@ -72,7 +78,7 @@ async function addWallet() {
       var responseChoice = await prompts({
         type: 'confirm',
         name: 'choice',
-        message: 'Do you wish to create your own account instead of using the default?',
+        message: 'Add your own account instead of default?',
         }, { onCancel });
       const choice = responseChoice.choice
       console.log('');
@@ -90,7 +96,7 @@ async function addWallet() {
         let responseAddress = await prompts({
           type: 'text',
           name: 'address',
-          message: 'Please enter the address for the account you wish to use.\n',
+          message: 'Please enter account address.\n',
           validate: address => !isValidSubstrateAddress(address) ?
             red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) + `Invalid address` : true
         }, { onCancel });
@@ -104,7 +110,7 @@ async function addWallet() {
           let responseMnemonic = await prompts({
             type: 'text',
             name: 'mnemonic',
-            message: 'Please enter the mnemonic for the account you wish to use.\n',
+            message: 'Please enter account address mnemonic.\n',
             validate: mnemonic => !isValidMnemonic(mnemonic) ?
               red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) + `Invalid mnemonic` : true
           }, { onCancel });
@@ -115,19 +121,23 @@ async function addWallet() {
                                            `"CLIENT_MNEMONIC":"${mnemonic}"}`);
 
           console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-            color.bold(`You entered a valid address and mnemonic`));
+            color.bold(`You entered a valid address and mnemonic,`));
           console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-             color.bold(`that will be stored locally to sign for transaction.`));
+             color.bold(`stored locally to sign transactions.`));
           console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-            color.bold(`At no point will your mnemonic be transmitted beyond this device.\n`));
+            color.bold(`At no point will your mnemonic be`));
+          console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
+            color.bold(`transmitted beyond this device.\n`));
 
 
           console.log(yellow(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-            color.bold(`If you would like to purge your address and mnemonic information from this application,`));
+            color.bold(`If you would like to purge your address`));
+          console.log(yellow(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
+            color.bold(`and mnemonic information from this app,`));
           console.log(yellow(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
             color.bold(`you may do so from the main menu.\n`));
   
-          await returnToMain('return to main menu to mint universal access NFT');
+          await returnToMain('return to mint universal access NFT');
         })();
       })();
      })();

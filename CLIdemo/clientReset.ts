@@ -59,18 +59,22 @@ const storageDepositLimit = null;
 var socket = io('http://localhost:3000');
 socket.on('connect', async () => {
 
+	console.log('');
   // establish connection with blockchain
-   const [ api, contract ] = await setupSession('setAuthenticated');
+  const [ api, contract ] = await setupSession('setAuthenticated');
 
-  console.log(green(`\nUA-NFT`) + color.bold(`|CLIENT-APP: `) +
-    color.bold(`In order to reset your universal access NFT credentials, you MUST know the NFT ID.\n`));
-
-  console.log(green(`\nUA-NFT`) + color.bold(`|CLIENT-APP: `) +
-    color.bold(`Resetting your username and password is a two step process.`));
-  console.log(green(`\nUA-NFT`) + color.bold(`|CLIENT-APP: `) +
-    color.bold(`Step 1: reset your universal access NFT here.\n`));
   console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-    color.bold(`Step 2: redo the authentication and credential registration step from the main menu.\n\n`));
+    color.bold(`In order to reset your universal access`));
+  console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
+    color.bold(`NFT credentials, you MUST know the NFT ID.\n`));
+
+  console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
+    color.bold(`Resetting credentials is a two step process:`));
+
+  console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
+    color.bold(`Step 1 - Reset your universal access NFT here.`));
+  console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
+    color.bold(`Step 2 - Repeat authenticate/registration.\n\n`));
 
     // if valid, check to see if CLIENT_ADDRESS has nft collection
     if (!(await hasCollection(api, contract, CLIENT_ADDRESS))) {
@@ -129,14 +133,17 @@ socket.on('connect', async () => {
     }
 
     // check if collection contains authenticated nfts to reset
-    if (reset == []) {
+    if (reset.length == 0) {
 
       console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-        color.bold(`This collection has no universal access NFTs available to reset. `) +
-        color.bold(`They are all not authenticated.`));
+        color.bold(`This collection has no universal access.`));
+      console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
+        color.bold(`NFTs available to reset.`));
+      console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
+        color.bold(`They are all not authenticated.\n`));
 
       // if no collection propmt to return to main menu
-      await returnToMain('return to main menu');
+      await returnToMain('return to main menu to mint or authenticate NFTs');
     }
 
     // second prompt, get NFT ID
@@ -148,7 +155,7 @@ socket.on('connect', async () => {
         name: 'id',
         message: 'Now, enter the ID of the NFT credentials you would like to reset.\n',
         validate: id => !reset.includes(id) ?
-          red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) + `Not a NFT you can reset right now. Reenter ID.` : true
+          red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) + `Not a NFT you can reset right now.` : true
       }, { onCancel });
       const id = responseId.id;
       console.log('');
@@ -171,7 +178,7 @@ socket.on('connect', async () => {
 
            // logging and terminate
            console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-             'tx aborted, gas required is greater than the acceptable gas limit.');
+             'gas needed is more than limit.');
         }
 
         // submit doer tx
@@ -192,9 +199,11 @@ socket.on('connect', async () => {
             console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
               color.bold(`NFT reset successful\n`));
             console.log(color.bold.magenta(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-              color.bold(`To create new credentials for universal access NFT `) +
-              red(`ID ${id}`) + color.bold(` you will need to reauthenticate and register.\n
-                                       `));
+              color.bold(`To create new credentials for universal access`));
+            console.log(color.bold.magenta(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
+              color.bold(`NFT `) + red(`ID ${id} `) +
+							color.bold(`you must reauthenticate and register.\n`));
+
             await returnToMain('return to main menu to reregister NFT ' + red(`ID ${id}`));
           }
       });

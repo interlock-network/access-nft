@@ -416,7 +416,7 @@ export const onCancel = prompt => {
   setTimeout( () => {
 
     console.clear();
-    console.log(red(`\n     YOU ABORTED PROMPT ... RETURNING TO MAIN MENU`));
+    console.log(red(`\n YOU ABORTED PROMPT ... RETURNING TO MAIN MENU`));
 
     setTimeout( () => {
 

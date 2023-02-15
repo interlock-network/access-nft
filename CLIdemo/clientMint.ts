@@ -41,7 +41,7 @@ var socket = io('http://localhost:3000');
 socket.on('connect', async () => {
 
   console.log(blue(`\nUA-NFT`) + color.bold(`|CLIENT-APP: `) +
-    `accessApp socket connected, ID ` + cyan(`${socket.id}\n`));
+    `demoApp connect, SID ` + cyan(`${socket.id}\n`));
    
   // confirm mint process begining
   await (async () => {
@@ -50,8 +50,8 @@ socket.on('connect', async () => {
     var responseChoice = await prompts({
       type: 'confirm',
       name: 'choice',
-      message: `Do wish to proceed minting a universal access NFT to your\n` +
-        `account ` + color.bold.magenta(`${CLIENT_ADDRESS}`) +`?`,
+      message: `Proceed minting a universal access NFT to your account\n` +
+        color.bold.magenta(`${CLIENT_ADDRESS}`) +` ?`,
     }, { onCancel });
     const choice = responseChoice.choice
     console.log('');
@@ -79,9 +79,9 @@ socket.onAny(async (message, ...args) => {
       color.bold(`Server is waiting on your payment.\n`));
 
     console.log(yellow(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-      color.bold(`The current price of one universal access NFT to`));
+      color.bold(`The current price of one universal access NFT`));
     console.log(yellow(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-      color.bold(`our restricted area is `) + red(`${adjustedPrice} TZERO\n`));
+      color.bold(`to our restricted area is `) + red(`${adjustedPrice} TZERO\n`));
     console.log(yellow(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
       color.bold(`Do you still wish to proceed, to purchase and`));
     console.log(yellow(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
@@ -99,7 +99,7 @@ socket.onAny(async (message, ...args) => {
         name: 'return',
         message: 'Please confirm:',
         choices: [
-          { title: `YES, transfer ${adjustedPrice} AZERO to mint my NFT.\n`, value: 'mint' },
+          { title: `YES, transfer ${adjustedPrice} TZERO to mint my NFT.\n`, value: 'mint' },
           { title: 'NO, I do not wish to purchase an NFT for this price.\n', value: 'cancel' },
         ]
       }, { onCancel });
@@ -127,8 +127,7 @@ socket.onAny(async (message, ...args) => {
           color.bold(`Transfer transaction finalized.`));
         console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
           color.bold(`Transaction hash for record: `));
-        console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-        color.yellow(`${hash}\n`));
+        console.log(color.yellow(`${hash}\n`));
       }
      })();
   // payment received and mint in progress
@@ -152,13 +151,13 @@ socket.onAny(async (message, ...args) => {
 
     // success
     console.log(green(`\n\nUA-NFT`) + color.bold(`|CLIENT-APP: `) +
-      color.bold(`Universal Access NFT successfully minted!!!\n`));
+      color.bold(`Universal Access NFT successfully minted!!!`));
 
     console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
       color.bold(`Your new Universal Access NFT is `) +
       red(`ID ${nftId}`) + color.bold(`!\n`));
     console.log(color.bold.magenta(`\n\nUA-NFT`) + color.bold(`|CLIENT-APP: `) +
-      color.bold(`Check out your collection to see your NFT status.\n`));
+      color.bold(`Check out your collection to see NFT status.\n`));
 
     await returnToMain('return to main menu to authenticate or display NFT');
   }

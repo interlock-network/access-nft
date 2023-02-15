@@ -44,21 +44,34 @@ const FALSE = '0x66616c7365';
 var socket = io('http://localhost:3000');
 socket.on('connect', async () => {
 
+	console.log('');
+
   // establish connection with blockchain
   const [ api, contract ] = await setupSession('setAuthenticated');
 
   console.log(color.bold.magenta(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-    color.bold(`Reminder... You are responsible for remembering the username password pairs`));
+    color.bold(`Reminder...`));
   console.log(color.bold.magenta(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-    color.bold(`associated with each authenticated universal access NFT.\n`));
+    color.bold(`You are responsible for remembering the`));
   console.log(color.bold.magenta(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-    color.bold(`This is because username password pairs are not stored in a traditional database.`));
+    color.bold(`username/password pairs associated with`));
   console.log(color.bold.magenta(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-    color.bold(`We only store the obfuscated anonymized username and password hashes on the blockchain`));
+    color.bold(`each authenticated universal access NFT.\n`));
+
   console.log(color.bold.magenta(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-    color.bold(`for the purpose of comparing the hashes of credentials you provide to our secure restricted`));
+    color.bold(`This is because username/password pairs`));
   console.log(color.bold.magenta(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-    color.bold(`access area server when you log in.\n`));
+    color.bold(`are not stored in a traditional database.`));
+  console.log(color.bold.magenta(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
+    color.bold(`We only store the obfuscated anonymized`));
+  console.log(color.bold.magenta(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
+    color.bold(`username/password hashes on the blockchain`));
+  console.log(color.bold.magenta(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
+    color.bold(`for the purpose of comparing the hashes of`));
+  console.log(color.bold.magenta(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
+    color.bold(`credentials you provide to our secure server`));
+  console.log(color.bold.magenta(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
+    color.bold(`each time you log in to restricted access area.\n`));
     
   // if valid, check to see if wallet has nft collection
   if (!(await hasCollection(api, contract, CLIENT_ADDRESS))) {
@@ -89,6 +102,7 @@ socket.on('connect', async () => {
   const nfts = Array.from(collection.ok.ok);
 
   // print table of NFTs and their authentication status
+  console.log(color.bold(`\n YOUR UNIVERSAL ACCESS NFT COLLECTION:\n`));
   console.log(color.bold(`\tNFT ID\t\t\t\tSTATUS\n`));
   let nft: any;
   for (nft of nfts) {
@@ -114,6 +128,6 @@ socket.on('connect', async () => {
       console.log(green(`\t${nft.u64}\t\t\t\tSUCCESSFULLY AUTHENTICATED!\n`));
     }
   }
-      await returnToMain('return to main menu to authenticate NFTs or login to restricted area');
+      await returnToMain('return to authenticate NFTs or login to restricted area');
 });
 
