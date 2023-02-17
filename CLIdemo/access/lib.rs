@@ -331,18 +331,18 @@ pub mod psp34_nft {
             Ok(())
         }
 
-        /// . get collection of nfts held by particular wallet
+        /// . get collection of nfts held by particular address
         #[ink(message)]
         pub fn get_collection(
             &self,
-            wallet: AccountId,
+            address: AccountId,
         ) -> Result<Vec<Id>, PSP34Error> {
 
             // retrieve the collection
-            match self.collections.get(wallet) {
+            match self.collections.get(address) {
                 Some(vec) => Ok(vec),
                 None => Err(PSP34Error::Custom(
-                        format!("The wallet {:?} does not have a collection.", wallet).into_bytes())),
+                        format!("The address {:?} does not have a collection.", address).into_bytes())),
             }
         }
 
