@@ -1,5 +1,5 @@
 //
-// INTERLOCK NETWORK - GENERAL ACCESS NFT
+// INTERLOCK NETWORK - UNIVERSAL ACCESS NFT
 //
 
 #![cfg_attr(not(feature = "std"), no_std)]
@@ -41,7 +41,7 @@ pub mod psp34_nft {
         attribute_names: Mapping<u32, Vec<u8>>,
         locked_tokens: Mapping<Id, u8>,
         locked_token_count: u64,
-        collection: Mapping<AccountId, Vec<Id>>,
+        collections: Mapping<AccountId, Vec<Id>>,
         cap: u64,
         credentials: Mapping<Hash, (Hash, Id)>,
         // username hash -> (password hash, nft ID)
@@ -72,7 +72,7 @@ pub mod psp34_nft {
             );
 
             // update sender's collection
-            let mut from_collection = match self.collection.get(from) {
+            let mut from_collection = match self.collections.get(from) {
                 Some(collection) => collection,
                 None => return Err(PSP34Error::Custom(
                         format!("No collection, fatal error").into_bytes())),
@@ -83,15 +83,15 @@ pub mod psp34_nft {
                         format!("No NFT in collection, fatal error").into_bytes())),
             };
             from_collection.remove(index);
-            self.collection.insert(from, &from_collection);
+            self.collections.insert(from, &from_collection);
 
             // update recipient's collection
-            let mut to_collection = match self.collection.get(to) {
+            let mut to_collection = match self.collections.get(to) {
                 Some(collection) => collection,
                 None => Vec::new(),
             };
             to_collection.push(id);
-            self.collection.insert(to, &to_collection);
+            self.collections.insert(to, &to_collection);
 
             Ok(())
         }
@@ -197,14 +197,14 @@ pub mod psp34_nft {
             let _ = self._mint_to(recipient, psp34::Id::U64(self.last_token_id))?;
 
             // get nft collection of recipient if already holding
-            let mut collection = match self.collection.get(recipient) {
+            let mut collection = match self.collections.get(recipient) {
                 Some(collection) => collection,
                 None => Vec::new(),
             };
 
             // add id to recipient's nft collection
             collection.push(psp34::Id::U64(self.last_token_id));
-            self.collection.insert(recipient, &collection);
+            self.collections.insert(recipient, &collection);
 
             // set metadata specific to token
             
@@ -249,12 +249,12 @@ pub mod psp34_nft {
             let _ = self.set_multiple_attributes(Id::U64(self.last_token_id), attributes, values)?;
 
             // update recipient's collection
-            let mut collection = match self.collection.get(recipient) {
+            let mut collection = match self.collections.get(recipient) {
                 Some(collection) => collection,
                 None => Vec::new(),
             };
             collection.push(Id::U64(self.last_token_id));
-            self.collection.insert(recipient, &collection);
+            self.collections.insert(recipient, &collection);
 
             Ok(())
         }
@@ -347,7 +347,7 @@ pub mod psp34_nft {
         ) -> Result<Vec<Id>, PSP34Error> {
 
             // retrieve the collection
-            match self.collection.get(wallet) {
+            match self.collections.get(wallet) {
                 Some(vec) => Ok(vec),
                 None => Err(PSP34Error::Custom(
                         format!("The wallet {:?} does not have a collection.", wallet).into_bytes())),
