@@ -269,11 +269,6 @@ pub mod psp34_nft {
                 String::from("isauthenticated").into_bytes(),
                 String::from("true").into_bytes(),
             );
-            self._set_attribute(
-                id,
-                String::from("iswaiting").into_bytes(),
-                String::from("false").into_bytes(),
-            );
 
             Ok(())
         }
