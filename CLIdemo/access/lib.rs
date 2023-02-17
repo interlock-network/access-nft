@@ -284,25 +284,6 @@ pub mod psp34_nft {
             Ok(())
         }
 
-        /// . indicate that NFT is waiting for authentication transfer
-        #[openbrush::modifiers(only_owner)]
-        #[ink(message)]
-        pub fn set_waiting(
-            &mut self,
-            id: Id,
-        ) -> Result<(), PSP34Error> {
-
-            // << insert custom logic here >>
-
-            self._set_attribute(
-                id,
-                String::from("iswaiting").into_bytes(),
-                String::from("true").into_bytes(),
-            );
-
-            Ok(())
-        }
-
         /// . store hashed username password pair
         #[openbrush::modifiers(only_owner)]
         #[ink(message)]
