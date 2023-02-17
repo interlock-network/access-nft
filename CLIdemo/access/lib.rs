@@ -36,6 +36,7 @@ pub mod psp34_nft {
         #[storage_field]
         ownable: ownable::Data,
 
+        token_price: u64,
         last_token_id: u64,
         attribute_count: u32,
         attribute_names: Mapping<u32, Vec<u8>>,
@@ -80,7 +81,7 @@ pub mod psp34_nft {
             let index = match from_collection.iter().position(|element| *element == id) {
                 Some(index) => index,
                 None => return Err(PSP34Error::Custom(
-                        format!("No NFT in collection, fatal error").into_bytes())),
+                        format!("token not in collection").into_bytes())),
             };
             from_collection.remove(index);
             self.collections.insert(from, &from_collection);
@@ -213,13 +214,6 @@ pub mod psp34_nft {
                 psp34::Id::U64(self.last_token_id),
                 String::from("isauthenticated").into_bytes(),
                 String::from("false").into_bytes(),
-            );
-
-            // identifying info if relevant
-            self._set_attribute(
-                psp34::Id::U64(self.last_token_id),
-                String::from("identification").into_bytes(),
-                String::from("").into_bytes(),
             );
 
             Ok(())
