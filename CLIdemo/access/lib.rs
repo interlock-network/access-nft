@@ -295,6 +295,19 @@ pub mod psp34_nft {
             Ok(())
         }
 
+        /// . change the price that self-minter must pay for nft
+        #[openbrush::modifiers(only_owner)]
+        #[ink(message)]
+        pub fn set_token_price(
+            &mut self,
+            price: u64,
+        ) -> Result<(), PSP34Error> {
+
+            self.token_price = price;
+
+            Ok(())
+        }
+
         /// . revoke 'authenticated' status from interlocker
         #[openbrush::modifiers(only_owner)]
         #[ink(message)]
