@@ -295,7 +295,16 @@ pub mod psp34_nft {
             Ok(())
         }
 
-        /// . change the price that self-minter must pay for nft
+        /// . retrieve the current price of universal access nft
+        #[ink(message)]
+        pub fn get_token_price(
+            &self,
+        ) -> u64 {
+
+            self.token_price
+        }
+
+        /// . change the price that self-minter must pay for universal access nft
         #[openbrush::modifiers(only_owner)]
         #[ink(message)]
         pub fn set_token_price(
