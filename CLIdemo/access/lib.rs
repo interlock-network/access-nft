@@ -25,6 +25,12 @@ pub mod psp34_nft {
         modifiers,
     };
 
+    use ilockmvp::ILOCKmvpRef;
+    use ilockmvp::ilockmvp::OtherError;
+    use ink::prelude::vec::Vec;
+
+    pub const PORT: u16;
+
     #[derive(Default, Storage)]
     #[ink(storage)]
     pub struct Psp34Nft {
@@ -36,7 +42,8 @@ pub mod psp34_nft {
         #[storage_field]
         ownable: ownable::Data,
 
-        token_price: u64,
+        nft_price_coin: u64,
+        nft_price_token: u64,
         last_token_id: u64,
         attribute_count: u32,
         attribute_names: Mapping<u32, Vec<u8>>,
@@ -46,6 +53,8 @@ pub mod psp34_nft {
         cap: u64,
         credentials: Mapping<Hash, (Hash, Id)>,
         // username hash -> (password hash, nft ID)
+        
+        token_instance: ILOCKtokenRef,
     }
 
     #[openbrush::wrapper]
@@ -146,6 +155,7 @@ pub mod psp34_nft {
             symbol: String,
             class: String,
             cap: u64,
+            token_address: 
         ) -> Self {
             
             // create the contract
@@ -177,7 +187,7 @@ pub mod psp34_nft {
             contract
         }
 
-        /// . mint an access NFT
+        /// . mint a universal access nft
         #[ink(message)]
         #[modifiers(only_owner)]
         pub fn mint(
@@ -196,6 +206,46 @@ pub mod psp34_nft {
 
             // if cap not surpassed, mint next id
             let _ = self._mint_to(recipient, psp34::Id::U64(self.last_token_id))?;
+
+            // get nft collection of recipient if already holding
+            let mut collection = match self.collections.get(recipient) {
+                Some(collection) => collection,
+                None => Vec::new(),
+            };
+
+            // add id to recipient's nft collection
+            collection.push(psp34::Id::U64(self.last_token_id));
+            self.collections.insert(recipient, &collection);
+
+            // set metadata specific to token
+            
+            // initial authentication status is false
+            self._set_attribute(
+                psp34::Id::U64(self.last_token_id),
+                String::from("isauthenticated").into_bytes(),
+                String::from("false").into_bytes(),
+            );
+
+            Ok(())
+        }
+
+        /// . mint a universal access nft to self at token_price in ILOCK
+        #[ink(message)]
+        pub fn self_mint(
+            &mut self,
+        ) -> Result<(), PSP34Error> {
+
+            // next token id
+            self.last_token_id += 1;
+
+            // make sure cap is not surpassed
+            if self.last_token_id >= self.cap {
+                return Err(PSP34Error::Custom(
+                       format!("The NFT cap of {:?} has been met. Cannot mint.", self.cap).into_bytes()))
+            }
+
+            // if cap not surpassed, mint next id
+            let _ = self._mint_to(self.env().caller(), psp34::Id::U64(self.last_token_id))?;
 
             // get nft collection of recipient if already holding
             let mut collection = match self.collections.get(recipient) {
@@ -253,26 +303,6 @@ pub mod psp34_nft {
             Ok(())
         }
 
-        /// . grant 'authenticated' status to interlocker
-        /// . indicate no longer waiting for authentication transfer
-        #[openbrush::modifiers(only_owner)]
-        #[ink(message)]
-        pub fn set_authenticated(
-            &mut self,
-            id: Id,
-        ) -> Result<(), PSP34Error> {
-
-            // << insert custom logic here >>
-
-            self._set_attribute(
-                id.clone(),
-                String::from("isauthenticated").into_bytes(),
-                String::from("true").into_bytes(),
-            );
-
-            Ok(())
-        }
-
         /// . store hashed username password pair
         #[openbrush::modifiers(only_owner)]
         #[ink(message)]
@@ -312,7 +342,26 @@ pub mod psp34_nft {
             Ok(())
         }
 
-        /// . revoke 'authenticated' status from interlocker
+        /// . grant 'authenticated' status to holder
+        #[openbrush::modifiers(only_owner)]
+        #[ink(message)]
+        pub fn set_authenticated(
+            &mut self,
+            id: Id,
+        ) -> Result<(), PSP34Error> {
+
+            // << insert custom logic here >>
+
+            self._set_attribute(
+                id.clone(),
+                String::from("isauthenticated").into_bytes(),
+                String::from("true").into_bytes(),
+            );
+
+            Ok(())
+        }
+
+        /// . revoke 'authenticated' status from holder
         #[openbrush::modifiers(only_owner)]
         #[ink(message)]
         pub fn set_not_authenticated(
