@@ -11,7 +11,6 @@ const deleteWallet = path.resolve('clientDeleteWallet.js');
 const mint = path.resolve('clientMint.js');
 const authenticate = path.resolve('clientAuthenticate.js');
 const display = path.resolve('clientDisplay.js');
-const reset = path.resolve('clientReset.js');
 const login = path.resolve('clientLogin.js');
 
 // imports
@@ -35,7 +34,6 @@ const options = [
   { title: bold('register universal access NFT'), value: 'authenticate' },
   { title: bold('see universal access NFT collection'), value: 'display' },
   { title: bold('login to restricted access area'), value: 'login' },
-  { title: bold('reset username and password'), value: 'reset' },
   { title: bold('delete wallet information'), value: 'delete' },
   { title: bold('quit application'), value: 'quit' }
 ];
@@ -106,17 +104,6 @@ async function mainMenu() {
         const loginChild = fork(login);
 
         loginChild.on('message', () => {
-          
-          const menuChild = fork(menu);
-        });
-        break;
-
-      case 'reset':
-
-        // reset username and password
-        const resetChild = fork(reset);
-
-        resetChild.on('message', () => {
           
           const menuChild = fork(menu);
         });
