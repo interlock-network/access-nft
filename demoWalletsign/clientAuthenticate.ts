@@ -43,7 +43,6 @@ import {
 const WALLET = JSON.parse(readFileSync('.wallet.json').toString());
 const CLIENT_MNEMONIC = WALLET.CLIENT_MNEMONIC
 const CLIENT_ADDRESS = WALLET.CLIENT_ADDRESS;
-const OWNER_ADDRESS = process.env.OWNER_ADDRESS;
   
 var username;
 var password;
@@ -87,6 +86,7 @@ async function authenticate() {
     // print table of NFTs and their authentication status
     console.log(color.bold(`AVAILABLE UANFTs TO REGISTER\n`));
     let nft: any;
+		let ids: any[] = [];
     for (nft of nfts) {
 
       // get attribute isauthenticated state
@@ -101,7 +101,7 @@ async function authenticate() {
       let authenticated = JSON.parse(JSON.stringify(OUTPUT_authenticated));
 
       // record nft id of one that is waiting and ready to authenticate
-      if (authenticated.ok == true) {
+      if (authenticated.ok.ok == true) {
 
         console.log(red(`\t${nft.u64}\n`));
 
@@ -109,6 +109,7 @@ async function authenticate() {
 
         console.log(green(`\t${nft.u64}\n`));
       }
+			ids.push(nft.u64);
     }
 
     console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
@@ -128,7 +129,7 @@ async function authenticate() {
         type: 'number',
         name: 'id',
         message: 'Enter the ID of the UANFT you wish to register credentials for.\n',
-        validate: id => !nfts.includes({u64: id}) ?
+        validate: id => !ids.includes(id) ?
           red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) + `NFT ID not in your collection.` : true
       }, { onCancel });
       const id = responseId.id;
@@ -329,10 +330,10 @@ async function authenticate() {
 
   } catch(error) {
 
-    console.log(red(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) + error);
+    console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) + error);
 
-    process.send('authenticate-process-error');
-    process.exit();
+    //process.send('authenticate-process-error');
+    //process.exit();
   }
 }
 
