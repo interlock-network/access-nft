@@ -113,7 +113,6 @@ export async function contractGetter(
 //
 export async function contractDoer(
   api: any,
-  socket: any,
   contract: any,
   storageMax: any,
   refTimeLimit: any,
@@ -131,7 +130,6 @@ export async function contractDoer(
   var [ gasRequired, storageDeposit, RESULT, OUTPUT ] =
     await contractGetter(
       api,
-      socket,
       contract,
       origin,
       method,
@@ -151,8 +149,6 @@ export async function contractDoer(
     // emit error message with signature values to server
     console.log(red(`UA-NFT`) + color.bold(`|BLOCKCHAIN: `) +
       'tx needs too much gas');
-    socket.emit(`${origin}-${method}-gaslimit`, [...args], gasRequired);
-    discoSocket(socket, origin);
     process.send('gas-limit');
     process.exit();
   }
@@ -163,8 +159,6 @@ export async function contractDoer(
     // emit error message with signature values to server
     console.log(red(`UA-NFT`) + color.bold(`|BLOCKCHAIN: `) +
       'tx needs too much storage');
-    socket.emit(`${origin}-${method}-storagelimit`, [...args], storageDeposit);
-    discoSocket(socket, origin);
     process.send('gas-limit');
     process.exit();
   }
@@ -188,8 +182,6 @@ export async function contractDoer(
         color.bold(`${method} successful`));
 
       // emit success message with signature values to server
-      socket.emit(`${method}-complete`, [...args]);
-      discoSocket(socket, origin);
       process.send(`${method}-complete`);
       process.exit();
     }
@@ -264,24 +256,6 @@ export async function sendMicropayment(
   return hash.toHex()
 }
 
-//
-// emit message, disconnect socket, and exit process
-//
-export function terminateProcess(
-  socket: any,
-  origin: string,
-  message: string,
-  values: any[],
-) {
-     
-  // emit message to parent process and relay then exit after printing to log
-  process.send(message);
-  socket.emit(message, values);
-  console.log(blue(`UA-NFT`) + color.bold(`|SOCKET: `) +
-    `${origin} disconnecting, SID ` + cyan(`${socket.id}\n`));
-  socket.disconnect();
-  process.exit();
-}
 
 //
 // calculate SHA256 hash
@@ -384,16 +358,6 @@ export async function hasCollection(api, contract, wallet) {
   } catch (error) {
     console.log(error)
   }
-}
-
-//
-// disconnect socket
-//
-export function discoSocket(socket, origin) {
-
-      console.log(blue(`UA-NFT`) + color.bold(`|SOCKET: `) +
-        `${origin} disconnect, SID ` + cyan(`${socket.id}\n`));
-      socket.disconnect();
 }
 
 // 
