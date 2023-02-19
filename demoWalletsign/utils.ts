@@ -39,7 +39,6 @@ const CLIENT_ADDRESS = WALLET.CLIENT_ADDRESS;
 //
 export async function contractGetter(
   api: any,
-  socket: any,
   contract: any,
   origin: string,
   method: string,
@@ -48,7 +47,7 @@ export async function contractGetter(
 
   // create keypair for owner
   const keyring = new Keyring({type: 'sr25519'});
-  const OWNER_PAIR = keyring.addFromUri(OWNER_MNEMONIC);
+  const CLIENT_PAIR = keyring.addFromUri(CLIENT_MNEMONIC);
 
   // define special type for gas weights
   type WeightV2 = InstanceType<typeof WeightV2>;
@@ -60,7 +59,7 @@ export async function contractGetter(
   // get getter output
   var { gasRequired, storageDeposit, result, output } =
     await contract.query[method](
-      OWNER_PAIR.address, {gasLimit}, ...args);
+      CLIENT_PAIR.address, {gasLimit}, ...args);
 
   // convert to JSON format for convenience
   const OUTPUT = JSON.parse(JSON.stringify(output));
@@ -89,7 +88,6 @@ export async function contractGetter(
       }
 
       // send message and signature values to servers
-      socket.emit(`${origin}-${method}-contract-error`, [...args, outputerror]);
       return [ false, false, false, false ]
     }
   } else {
@@ -98,7 +96,6 @@ export async function contractGetter(
     outputerror = result.asErr.toHuman();
     console.log(red(`UA-NFT`) + color.bold(`|BLOCKCHAIN: `) +
       `${outputerror}`);
-    socket.emit(`${origin}-${method}-calling-error`, [...args, outputerror]);
     return [ false, false, false, false ]
   }
 
@@ -122,7 +119,7 @@ export async function contractDoer(
 
   // create key pair for owner
   const keyring = new Keyring({type: 'sr25519'});
-  const OWNER_PAIR = keyring.addFromUri(OWNER_MNEMONIC);
+  const CLIETN_PAIR = keyring.addFromUri(CLIENT_MNEMONIC);
 
     // get attribute isauthenticated state
   var [ gasRequired, storageDeposit, RESULT, OUTPUT ] =
@@ -164,7 +161,7 @@ export async function contractDoer(
   // submit doer tx
   let extrinsic = await contract.tx[method](
     { storageMax, gasLimit }, ...args)
-      .signAndSend(OWNER_PAIR, result => {
+      .signAndSend(CLIENT_PAIR, result => {
 
     // when tx hits block
     if (result.status.isInBlock) {
@@ -284,7 +281,7 @@ export async function hasCollection(api, contract, wallet) {
 
   // create keypair for owner
   const keyring = new Keyring({type: 'sr25519'});
-  const OWNER_PAIR = keyring.addFromUri(OWNER_MNEMONIC);
+  const CLIENT_PAIR = keyring.addFromUri(CLIENT_MNEMONIC);
 
   // define special type for gas weights
   type WeightV2 = InstanceType<typeof WeightV2>;
@@ -296,7 +293,7 @@ export async function hasCollection(api, contract, wallet) {
   // get getter output
   var { gasRequired, storageDeposit, result, output } =
     await contract.query['getCollection'](
-      OWNER_PAIR.address, {gasLimit}, wallet);
+      CLIENT_PAIR.address, {gasLimit}, wallet);
 
   // convert to JSON format for convenience
   const RESULT = JSON.parse(JSON.stringify(result));
