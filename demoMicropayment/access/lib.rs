@@ -54,7 +54,9 @@ pub mod psp34_nft {
         credentials: Mapping<Hash, (Hash, Id)>,
         // username hash -> (password hash, nft ID)
         
+        // application state forming socket to ILOCK token contract
         token_instance: ILOCKtokenRef,
+        operator: AccountId,
     }
 
     #[openbrush::wrapper]
@@ -180,6 +182,12 @@ pub mod psp34_nft {
 
             // assign caller as owner
             contract._init_with_owner(contract.env().caller());
+
+            // create reference to deployed token contract
+            
+            // create a reference to the deployed token contract
+            contract.token_instance = ink::env::call::FromAccountId::from_account_id(token_address);
+            contract.operator = Self::env().caller();
 
             // set cap
             contract.cap = cap;
