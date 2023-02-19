@@ -32,6 +32,7 @@ const magenta = color.magenta;
 
 // utility functions
 import {
+	contractGetter,
   setupSession,
   getHash,
   returnToMain,
@@ -127,7 +128,7 @@ async function authenticate() {
         type: 'number',
         name: 'id',
         message: 'Enter the ID of the UANFT you wish to register credentials for.\n',
-        validate: id = !nfts.includes({u64: id}) ?
+        validate: id => !nfts.includes({u64: id}) ?
           red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) + `NFT ID not in your collection.` : true
       }, { onCancel });
       const id = responseId.id;
@@ -236,13 +237,13 @@ async function authenticate() {
 			      // fork process to register UANFT and set credentials provided
       			const registerChild = fork(register);
 			      registerChild.send({
-      			  id: nftId,
+      			  id: id,
 			        userhash: getHash(username),
       			  passhash: getHash(password)
 			      });
 
       			// listen for results of registration tx
-			      registerChild.on('message', () => {
+			      registerChild.on('message', async (message) => {
 
 							if (message == 'register-complete') {
 
@@ -252,7 +253,7 @@ async function authenticate() {
 		    				  color.bold(`been stored on the blockchain.\n\n\n\n\n`));
 
 				    		console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-		    				  color.bold(`Universal access NFT`) + red(` ID ${nftId}`) + color.bold(` authenticated!!!`));
+		    				  color.bold(`Universal access NFT`) + red(` ID ${id}`) + color.bold(` authenticated!!!`));
 				    		console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
 		    				  color.bold(`You may now login to the restricted access area!!!\n\n`));
 
@@ -285,10 +286,10 @@ async function authenticate() {
 
 						    console.log(color.bold.magenta(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
  					   		  color.bold(`USERNAME STORED ON BLOCKCHAIN AS SHA256 HASH`));
-						    console.log(color.yellow(`0x${userhash}`));
+						    console.log(color.yellow(`0x${getHash(username)}`));
 				    		console.log(color.bold.magenta(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
 						      color.bold(`PASSWORD STORED ON BLOCKCHAIN AS SHA256 HASH `));
-						    console.log(color.yellow(`0x${passhash}\n\n`));
+						    console.log(color.yellow(`0x${getHash(password)}\n\n`));
 
 						    console.log(color.bold.magenta(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
 						      color.bold(`USERNAME/PASSWORD IMPOSSIBLE TO DERIVE FROM HASH. `));
