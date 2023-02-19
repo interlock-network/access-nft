@@ -237,8 +237,8 @@ async function authenticate() {
       			const registerChild = fork(register);
 			      registerChild.send({
       			  id: nftId,
-			        userhash: getHash(userhash),
-      			  passhash: getHash(passhash)
+			        userhash: getHash(username),
+      			  passhash: getHash(password)
 			      });
 
       			// listen for results of registration tx

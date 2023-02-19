@@ -27,12 +27,10 @@ const magenta = color.magenta;
 // constants
 const ACCESS_METADATA = require('./access/target/ink/metadata.json');
 const ACCESS_CONTRACT = process.env.ACCESS_CONTRACT;
-const OWNER_MNEMONIC = process.env.OWNER_MNEMONIC;
 const WEB_SOCKET = process.env.WEB_SOCKET;
 
 const WALLET = JSON.parse(readFileSync('.wallet.json').toString());
 const CLIENT_MNEMONIC = WALLET.CLIENT_MNEMONIC
-const CLIENT_ADDRESS = WALLET.CLIENT_ADDRESS;
 
 //
 // call smart contract getter
@@ -119,7 +117,7 @@ export async function contractDoer(
 
   // create key pair for owner
   const keyring = new Keyring({type: 'sr25519'});
-  const CLIETN_PAIR = keyring.addFromUri(CLIENT_MNEMONIC);
+  const CLIENT_PAIR = keyring.addFromUri(CLIENT_MNEMONIC);
 
     // get attribute isauthenticated state
   var [ gasRequired, storageDeposit, RESULT, OUTPUT ] =
