@@ -218,46 +218,6 @@ export async function setupSession(
 }
 
 //
-// send micropayment to verify wallet owner is true 
-//
-export async function sendMicropayment(
-  api: any,
-  address: string,
-  id: number
-) {
-
-  // create keypair for owner
-  const keyring = new Keyring({type: 'sr25519'});
-  const OWNER_PAIR = keyring.addFromUri(OWNER_MNEMONIC);
-
-  // logging transfer intention
-  console.log(green(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
-    color.bold(`address contains valid nft: `) + red(`ID ${id}`));
-  console.log(yellow(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
-    `transferring micropayment to`);
-  console.log(yellow(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
-    magenta(`${address}\n`));
-
-  // create transfer object
-  const transfer = api.tx.balances.transfer(address, AMOUNT);
-
-  // Sign and send the transaction using our account
-  const hash = await transfer.signAndSend(OWNER_PAIR);
-
-  // loggin transfer success
-  console.log(green(`UA-NFT`) + color.bold(`|BLOCKCHAIN: `) +
-    color.bold(`micropayment complete to address`));
-  console.log(green(`UA-NFT`) + color.bold(`|BLOCKCHAIN: `) +
-    magenta(`${address}`));
-  console.log(green(`UA-NFT`) + color.bold(`|BLOCKCHAIN: `) +
-    color.bold(`txhash:`));
-  console.log(color.yellow(`${hash.toHex()}\n`));
-
-  return hash.toHex()
-}
-
-
-//
 // calculate SHA256 hash
 //
 export function getHash(input) {
