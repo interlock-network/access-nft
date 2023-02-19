@@ -9,7 +9,7 @@ const { ContractPromise, CodePromise } = require('@polkadot/api-contract');
 const { decodeAddress, encodeAddress } = require('@polkadot/keyring')
 const WeightV2 = require('@polkadot/types/interfaces');
 
-// environment constants
+import { readFileSync } from "fs";
 import * as dotenv from 'dotenv';
 import * as crypto from 'crypto';
 import * as prompts from 'prompts';
@@ -28,13 +28,11 @@ const magenta = color.magenta;
 const ACCESS_METADATA = require('./access/target/ink/metadata.json');
 const ACCESS_CONTRACT = process.env.ACCESS_CONTRACT;
 const OWNER_MNEMONIC = process.env.OWNER_MNEMONIC;
-const APP_PROCESS = process.env.APP_PROCESS;
 const WEB_SOCKET = process.env.WEB_SOCKET;
-const TRUE = '0x74727565';
-const FALSE = '0x66616c7365';
-const ISAUTHENTICATED = '0x697361757468656e74696361746564';
-const ISWAITING = '0x697377616974696e67';
-const AMOUNT = 1;
+
+const WALLET = JSON.parse(readFileSync('.wallet.json').toString());
+const CLIENT_MNEMONIC = WALLET.CLIENT_MNEMONIC
+const CLIENT_ADDRESS = WALLET.CLIENT_ADDRESS;
 
 //
 // call smart contract getter
