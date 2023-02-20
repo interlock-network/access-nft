@@ -13,7 +13,7 @@ import * as figlet from 'figlet';
 
 // child process paths
 import * as path from 'path';
-const restrictedGetCredential = path.resolve('restrictedGetCredential.js');
+const restrictedGetCredential = path.resolve('getCredential.js');
 
 // utility functions
 import {
@@ -36,8 +36,8 @@ var somethingUseful;
 // setup server
 const app = express();
 const options = {  
-  key: readFileSync('./server-creds/key.pem'),
-  cert: readFileSync('./server-creds/cert.pem')
+  key: readFileSync('./server-credentials/key.pem'),
+  cert: readFileSync('./server-credentials/cert.pem')
 };
 const httpsServer = createServer(options, app);
 const io = new Server(httpsServer);

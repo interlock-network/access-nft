@@ -25,7 +25,7 @@ const yellow = color.yellow.bold;
 const magenta = color.magenta;
 
 // constants
-const ACCESS_METADATA = require('./access/target/ink/interlock_access_nft.json');
+const ACCESS_METADATA = JSON.parse(readFileSync(process.env.ACCESS_METADATA).toString());
 const ACCESS_CONTRACT = process.env.ACCESS_CONTRACT;
 const WEB_SOCKET = process.env.WEB_SOCKET;
 
