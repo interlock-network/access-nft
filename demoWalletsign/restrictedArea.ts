@@ -155,7 +155,7 @@ io.on('connect', (socket) => {
 
               // generate ascii art
               figlet(`WELCOME TO\nRESTRICTED\n\n\nAREA...\n\n\n\n\n\n` +
-		     `...YOU'RE VERY\nIMPORTANT!!!  :)`, function(err, data) {
+			 		    	`...YOU'RE VERY\nIMPORTANT!!!  :)`, function(err, data) {
                   
                 if (err) {
                   console.log('Something went wrong...');
