@@ -339,4 +339,31 @@ export const onCancel = prompt => {
   }, 250);
 }
 
+//
+// Check if valid username.
+//
+export function isValidUsername(username) {
+  
+	try {
 
+    // search for any whitespace
+    if (/\s/.test(username)) {
+
+      // username not valid
+      return false
+
+    // make sure not too short
+    } else if (username.length < 5) {
+
+      // username not valid
+      return false
+    }
+
+    // username valid
+    return true
+
+  } catch (error) {
+
+    return false
+  }
+}

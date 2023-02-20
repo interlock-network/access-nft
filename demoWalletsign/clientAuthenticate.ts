@@ -33,6 +33,7 @@ const magenta = color.magenta;
 // utility functions
 import {
   contractGetter,
+  isValidUsername,
   setupSession,
   getHash,
   returnToMain,
@@ -55,9 +56,9 @@ async function authenticate() {
     // establish connection with blockchain
     const [ api, contract ] = await setupSession('authenticate');
 
-		// create keypair for owner
-	  const keyring = new Keyring({type: 'sr25519'});
-  	const CLIENT_PAIR = keyring.addFromUri(CLIENT_MNEMONIC);
+    // create keypair for owner
+    const keyring = new Keyring({type: 'sr25519'});
+    const CLIENT_PAIR = keyring.addFromUri(CLIENT_MNEMONIC);
 
     // check to see if CLIENT_ADDRESS has nft collection
     if (!(await hasCollection(api, contract, CLIENT_ADDRESS))) {
@@ -99,7 +100,7 @@ async function authenticate() {
         await contractGetter(
           api,
           contract,
-					CLIENT_PAIR,
+          CLIENT_PAIR,
           'Authenticate',
           'isAuthenticated',
           {u64: nft.u64},
@@ -343,32 +344,6 @@ async function authenticate() {
 }
 
 authenticate();
-
-
-// Check if valid username.
-const isValidUsername = (username) => {
-  try {
-
-    // search for any whitespace
-    if (/\s/.test(username)) {
-
-      // username not valid
-      return false
-
-    // make sure not too short
-    } else if (username.length < 5) {
-
-      // username not valid
-      return false
-    }
-
-    // username valid
-    return true
-
-  } catch (error) {
-    return false
-  }
-}
 
 // Check if username is available
 const isAvailableUsername = async (api, contract, usernameHash)  => {
