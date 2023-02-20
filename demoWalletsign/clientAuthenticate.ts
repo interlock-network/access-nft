@@ -86,7 +86,7 @@ async function authenticate() {
     // print table of NFTs and their authentication status
     console.log(color.bold(`AVAILABLE UANFTs TO REGISTER\n`));
     let nft: any;
-		let ids: any[] = [];
+    let ids: any[] = [];
     for (nft of nfts) {
 
       // get attribute isauthenticated state
@@ -109,7 +109,7 @@ async function authenticate() {
 
         console.log(green(`\t${nft.u64}\n`));
       }
-			ids.push(nft.u64);
+      ids.push(nft.u64);
     }
 
     console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
@@ -248,7 +248,7 @@ async function authenticate() {
 
               if (message == 'register-complete') {
 
-								console.clear();
+                console.clear();
 
                 console.log(green(`\n\nUA-NFT`) + color.bold(`|CLIENT-APP: `) +
                   color.bold(`Your anonymized NFT access credentials have`));
