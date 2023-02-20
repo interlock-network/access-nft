@@ -344,7 +344,7 @@ export const onCancel = prompt => {
 //
 export function isValidUsername(username) {
   
-	try {
+  try {
 
     // search for any whitespace
     if (/\s/.test(username)) {
@@ -365,5 +365,57 @@ export function isValidUsername(username) {
   } catch (error) {
 
     return false
+  }
+}
+
+//
+// Check if username is available
+//
+export async function isAvailableUsername(
+	
+	api,
+	contract,
+	usernameHash
+) 
+{
+  try {
+
+  // create keypair for owner
+  const keyring = new Keyring({type: 'sr25519'});
+  const CLIENT_PAIR = keyring.addFromUri(CLIENT_MNEMONIC);
+
+  // define special type for gas weights
+  type WeightV2 = InstanceType<typeof WeightV2>;
+  const gasLimit = api.registry.createType('WeightV2', {
+    refTime: 2**53 - 1,
+    proofSize: 2**53 - 1,
+  }) as WeightV2;
+
+  // get getter output
+  var { gasRequired, storageDeposit, result, output } =
+    await contract.query['getCredential'](
+      CLIENT_PAIR.address, {gasLimit}, '0x' + usernameHash);
+
+  // convert to JSON format for convenience
+  const RESULT = JSON.parse(JSON.stringify(result));
+  const OUTPUT = JSON.parse(JSON.stringify(output));
+
+    // if this call reverts, then only possible error is 'credential nonexistent'
+    if (RESULT.ok.flags == 'Revert') {
+
+      // logging custom error
+      let error = OUTPUT.ok.err.custom.toString().replace(/0x/, '')
+      console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
+        color.bold(`username available!\n`));
+
+      // username is available
+      return true
+    }
+
+    // username is not available
+    return false
+
+  } catch (error) {
+    console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) + error);
   }
 }

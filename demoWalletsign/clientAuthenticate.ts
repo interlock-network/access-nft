@@ -34,6 +34,7 @@ const magenta = color.magenta;
 import {
   contractGetter,
   isValidUsername,
+  isAvailableUsername,
   setupSession,
   getHash,
   returnToMain,
@@ -147,8 +148,10 @@ async function authenticate() {
         // prompt: username
         await (async () => {
 
+          console.clear();
+
           console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-            color.bold(`!!! WARNING !!!\n`));
+            color.bold(`\n\n!!! WARNING !!!\n`));
 
           console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
             color.bold(`Because your credentials are anonymized, `));
@@ -331,9 +334,9 @@ async function authenticate() {
               }
             });
           })();
-        })().catch(error => otherError());
+        })();
       }
-    })().catch(error => otherError());
+    })();
   } catch(error) {
 
     console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) + error);
@@ -345,55 +348,3 @@ async function authenticate() {
 
 authenticate();
 
-// Check if username is available
-const isAvailableUsername = async (api, contract, usernameHash)  => {
-  try {
-
-  // create keypair for owner
-  const keyring = new Keyring({type: 'sr25519'});
-  const CLIENT_PAIR = keyring.addFromUri(CLIENT_MNEMONIC);
-
-  // define special type for gas weights
-  type WeightV2 = InstanceType<typeof WeightV2>;
-  const gasLimit = api.registry.createType('WeightV2', {
-    refTime: 2**53 - 1,
-    proofSize: 2**53 - 1,
-  }) as WeightV2;
-
-  // get getter output
-  var { gasRequired, storageDeposit, result, output } =
-    await contract.query['getCredential'](
-      CLIENT_PAIR.address, {gasLimit}, '0x' + usernameHash);
-
-  // convert to JSON format for convenience
-  const RESULT = JSON.parse(JSON.stringify(result));
-  const OUTPUT = JSON.parse(JSON.stringify(output));
-
-    // if this call reverts, then only possible error is 'credential nonexistent'
-    if (RESULT.ok.flags == 'Revert') {
-
-      // logging custom error
-      let error = OUTPUT.ok.err.custom.toString().replace(/0x/, '')
-      console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-        color.bold(`username available!\n`));
-
-      // username is available
-      return true
-    }
-    
-    // username is not available
-    return false
-
-  } catch (error) {
-    console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) + error);
-  }
-}
-
-// handle misc error
-const otherError = () => {
-
-  console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-    color.bold('Failed to register credentials.\n'));
-  process.send('error');
-  process.exit();
-}
