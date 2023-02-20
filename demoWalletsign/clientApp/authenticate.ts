@@ -19,7 +19,7 @@ dotenv.config();
 
 // child process paths
 import * as path from 'path';
-const register = path.resolve('clientRegister.js');
+const register = path.resolve('register.js');
 
 // specify color formatting
 import * as color from 'cli-color';
