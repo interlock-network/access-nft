@@ -38,9 +38,9 @@ async function register(message) {
     // establish connection with blockchain
     const [ api, contract ] = await setupSession('register');
 
-	  // create keypair for owner
-	  const keyring = new Keyring({type: 'sr25519'});
-  	const CLIENT_PAIR = keyring.addFromUri(CLIENT_MNEMONIC);
+    // create keypair for owner
+    const keyring = new Keyring({type: 'sr25519'});
+    const CLIENT_PAIR = keyring.addFromUri(CLIENT_MNEMONIC);
 
     console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
       `registering credentials for NFT ` + red(`ID ${message.id}`));

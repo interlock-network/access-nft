@@ -44,9 +44,9 @@ async function display() {
     // establish connection with blockchain
     const [ api, contract ] = await setupSession('setAuthenticated');
 
-		// create keypair for owner
-	  const keyring = new Keyring({type: 'sr25519'});
-  	const CLIENT_PAIR = keyring.addFromUri(CLIENT_MNEMONIC);
+    // create keypair for owner
+    const keyring = new Keyring({type: 'sr25519'});
+    const CLIENT_PAIR = keyring.addFromUri(CLIENT_MNEMONIC);
 
     console.log(color.bold.magenta(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
       color.bold(`Reminder...`));
@@ -90,7 +90,7 @@ async function display() {
       await contractGetter(
         api,
         contract,
-				CLIENT_PAIR,
+        CLIENT_PAIR,
         'Authenticate',
         'getCollection',
         CLIENT_ADDRESS,
@@ -111,7 +111,7 @@ async function display() {
         await contractGetter(
           api,
           contract,
-					CLIENT_PAIR,
+          CLIENT_PAIR,
           'display',
           'isAuthenticated',
           {u64: nft.u64},

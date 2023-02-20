@@ -49,9 +49,9 @@ async function mint() {
     // establish connection with blockchain
     const [ api, contract ] = await setupSession('mint');
 
-		// create keypair for owner
-	  const keyring = new Keyring({type: 'sr25519'});
-  	const OWNER_PAIR = keyring.addFromUri(OWNER_MNEMONIC);
+    // create keypair for owner
+    const keyring = new Keyring({type: 'sr25519'});
+    const OWNER_PAIR = keyring.addFromUri(OWNER_MNEMONIC);
    
     // confirm mint process begining
     await (async () => {
@@ -89,7 +89,7 @@ async function mint() {
             await contractGetter(
               api,
               contract,
-							OWNER_PAIR,
+              OWNER_PAIR,
               'mint',
               'getCollection',
               CLIENT_ADDRESS,

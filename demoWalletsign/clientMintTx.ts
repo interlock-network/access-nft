@@ -11,7 +11,7 @@ const WeightV2 = require('@polkadot/types/interfaces');
 // utility functions
 import {
   setupSession,
-  contractGetter,
+  contractDoer,
 } from "./utils";
 
 // specify color formatting
@@ -42,7 +42,7 @@ async function mint(recipient) {
   try {
 
     // establish connection with blockchain
-    const [ api, contract ] = await setupSession('setAuthenticated');
+    const [ api, contract ] = await setupSession('mintTx');
 
     // create key pair for owner
     const keyring = new Keyring({type: 'sr25519'});
@@ -53,67 +53,18 @@ async function mint(recipient) {
     console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
       magenta(`${recipient}\n`));
 
-    // get attribute isauthenticated state
-    var [ gasRequired, storageDeposit, RESULT, OUTPUT ] =
-      await contractGetter(
-        api,
-        contract,
-	OWNER_PAIR,
-        'mint',
-        'mint',
-        recipient
-      ); 
-
-    // define special type for gas weights
-    type WeightV2 = InstanceType<typeof WeightV2>;
-    const gasLimit = api.registry.createType('WeightV2', {
-      refTime: refTimeLimit,
-      proofSize: proofSizeLimit,
-    }) as WeightV2;
-
-    // too much gas required?
-    if (gasRequired > gasLimit) {
-  
-      // emit error message with signature values to server
-      console.log(red(`UA-NFT`) + color.bold(`|BLOCKCHAIN: `) +
-        'tx needs too much gas');
-      process.send('gas-limit');
-      process.exit();
-    }
-
-    // too much storage required?
-    if (storageDeposit > storageDepositLimit) {
-  
-      // emit error message with signature values to server
-      console.log(red(`UA-NFT`) + color.bold(`|BLOCKCHAIN: `) +
-        'tx needs too much storage');
-      process.send('storage-limit');
-      process.exit();
-    }
-
-    // submit doer tx
-    let extrinsic = await contract.tx['mint'](
-      { storageDepositLimit, gasLimit }, recipient)
-        .signAndSend(OWNER_PAIR, result => {
-
-      // when tx hits block
-      if (result.status.isInBlock) {
-
-        // logging
-        console.log(yellow(`UA-NFT`) + color.bold(`|BLOCKCHAIN: `) + `mint in a block`);
-
-      // when tx is finalized in block, tx is successful
-      } else if (result.status.isFinalized) {
-
-        // logging and terminate
-        console.log(green(`UA-NFT`) + color.bold(`|BLOCKCHAIN: `) +
-          color.bold(`mint successful`));
-
-        // emit success message with signature values to server
-        process.send(`mint-complete`);
-        process.exit();
-      }
-    });
+    // call mint tx
+    await contractDoer(
+      api,
+      contract,
+      OWNER_PAIR,
+      storageDepositLimit,
+      refTimeLimit,
+      proofSizeLimit,
+      'mintTx',
+      'mint',
+      recipient,
+    );
   } catch(error) {
 
     console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) + error);

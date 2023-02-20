@@ -42,7 +42,6 @@ async function mainMenu() {
 
   try {
 
-
     const response = await prompts([
       {
         type: 'select',
