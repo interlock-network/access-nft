@@ -9,7 +9,7 @@ const menu = path.resolve('main.js');
 const addWallet = path.resolve('addWallet.js');
 const deleteWallet = path.resolve('deleteWallet.js');
 const mint = path.resolve('mint.js');
-const authenticate = path.resolve('clientAuthenticate.js');
+const authenticate = path.resolve('authenticate.js');
 const display = path.resolve('display.js');
 const login = path.resolve('clientLogin.js');
 
