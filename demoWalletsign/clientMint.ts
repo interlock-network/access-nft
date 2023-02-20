@@ -30,6 +30,7 @@ const magenta = color.magenta;
 
 // utility functions
 import {
+	contractGetter,
   setupSession,
   returnToMain,
   onCancel
@@ -41,35 +42,88 @@ const CLIENT_ADDRESS = WALLET.CLIENT_ADDRESS;
 const OWNER_MNEMONIC = process.env.OWNER_MNEMONIC
 const OWNER_ADDRESS = process.env.OWNER_ADDRESS;
 
-// setup socket connection with autheticateWallet script
-var socket = io('http://localhost:3000');
-socket.on('connect', async () => {
+async function mint() {
 
-  console.log(blue(`\nUA-NFT`) + color.bold(`|CLIENT-APP: `) +
-    `demoApp connect, SID ` + cyan(`${socket.id}\n`));
+  try {
+
+    // establish connection with blockchain
+    const [ api, contract ] = await setupSession('authenticate');
    
-  // confirm mint process begining
-  await (async () => {
+	  // confirm mint process begining
+  	await (async () => {
 
-    // get response
-    var responseChoice = await prompts({
-      type: 'confirm',
-      name: 'choice',
-      message: `Proceed minting a universal access NFT to your account\n` +
-        color.bold.magenta(`${CLIENT_ADDRESS}`) +` ?`,
-    }, { onCancel });
-    const choice = responseChoice.choice
-    console.log('');
+	    // get response
+  	  var responseChoice = await prompts({
+    	  type: 'confirm',
+      	name: 'choice',
+	      message: `Proceed minting a universal access NFT to your account\n` +
+  	      color.bold.magenta(`${CLIENT_ADDRESS}`) +` ?`,
+    	}, { onCancel });
+	    const choice = responseChoice.choice
+  	  console.log('');
 
-    // if cancel, exit
-    if (choice == false) {
+	    // if cancel, exit
+  	  if (choice == false) {
 
-      process.send('done');
-      process.exit();
-    }
+    	  process.send('done');
+      	process.exit();
+	    }
       
-    // fork process to mint UANFT to client address
-    const mintTxChild = fork(mintTx);
-    mintTxChild.send(CLIENT_ADDRESS.toHuman());
-  })();
-});
+	    // fork process to mint UANFT to client address
+  	  const mintTxChild = fork(mintTx);
+    	mintTxChild.send(CLIENT_ADDRESS);
+
+	    // listen for results of mint tx
+  	  mintTxChild.on('message', async (message) => {
+
+    	  if (message == 'mint-complete') {
+
+      	  // get new array of nfts
+        	//
+	        // get nft collection for address
+  	      var [ gasRequired, storageDeposit, RESULT_collection, OUTPUT_collection ] =
+    	      await contractGetter(
+      	      api,
+        	    contract,
+          	  'mint',
+            	'getCollection',
+	            CLIENT_ADDRESS,
+  	        );
+    	    const collection = JSON.parse(JSON.stringify(OUTPUT_collection));
+
+      	  // get the id of new nft (last in collection)
+        	const nftId = Array.from(collection.ok.ok).pop();
+
+	        // success
+  	      console.log(green(`\n\nUA-NFT`) + color.bold(`|CLIENT-APP: `) +
+    	      color.bold(`Universal Access NFT successfully minted!!!`));
+
+      	  console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
+        	  color.bold(`Your new Universal Access NFT is `) +
+          	red(`ID ${nftId}`) + color.bold(`!\n`));
+	        console.log(color.bold.magenta(`\n\nUA-NFT`) + color.bold(`|CLIENT-APP: `) +
+  	        color.bold(`Check out your collection to see NFT status.\n`));
+
+    	    await returnToMain('return to main menu to register or display NFT');
+
+	      // if some other message
+  	    } else {
+
+    	    // failure
+      	  console.log(red(`\n\nUA-NFT`) + color.bold(`|CLIENT-APP: `) +
+        	  color.bold(`Something went wrong minting UANFT.`));
+
+	        await returnToMain('return to main menu');
+  	    }
+    	});
+	  })();
+  } catch(error) {
+
+    console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) + error);
+
+    process.send('mint-process-error');
+    process.exit();
+  }
+}
+
+mint();

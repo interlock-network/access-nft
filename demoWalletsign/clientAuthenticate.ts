@@ -334,8 +334,8 @@ async function authenticate() {
 
     console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) + error);
 
-    //process.send('authenticate-process-error');
-    //process.exit();
+    process.send('authenticate-process-error');
+    process.exit();
   }
 }
 
