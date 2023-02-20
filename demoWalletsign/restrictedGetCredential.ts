@@ -13,7 +13,6 @@ import { io } from 'socket.io-client';
 
 // utility functions
 import {
-  contractGetter,
   setupSession,
   hexToString
 } from "./utils";
@@ -26,10 +25,6 @@ const blue = color.blue.bold;
 const cyan = color.cyan;
 const yellow = color.yellow.bold;
 const magenta = color.magenta;
-
-// constants
-const ISAUTHENTICATED = '0x697361757468656e74696361746564';
-const FALSE = '0x66616c7365';
 
 const OWNER_MNEMONIC = process.env.OWNER_MNEMONIC;
 
@@ -99,56 +94,8 @@ async function credentialCheck(message) {
     process.exit();
   }
 
-  // get getter output
-  var { gasRequired, storageDeposit, result, output } =
-    await contract.query['psp34Metadata::getAttribute'](
-      OWNER_PAIR.address, {gasLimit}, {u64: nftId}, ISAUTHENTICATED);
-
-  // convert to JSON format for convenience
-  var OUTPUT = JSON.parse(JSON.stringify(output));
-  var RESULT = JSON.parse(JSON.stringify(result));
-
-  // check if the call was successful
-  if (result.isOk) {
-      
-    // check if OK result is reverted contract that returned error
-    if (RESULT.ok.flags == 'Revert') {
-
-      // is this error a custom error?      
-      if (OUTPUT.ok.err.hasOwnProperty('custom')) {
-
-        // logging custom error
-        let error = OUTPUT.ok.err.custom.toString().replace(/0x/, '')
-        console.log(red(`UA-NFT`) + color.bold(`|RESTRICTED-AREA: `) +
-          `${hexToString(error)}`);
-        process.send('bad-username');
-        process.exit();
-
-      } else {
-          
-        // if not custom then print Error enum type
-        console.log(red(`UA-NFT`) + color.bold(`|RESTRICTED-AREA: `) +
-          `${OUTPUT.ok.err}`);
-      }
-    }
-  } else {
-
-    // loggin calling error and terminate
-    console.log(red(`UA-NFT`) + color.bold(`|RESTRICTED-AREA: `) +
-      `${result.asErr.toHuman()}`);
-  }
-
-  const authStatus = OUTPUT.ok;
-
-  if (authStatus == FALSE) {
-
-    process.send('not-authenticated');
-    process.exit();
-  }
-
   process.send('access-granted');
   process.exit();
-
       
   } catch(error) {
 
