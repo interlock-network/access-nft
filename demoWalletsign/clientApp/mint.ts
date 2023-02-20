@@ -74,55 +74,55 @@ async function mint() {
       }
 
       if (choice == true) {
-							
-	      // fork process to mint UANFT to client address
-  	    const mintTxChild = fork(mintTx);
-    	  mintTxChild.send(CLIENT_ADDRESS);
+              
+        // fork process to mint UANFT to client address
+        const mintTxChild = fork(mintTx);
+        mintTxChild.send(CLIENT_ADDRESS);
 
-      	// listen for results of mint tx
-	      mintTxChild.on('message', async (message) => {
+        // listen for results of mint tx
+        mintTxChild.on('message', async (message) => {
 
-  	      if (message == 'mint-complete') {
+          if (message == 'mint-complete') {
 
-    	      // get new array of nfts
-      	    //
-        	  // get nft collection for address
-          	var [ gasRequired, storageDeposit, RESULT_collection, OUTPUT_collection ] =
-            	await contractGetter(
-              	api,
-	              contract,
-  	            OWNER_PAIR,
-    	          'mint',
-      	        'getCollection',
-        	      CLIENT_ADDRESS,
-          	  );
-	          const collection = JSON.parse(JSON.stringify(OUTPUT_collection));
+            // get new array of nfts
+            //
+            // get nft collection for address
+            var [ gasRequired, storageDeposit, RESULT_collection, OUTPUT_collection ] =
+              await contractGetter(
+                api,
+                contract,
+                OWNER_PAIR,
+                'mint',
+                'getCollection',
+                CLIENT_ADDRESS,
+              );
+            const collection = JSON.parse(JSON.stringify(OUTPUT_collection));
 
-  	        // get the id of new nft (last in collection)
-    	      const nftId: any = Array.from(collection.ok.ok).pop();
+            // get the id of new nft (last in collection)
+            const nftId: any = Array.from(collection.ok.ok).pop();
 
-	          // success
-  	        console.log(green(`\n\nUA-NFT`) + color.bold(`|CLIENT-APP: `) +
-    	        color.bold(`Universal Access NFT successfully minted!!!`));
+            // success
+            console.log(green(`\n\nUA-NFT`) + color.bold(`|CLIENT-APP: `) +
+              color.bold(`Universal Access NFT successfully minted!!!`));
 
-      	    console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-        	    color.bold(`Your new Universal Access NFT is `) +
-          	  red(`ID ${nftId.u64}`) + color.bold(`!\n`));
-	          console.log(color.bold.magenta(`\n\nUA-NFT`) + color.bold(`|CLIENT-APP: `) +
-  	          color.bold(`Check out your collection to see NFT status.\n`));
+            console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
+              color.bold(`Your new Universal Access NFT is `) +
+              red(`ID ${nftId.u64}`) + color.bold(`!\n`));
+            console.log(color.bold.magenta(`\n\nUA-NFT`) + color.bold(`|CLIENT-APP: `) +
+              color.bold(`Check out your collection to see NFT status.\n`));
 
-    	      await returnToMain('return to main menu to register or display NFT');
+            await returnToMain('return to main menu to register or display NFT');
 
-      	  // if some other message
-        	} else {
+          // if some other message
+          } else {
 
-	          // failure
-  	        console.log(red(`\n\nUA-NFT`) + color.bold(`|CLIENT-APP: `) +
-    	        color.bold(`Something went wrong minting UANFT.`));
+            // failure
+            console.log(red(`\n\nUA-NFT`) + color.bold(`|CLIENT-APP: `) +
+              color.bold(`Something went wrong minting UANFT.`));
 
-      	    await returnToMain('return to main menu');
-        	}
-	      });
+            await returnToMain('return to main menu');
+          }
+        });
       }
     })();
   } catch(error) {

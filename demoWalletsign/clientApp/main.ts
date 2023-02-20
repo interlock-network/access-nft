@@ -6,7 +6,7 @@
 // child process paths
 import * as path from 'path';
 const menu = path.resolve('main.js');
-const addWallet = path.resolve('clientAddWallet.js');
+const addWallet = path.resolve('addWallet.js');
 const deleteWallet = path.resolve('clientDeleteWallet.js');
 const mint = path.resolve('mint.js');
 const authenticate = path.resolve('clientAuthenticate.js');
