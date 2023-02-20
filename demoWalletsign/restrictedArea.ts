@@ -13,14 +13,10 @@ import * as figlet from 'figlet';
 
 // child process paths
 import * as path from 'path';
-const restrictedCredentialCheck = path.resolve('restrictedCredentialCheck.js');
+const restrictedGetCredential = path.resolve('restrictedGetCredential.js');
 
 // utility functions
 import {
-  contractGetter,
-  setupSession,
-  terminateProcess,
-  contractDoer,
   getHash
 } from "./utils";
 
@@ -68,10 +64,10 @@ io.on('connect', (socket) => {
       global.gc();
     
       // fetch the passhash corresponding to userhash from blockchain
-      const restrictedCredentialCheckChild = fork(restrictedCredentialCheck);
-      restrictedCredentialCheckChild.send( {userhash: userhash, passhash: passhash} );
+      const restrictedGetCredentialChild = fork(restrictedGetCredential);
+      restrictedGetCredentialChild.send( {userhash: userhash, passhash: passhash} );
 
-      restrictedCredentialCheckChild.on('message', (results) => {
+      restrictedGetCredentialChild.on('message', (results) => {
 
         if (results == 'bad-username') {
 
