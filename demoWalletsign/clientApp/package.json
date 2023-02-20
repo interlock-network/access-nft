@@ -2,12 +2,12 @@
   "name": "walletsign-uanft-demo-app",
   "version": "1.0.0",
   "description": "universal access NFT demonstration application, the wallet-signing version",
-  "main": "clientMain.js",
+  "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Blair Munro",
-  "license": "ISC",
+  "license": "GPL-3.0-or-later",
   "dependencies": {
     "@polkadot/api": "^9.14.2",
     "@polkadot/api-contract": "^9.14.2",

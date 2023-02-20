@@ -29,10 +29,10 @@ const bold = color.bold;
 
 // start menu options
 const options = [
-  { title: bold('create or add wallet for demo app\n'), value: 'add'},
+  { title: bold('add wallet or use default for signing tx\n'), value: 'add'},
   { title: bold('mint new universal access NFT\n'), value: 'mint' },
   { title: bold('register or reset universal access NFT credentials\n'), value: 'authenticate' },
-  { title: bold('see universal access NFT collection\n'), value: 'display' },
+  { title: bold('display universal access NFT collection\n'), value: 'display' },
   { title: bold('login to restricted access area\n'), value: 'login' },
   { title: bold('delete wallet information\n'), value: 'delete' },
   { title: bold('quit application\n'), value: 'quit' }
@@ -46,7 +46,7 @@ async function mainMenu() {
       {
         type: 'select',
         name: 'choice',
-        message: blue('\n UNIVERSAL ACCESS NFT DEMO APP ~ PLEASE CHOOSE AN ACTION!\n'),
+        message: blue(' UNIVERSAL ACCESS NFT DEMO APP ~ PLEASE CHOOSE AN ACTION!\n'),
         choices: options,
       }
     ]);
@@ -135,24 +135,20 @@ async function mainMenu() {
 }
 
 console.clear();
-console.log(blue(`\n\n Welcome to the Universal Access NFT demo app!\n\n`));
+console.log(blue(`\n Welcome to the Universal Access NFT demo app!\n`));
 
 console.log(red(` The value of this tech is as a blockchain-based secret/access`));
 console.log(red(` management system using NFTs and crypto hashing to establish`));
 console.log(red(` access permissions/credentials highly resistant to compromise.\n`));
 
 console.log(yellow(`. NFT provides owner right to register one set of access credentials.`));
-console.log(yellow(`. All stored credential info--all id info--is kept secret.`));
-console.log(yellow(`. Never are access permission secrets or id info stored in database.`));
-console.log(yellow(`. Id info and secrets stored on blockchain as SHA256 hash digests.`));
-console.log(yellow(`. Secrets are only as vulnerable as https protocol or root ability`));
-console.log(yellow(`  to scrape runtime memory in the server responsible for granting`));
-console.log(yellow(`  client applications auth token or access to restricted area`));
-console.log(yellow(`  (that is, disregarding cases of compromised client device or phish).\n`));
+console.log(yellow(`. All credential info is kept secret, anonymized on blockchain..`));
+console.log(yellow(`. Never are access credentials stored in database.`));
+console.log(yellow(`. Anonymized credentials stored on blockchain as SHA256 hash digests.`));
+console.log(yellow(`. Architecture lends itself to future zero-knowledge proof scheme.\n`));
 
 console.log(bold.magenta(` This is a proof of concept containing all the key pieces.`));
-console.log(bold.magenta(` Production implementations will vary.\n\n`));
-
-console.log(blue(`~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n`));
+console.log(bold.magenta(` Production implementations will vary. Implementation may be`));
+console.log(bold.magenta(` configured for basic username/password, or 2FA token issue.\n`));
 
 mainMenu();
