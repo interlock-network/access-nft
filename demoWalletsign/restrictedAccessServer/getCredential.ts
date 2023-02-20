@@ -1,6 +1,6 @@
 //
 // INTERLOCK NETWORK & ALEPH ZERO
-// PSP34 UNIVERSAL ACCESS NFT - RESTRICTED CREDENTIAL CHECK
+// PSP34 UNIVERSAL ACCESS NFT - RESTRICTED ACCESS AREA GET CREDENTIAL
 //
 
 // imports (anything polkadot with node-js must be required)
@@ -9,31 +9,29 @@ const { ContractPromise, CodePromise } = require('@polkadot/api-contract');
 const WeightV2 = require('@polkadot/types/interfaces');
 
 // imports
-import { io } from 'socket.io-client';
-
-// utility functions
-import {
-  setupSession,
-  hexToString
-} from "./utils";
+import { readFileSync } from "fs";
+import * as dotenv from 'dotenv';
+dotenv.config();
 
 // specify color formatting
 import * as color from 'cli-color';
 const red = color.red.bold;
-const green = color.green.bold;
 const blue = color.blue.bold;
 const cyan = color.cyan;
-const yellow = color.yellow.bold;
-const magenta = color.magenta;
+const magenta = color.magenta.bold;
 
+// constants
 const OWNER_MNEMONIC = process.env.OWNER_MNEMONIC;
+const WEB_SOCKET = process.env.WEB_SOCKET;
+const ACCESS_METADATA = JSON.parse(readFileSync(process.env.ACCESS_METADATA).toString());
+const ACCESS_CONTRACT = process.env.ACCESS_CONTRACT;
 
 async function credentialCheck(message) {
 
   try {
   
   // establish connection with blockchain
-  const [ api, contract ] = await setupSession('restrictedArea');
+  const [ api, contract ] = await setupSession('getCredential');
 
   // create keypair for owner
   const keyring = new Keyring({type: 'sr25519'});
@@ -112,4 +110,45 @@ process.on('message', message => {
   });
 });
 
+//
+// convert hex string to ASCII string
+//
+function hexToString(hex: String) {
 
+  // iterate through hex string taking byte chunks and converting to ASCII characters
+  var str = '';
+  for (var i = 0; i < hex.length; i += 2) {
+    str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+  }
+
+  return str;
+}
+
+//
+// setup blockchain connection session
+//
+async function setupSession(
+  origin: string
+) {
+
+  // setup session
+  //
+  // logging
+  console.log(blue(`UA-NFT`) + color.bold(`|BLOCKCHAIN: `) +
+    color.bold(`${origin} connecting to ` + magenta(`Aleph Zero blockchain`)));
+
+  // create api object
+  const wsProvider = new WsProvider(WEB_SOCKET);
+  const API = await ApiPromise.create({ provider: wsProvider });
+
+  // logging
+  console.log(blue(`UA-NFT`) + color.bold(`|BLOCKCHAIN: `) +
+    color.bold(`secured websocket with ` + magenta(`Aleph Zero blockchain `)));
+  console.log(blue(`UA-NFT`) + color.bold(`|BLOCKCHAIN: `) +
+    color.bold(`at ` + cyan(`${WEB_SOCKET}\n`)));
+
+  // create contract object
+  const CONTRACT = new ContractPromise(API, ACCESS_METADATA, ACCESS_CONTRACT);
+
+  return [ API, CONTRACT ]
+}

@@ -10,15 +10,11 @@ import { readFileSync } from "fs";
 import { Server } from "socket.io";
 import * as express from 'express';
 import * as figlet from 'figlet';
+import * as crypto from 'crypto';
 
 // child process paths
 import * as path from 'path';
 const restrictedGetCredential = path.resolve('getCredential.js');
-
-// utility functions
-import {
-  getHash
-} from "./utils";
 
 // specify color formatting
 import * as color from 'cli-color';
@@ -31,8 +27,6 @@ const magenta = color.magenta.bold;
 // constants
 const SERVERPORT = 8443;
 
-var somethingUseful;
-
 // setup server
 const app = express();
 const options = {  
@@ -42,6 +36,10 @@ const options = {
 const httpsServer = createServer(options, app);
 const io = new Server(httpsServer);
 
+// state variable only accessible to those inside restricted access area
+var somethingUseful: boolean;
+
+// on secure https client connection to restricted access server
 io.on('connect', (socket) => {
 
   console.log(blue(`UA-NFT`) + color.bold(`|RESTRICTED-AREA: `) +
@@ -197,3 +195,17 @@ httpsServer.listen(SERVERPORT, () => {
   console.log(blue(`UA-NFT`) + color.bold(`|RESTRICTED-AREA: `) +
     color.bold(`area, ready for connecting applications\n`));  
 });
+
+//
+// calculate SHA256 hash
+//
+function getHash(input) {
+
+  const digest = crypto
+    .createHash('sha256')
+    .update(input ?? '')
+    .digest('hex');
+
+  return digest
+}
+
