@@ -8,7 +8,7 @@ import * as path from 'path';
 const menu = path.resolve('clientMain.js');
 const addWallet = path.resolve('clientAddWallet.js');
 const deleteWallet = path.resolve('clientDeleteWallet.js');
-const mint = path.resolve('clientMint.js');
+const mint = path.resolve('mint.js');
 const authenticate = path.resolve('clientAuthenticate.js');
 const display = path.resolve('clientDisplay.js');
 const login = path.resolve('clientLogin.js');
