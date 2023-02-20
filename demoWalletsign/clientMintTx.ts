@@ -58,7 +58,7 @@ async function mint(recipient) {
     	await contractGetter(
       	api,
 	      contract,
-  	    origin,
+  	    'mint',
     	  'mint',
       	recipient
 	    ); 
