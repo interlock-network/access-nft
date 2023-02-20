@@ -31,7 +31,7 @@ const bold = color.bold;
 const options = [
   { title: bold('create or add wallet for demo app'), value: 'add'},
   { title: bold('mint new universal access NFT'), value: 'mint' },
-  { title: bold('register universal access NFT'), value: 'authenticate' },
+  { title: bold('register or reset universal access NFT credentials'), value: 'authenticate' },
   { title: bold('see universal access NFT collection'), value: 'display' },
   { title: bold('login to restricted access area'), value: 'login' },
   { title: bold('delete wallet information'), value: 'delete' },
