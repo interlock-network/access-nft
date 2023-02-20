@@ -11,7 +11,7 @@ const deleteWallet = path.resolve('deleteWallet.js');
 const mint = path.resolve('mint.js');
 const authenticate = path.resolve('authenticate.js');
 const display = path.resolve('display.js');
-const login = path.resolve('clientLogin.js');
+const login = path.resolve('login.js');
 
 // imports
 import { fork } from 'child_process';
