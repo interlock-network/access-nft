@@ -53,7 +53,7 @@ async function credentialCheck(message) {
 
   // get getter output
   var { gasRequired, storageDeposit, result, output } =
-    await contract.query['checkCredential'](
+    await contract.query['getCredential'](
       OWNER_PAIR.address, {gasLimit}, '0x' + message.userhash);
 
   // convert to JSON format for convenience
