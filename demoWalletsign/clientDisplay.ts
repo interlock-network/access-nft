@@ -34,6 +34,7 @@ import {
 
 // constants
 const WALLET = JSON.parse(readFileSync('.wallet.json').toString());
+const CLIENT_MNEMONIC = WALLET.CLIENT_MNEMONIC;
 const CLIENT_ADDRESS = WALLET.CLIENT_ADDRESS;
 
 async function display() {
@@ -42,6 +43,10 @@ async function display() {
 
     // establish connection with blockchain
     const [ api, contract ] = await setupSession('setAuthenticated');
+
+		// create keypair for owner
+	  const keyring = new Keyring({type: 'sr25519'});
+  	const CLIENT_PAIR = keyring.addFromUri(CLIENT_MNEMONIC);
 
     console.log(color.bold.magenta(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
       color.bold(`Reminder...`));
@@ -85,6 +90,7 @@ async function display() {
       await contractGetter(
         api,
         contract,
+				CLIENT_PAIR,
         'Authenticate',
         'getCollection',
         CLIENT_ADDRESS,
@@ -105,6 +111,7 @@ async function display() {
         await contractGetter(
           api,
           contract,
+					CLIENT_PAIR,
           'display',
           'isAuthenticated',
           {u64: nft.u64},

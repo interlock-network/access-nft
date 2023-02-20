@@ -44,20 +44,21 @@ async function mint(recipient) {
     // establish connection with blockchain
     const [ api, contract ] = await setupSession('setAuthenticated');
 
+    // create key pair for owner
+    const keyring = new Keyring({type: 'sr25519'});
+    const OWNER_PAIR = keyring.addFromUri(OWNER_MNEMONIC);
+
     console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
       `minting UA-NFT for`);
     console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
       magenta(`${recipient}\n`));
-
-    // create key pair for owner
-    const keyring = new Keyring({type: 'sr25519'});
-    const OWNER_PAIR = keyring.addFromUri(OWNER_MNEMONIC);
 
     // get attribute isauthenticated state
     var [ gasRequired, storageDeposit, RESULT, OUTPUT ] =
       await contractGetter(
         api,
         contract,
+	OWNER_PAIR,
         'mint',
         'mint',
         recipient

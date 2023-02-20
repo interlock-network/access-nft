@@ -55,6 +55,10 @@ async function authenticate() {
     // establish connection with blockchain
     const [ api, contract ] = await setupSession('authenticate');
 
+		// create keypair for owner
+	  const keyring = new Keyring({type: 'sr25519'});
+  	const CLIENT_PAIR = keyring.addFromUri(CLIENT_MNEMONIC);
+
     // check to see if CLIENT_ADDRESS has nft collection
     if (!(await hasCollection(api, contract, CLIENT_ADDRESS))) {
         
@@ -74,6 +78,7 @@ async function authenticate() {
       await contractGetter(
         api,
         contract,
+        CLIENT_PAIR,
         'Authenticate',
         'getCollection',
         CLIENT_ADDRESS,
@@ -94,6 +99,7 @@ async function authenticate() {
         await contractGetter(
           api,
           contract,
+					CLIENT_PAIR,
           'Authenticate',
           'isAuthenticated',
           {u64: nft.u64},
@@ -321,15 +327,12 @@ async function authenticate() {
                   color.bold(`Error: ${message}\n`));
 
                 await returnToMain('return to main menu to retry registration');
-              
               }
             });
           })();
         })().catch(error => otherError());
       }
     })().catch(error => otherError());
-
-
   } catch(error) {
 
     console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) + error);

@@ -47,7 +47,11 @@ async function mint() {
   try {
 
     // establish connection with blockchain
-    const [ api, contract ] = await setupSession('authenticate');
+    const [ api, contract ] = await setupSession('mint');
+
+		// create keypair for owner
+	  const keyring = new Keyring({type: 'sr25519'});
+  	const OWNER_PAIR = keyring.addFromUri(OWNER_MNEMONIC);
    
     // confirm mint process begining
     await (async () => {
@@ -85,6 +89,7 @@ async function mint() {
             await contractGetter(
               api,
               contract,
+							OWNER_PAIR,
               'mint',
               'getCollection',
               CLIENT_ADDRESS,
@@ -92,7 +97,7 @@ async function mint() {
           const collection = JSON.parse(JSON.stringify(OUTPUT_collection));
 
           // get the id of new nft (last in collection)
-          const nftId = Array.from(collection.ok.ok).pop();
+          const nftId: any = Array.from(collection.ok.ok).pop();
 
           // success
           console.log(green(`\n\nUA-NFT`) + color.bold(`|CLIENT-APP: `) +
@@ -100,7 +105,7 @@ async function mint() {
 
           console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
             color.bold(`Your new Universal Access NFT is `) +
-            red(`ID ${nftId}`) + color.bold(`!\n`));
+            red(`ID ${nftId.u64}`) + color.bold(`!\n`));
           console.log(color.bold.magenta(`\n\nUA-NFT`) + color.bold(`|CLIENT-APP: `) +
             color.bold(`Check out your collection to see NFT status.\n`));
 

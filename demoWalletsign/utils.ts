@@ -38,14 +38,11 @@ const CLIENT_MNEMONIC = WALLET.CLIENT_MNEMONIC
 export async function contractGetter(
   api: any,
   contract: any,
+  pair: any,
   origin: string,
   method: string,
   ...args: any[]
 ) {
-
-  // create keypair for owner
-  const keyring = new Keyring({type: 'sr25519'});
-  const CLIENT_PAIR = keyring.addFromUri(CLIENT_MNEMONIC);
 
   // define special type for gas weights
   type WeightV2 = InstanceType<typeof WeightV2>;
@@ -57,7 +54,7 @@ export async function contractGetter(
   // get getter output
   var { gasRequired, storageDeposit, result, output } =
     await contract.query[method](
-      CLIENT_PAIR.address, {gasLimit}, ...args);
+      pair.address, {gasLimit}, ...args);
 
   // convert to JSON format for convenience
   const OUTPUT = JSON.parse(JSON.stringify(output));
@@ -107,6 +104,7 @@ export async function contractGetter(
 export async function contractDoer(
   api: any,
   contract: any,
+  pair: any,
   storageMax: any,
   refTimeLimit: any,
   proofSizeLimit: any,
@@ -115,15 +113,12 @@ export async function contractDoer(
   ...args: any[]
 ) {
 
-  // create key pair for owner
-  const keyring = new Keyring({type: 'sr25519'});
-  const CLIENT_PAIR = keyring.addFromUri(CLIENT_MNEMONIC);
-
     // get attribute isauthenticated state
   var [ gasRequired, storageDeposit, RESULT, OUTPUT ] =
     await contractGetter(
       api,
       contract,
+      pair,
       origin,
       method,
       ...args
@@ -152,14 +147,14 @@ export async function contractDoer(
     // emit error message with signature values to server
     console.log(red(`UA-NFT`) + color.bold(`|BLOCKCHAIN: `) +
       'tx needs too much storage');
-    process.send('gas-limit');
+    process.send('storage-limit');
     process.exit();
   }
 
   // submit doer tx
   let extrinsic = await contract.tx[method](
     { storageMax, gasLimit }, ...args)
-      .signAndSend(CLIENT_PAIR, result => {
+      .signAndSend(pair, result => {
 
     // when tx hits block
     if (result.status.isInBlock) {
