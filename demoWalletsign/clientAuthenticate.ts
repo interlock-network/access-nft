@@ -248,6 +248,8 @@ async function authenticate() {
 
               if (message == 'register-complete') {
 
+								console.clear();
+
                 console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
                   color.bold(`Your anonymized NFT access credentials have`));
                 console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
