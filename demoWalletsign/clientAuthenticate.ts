@@ -250,7 +250,7 @@ async function authenticate() {
 
 								console.clear();
 
-                console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
+                console.log(green(`\n\nUA-NFT`) + color.bold(`|CLIENT-APP: `) +
                   color.bold(`Your anonymized NFT access credentials have`));
                 console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
                   color.bold(`been stored on the blockchain.\n\n\n\n\n`));

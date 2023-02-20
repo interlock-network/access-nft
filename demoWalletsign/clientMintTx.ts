@@ -1,6 +1,6 @@
 //
 // INTERLOCK NETWORK & ALEPH ZERO
-// PSP34 UNIVERSAL ACCESS NFT - CLIENT REGISTER
+// PSP34 UNIVERSAL ACCESS NFT - CLIENT MINT TX
 //
 
 // utility functions
@@ -13,53 +13,58 @@ import {
 import * as color from 'cli-color';
 const red = color.red.bold;
 const green = color.green.bold;
+const blue = color.blue.bold;
+const cyan = color.cyan;
+const yellow = color.yellow.bold;
+const magenta = color.magenta;
 
 // constants
 //
 // null === no limit
 // refTime and proofSize determined by contracts-ui estimation plus fudge-factor
 const refTimeLimit = 8000000000;
-const proofSizeLimit = 150000;
+const proofSizeLimit = 180000;
 const storageDepositLimit = null;
 
-async function register(message) {
+async function mint(recipient) {
 
   try {
 
     // establish connection with blockchain
-    const [ api, contract ] = await setupSession('register');
+    const [ api, contract ] = await setupSession('setAuthenticated');
 
     console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-      `registering credentials for NFT ` + red(`ID ${message.id}`));
+      `minting UA-NFT for`);
+    console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
+      magenta(`${recipient}\n`));
 
-    // call register tx
+    // call mint tx
     await contractDoer(
       api,
       contract,
       storageDepositLimit,
       refTimeLimit,
       proofSizeLimit,
-      'register',
-      'register',
-      {u64: message.id},
-      '0x' + message.userhash,
-      '0x' + message.passhash,
-    );
+      'mint',
+      'mint',
+      recipient
+   );
 
   } catch(error) {
 
     console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) + error);
 
-    process.send('register-process-error');
+    process.send('program-error');
     process.exit();
   }
 }
 
-process.on('message', message => {
+process.on('message', recipient => {
 
-  register(message).catch((error) => {
+  mint(recipient).catch((error) => {
 
     console.error(error);
     process.exit(-1);
   });
 });
+
