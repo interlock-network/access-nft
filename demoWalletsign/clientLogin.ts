@@ -128,12 +128,12 @@ socket.on('connect', async () => {
           } else if (message == 'access-granted') {
 
             console.clear();
-            console.log(green(`\n LOGIN SUCCESS!!!\n\n\n\n\n\n\n`));
+            console.log(green(`\n LOGIN SUCCESS!!!\n\n`));
             socket.emit('fetch-art');
 
             socket.on('ascii-art', (art) => {
 
-              console.log(red(`\n\n${art}`));
+              console.log(red(`${art}`));
               console.log(`\n\n\n\n\n\n\n`);
 
               // prompt

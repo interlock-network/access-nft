@@ -43,7 +43,7 @@ async function register(message) {
     const CLIENT_PAIR = keyring.addFromUri(CLIENT_MNEMONIC);
 
     console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-      `registering credentials for NFT ` + red(`ID ${message.id}`));
+      color.bold(`registering credentials for NFT `) + red(`ID ${message.id}`));
 
     // call register tx
     await contractDoer(

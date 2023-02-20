@@ -49,7 +49,7 @@ async function mint(recipient) {
     const OWNER_PAIR = keyring.addFromUri(OWNER_MNEMONIC);
 
     console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-      `minting UA-NFT for`);
+      color.bold(`minting UA-NFT for`));
     console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
       magenta(`${recipient}\n`));
 

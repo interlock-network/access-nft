@@ -73,13 +73,13 @@ export async function contractGetter(
         // logging custom error
         outputerror = hexToString(OUTPUT.ok.err.custom.toString().replace(/0x/, ''));
         console.log(red(`UA-NFT`) + color.bold(`|BLOCKCHAIN: `) +
-          `${outputerror}`);
+          color.bold(`${outputerror}`));
       } else {
           
         // if not custom then print Error enum type
         outputerror = OUTPUT.ok.err
         console.log(red(`UA-NFT`) + color.bold(`|BLOCKCHAIN: `) +
-          `${outputerror}`);
+          color.bold(`${outputerror}`));
       }
 
       // send message and signature values to servers
@@ -90,7 +90,8 @@ export async function contractGetter(
     // send calling error message
     outputerror = result.asErr.toHuman();
     console.log(red(`UA-NFT`) + color.bold(`|BLOCKCHAIN: `) +
-      `${outputerror}`);
+      color.bold(`${outputerror}`));
+
     return [ false, false, false, false ]
   }
 
@@ -136,7 +137,7 @@ export async function contractDoer(
   
     // emit error message with signature values to server
     console.log(red(`UA-NFT`) + color.bold(`|BLOCKCHAIN: `) +
-      'tx needs too much gas');
+      color.bold('tx needs too much gas'));
     process.send('gas-limit');
     process.exit();
   }
@@ -146,7 +147,7 @@ export async function contractDoer(
   
     // emit error message with signature values to server
     console.log(red(`UA-NFT`) + color.bold(`|BLOCKCHAIN: `) +
-      'tx needs too much storage');
+      color.bold('tx needs too much storage'));
     process.send('storage-limit');
     process.exit();
   }
@@ -160,7 +161,8 @@ export async function contractDoer(
     if (result.status.isInBlock) {
 
       // logging
-      console.log(yellow(`UA-NFT`) + color.bold(`|BLOCKCHAIN: `) + `${method} in a block`);
+      console.log(yellow(`UA-NFT`) + color.bold(`|BLOCKCHAIN: `) +
+				color.bold(`${method} in a block`));
 
     // when tx is finalized in block, tx is successful
     } else if (result.status.isFinalized) {

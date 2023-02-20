@@ -29,13 +29,13 @@ const bold = color.bold;
 
 // start menu options
 const options = [
-  { title: bold('create or add wallet for demo app'), value: 'add'},
-  { title: bold('mint new universal access NFT'), value: 'mint' },
-  { title: bold('register or reset universal access NFT credentials'), value: 'authenticate' },
-  { title: bold('see universal access NFT collection'), value: 'display' },
-  { title: bold('login to restricted access area'), value: 'login' },
-  { title: bold('delete wallet information'), value: 'delete' },
-  { title: bold('quit application'), value: 'quit' }
+  { title: bold('create or add wallet for demo app\n'), value: 'add'},
+  { title: bold('mint new universal access NFT\n'), value: 'mint' },
+  { title: bold('register or reset universal access NFT credentials\n'), value: 'authenticate' },
+  { title: bold('see universal access NFT collection\n'), value: 'display' },
+  { title: bold('login to restricted access area\n'), value: 'login' },
+  { title: bold('delete wallet information\n'), value: 'delete' },
+  { title: bold('quit application\n'), value: 'quit' }
 ];
 
 async function mainMenu() {
