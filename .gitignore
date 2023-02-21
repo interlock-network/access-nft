@@ -1,6 +1,5 @@
 # ignore stuff
 
-build
 .idea
 .arcconfig
 *.iml
