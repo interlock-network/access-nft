@@ -42,6 +42,7 @@ const CLIENT_ADDRESS = WALLET.CLIENT_ADDRESS;
 const OWNER_MNEMONIC = process.env.OWNER_MNEMONIC
 const OWNER_ADDRESS = process.env.OWNER_ADDRESS;
 
+// disclaimer regarding this minting functionality in context of client application
 console.log(magenta(`This mint transaction is signed using the contract owner's`));
 console.log(magenta(`keypair for convenience in this demo app. In production,`));
 console.log(magenta(`the restricted access server would serve as transaction relay`));
@@ -65,7 +66,7 @@ async function mint() {
     // confirm mint process begining
     await (async () => {
 
-      // get response
+      // get response to confirm mint operation
       var responseChoice = await prompts({
         type: 'confirm',
         name: 'choice',
@@ -82,6 +83,7 @@ async function mint() {
         process.exit();
       }
 
+      // if confirmed, initiate mint operation
       if (choice == true) {
               
         // fork process to mint UANFT to client address
@@ -91,9 +93,10 @@ async function mint() {
         // listen for results of mint tx
         mintTxChild.on('message', async (message) => {
 
+          // when mint succeeds child process will declare so
           if (message == 'mint-complete') {
 
-            // get new array of nfts
+            // get the resulting new array of nfts
             //
             // get nft collection for address
             var [ gasRequired, storageDeposit, RESULT_collection, OUTPUT_collection ] =
@@ -107,10 +110,10 @@ async function mint() {
               );
             const collection = JSON.parse(JSON.stringify(OUTPUT_collection));
 
-            // get the id of new nft (last in collection)
+            // get the id of new nft (last in collection) so we can give to user
             const nftId: any = Array.from(collection.ok.ok).pop();
 
-            // success
+            // mint success notification
             console.log(green(`\n\nUA-NFT`) + color.bold(`|CLIENT-APP: `) +
               color.bold(`Universal Access NFT successfully minted!!!`));
 
@@ -122,10 +125,10 @@ async function mint() {
 
             await returnToMain('return to main menu to register or display NFT');
 
-          // if some other message
+          // if some other message, implies failure
           } else {
 
-            // failure
+            // mint failure notification
             console.log(red(`\n\nUA-NFT`) + color.bold(`|CLIENT-APP: `) +
               color.bold(`Something went wrong minting UANFT.`));
 
@@ -138,8 +141,8 @@ async function mint() {
 
     console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) + error);
 
-    //process.send('mint-process-error');
-    //process.exit();
+    process.send('mint-process-error');
+    process.exit();
   }
 }
 
