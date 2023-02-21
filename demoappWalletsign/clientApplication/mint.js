@@ -66,6 +66,7 @@ var WALLET = JSON.parse((0, fs_1.readFileSync)('.wallet.json').toString());
 var CLIENT_ADDRESS = WALLET.CLIENT_ADDRESS;
 var OWNER_MNEMONIC = process.env.OWNER_MNEMONIC;
 var OWNER_ADDRESS = process.env.OWNER_ADDRESS;
+// disclaimer regarding this minting functionality in context of client application
 console.log(magenta("This mint transaction is signed using the contract owner's"));
 console.log(magenta("keypair for convenience in this demo app. In production,"));
 console.log(magenta("the restricted access server would serve as transaction relay"));
@@ -108,6 +109,7 @@ function mint() {
                                             process.send('done');
                                             process.exit();
                                         }
+                                        // if confirmed, initiate mint operation
                                         if (choice == true) {
                                             mintTxChild = (0, child_process_1.fork)(mintTx);
                                             mintTxChild.send(CLIENT_ADDRESS);
@@ -123,7 +125,7 @@ function mint() {
                                                             _a = _b.sent(), gasRequired = _a[0], storageDeposit = _a[1], RESULT_collection = _a[2], OUTPUT_collection = _a[3];
                                                             collection = JSON.parse(JSON.stringify(OUTPUT_collection));
                                                             nftId = Array.from(collection.ok.ok).pop();
-                                                            // success
+                                                            // mint success notification
                                                             console.log(green("\n\nUA-NFT") + color.bold("|CLIENT-APP: ") +
                                                                 color.bold("Universal Access NFT successfully minted!!!"));
                                                             console.log(green("UA-NFT") + color.bold("|CLIENT-APP: ") +
@@ -136,7 +138,7 @@ function mint() {
                                                             _b.sent();
                                                             return [3 /*break*/, 5];
                                                         case 3:
-                                                            // failure
+                                                            // mint failure notification
                                                             console.log(red("\n\nUA-NFT") + color.bold("|CLIENT-APP: ") +
                                                                 color.bold("Something went wrong minting UANFT."));
                                                             return [4 /*yield*/, (0, utils_1.returnToMain)('return to main menu')];
@@ -159,6 +161,8 @@ function mint() {
                 case 3:
                     error_1 = _b.sent();
                     console.log(red("UA-NFT") + color.bold("|CLIENT-APP: ") + error_1);
+                    process.send('mint-process-error');
+                    process.exit();
                     return [3 /*break*/, 4];
                 case 4: return [2 /*return*/];
             }

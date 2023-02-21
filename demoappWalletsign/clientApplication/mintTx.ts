@@ -23,10 +23,11 @@ const cyan = color.cyan;
 const yellow = color.yellow.bold;
 const magenta = color.magenta;
 
-// environment constants
+// import package
 import * as dotenv from 'dotenv';
 dotenv.config();
 
+// environment contstant
 const OWNER_MNEMONIC = process.env.OWNER_MNEMONIC;
 
 // constants
@@ -53,7 +54,7 @@ async function mint(recipient) {
     console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
       magenta(`${recipient}\n`));
 
-    // call mint tx
+    // call mint tx using contract owner's keypair
     await contractDoer(
       api,
       contract,

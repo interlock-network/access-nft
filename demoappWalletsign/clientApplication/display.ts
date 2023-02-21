@@ -32,7 +32,7 @@ import {
   hasCollection
 } from "./utils";
 
-// constants
+// wallet constants
 const WALLET = JSON.parse(readFileSync('.wallet.json').toString());
 const CLIENT_MNEMONIC = WALLET.CLIENT_MNEMONIC;
 const CLIENT_ADDRESS = WALLET.CLIENT_ADDRESS;
@@ -48,6 +48,7 @@ async function display() {
     const keyring = new Keyring({type: 'sr25519'});
     const CLIENT_PAIR = keyring.addFromUri(CLIENT_MNEMONIC);
 
+    // reminder notification that user must remember credentials
     console.log(color.bold.magenta(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
       color.bold(`Reminder...`));
     console.log(color.bold.magenta(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
@@ -57,6 +58,7 @@ async function display() {
     console.log(color.bold.magenta(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
       color.bold(`each authenticated universal access NFT.\n`));
 
+    // notification explaining that credentials are not retrievable in readible form
     console.log(color.bold.magenta(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
       color.bold(`This is because username/password pairs`));
     console.log(color.bold.magenta(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
@@ -97,16 +99,18 @@ async function display() {
       );
     const collection = JSON.parse(JSON.stringify(OUTPUT_collection));
 
-    // find nft to authenticated
+    // get collection as array
     const nfts = Array.from(collection.ok.ok);
 
     // print table of NFTs and their authentication status
     console.log(color.bold(`\n YOUR UNIVERSAL ACCESS NFT COLLECTION:\n`));
     console.log(color.bold(`\tNFT ID\t\t\t\tSTATUS\n`));
+
+    // iterate through array
     let nft: any;
     for (nft of nfts) {
 
-      // get attribute isauthenticated state
+      // get authentication status
       var [ gasRequired, storageDeposit, RESULT_authenticated, OUTPUT_authenticated ] =
         await contractGetter(
           api,
@@ -118,14 +122,19 @@ async function display() {
         ); 
       let authenticated = JSON.parse(JSON.stringify(OUTPUT_authenticated));
 
-      // record nft id of one that is waiting and ready to authenticate
+      // display list of nfts and individual credential registration status
       if (authenticated.ok.ok == false) {
 
-        console.log(red(`\t${nft.u64}\t\t\t\tNEEDS AUTHENTICATION\n`));
+        // uanft has no credentials associated with it
+        console.log(red(`\t${nft.u64}\t\t\t\tNEEDS REGISTRATION\n`));
+
       } else {
-        console.log(green(`\t${nft.u64}\t\t\t\tSUCCESSFULLY AUTHENTICATED!\n`));
+
+        // uanft already has credentials assigned to it
+        console.log(green(`\t${nft.u64}\t\t\t\tSUCCESSFULLY REGISTERED!\n`));
       }
     }
+
     await returnToMain('return to register NFTs or login to restricted area');
 
   } catch(error) {
