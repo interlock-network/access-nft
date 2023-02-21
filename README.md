@@ -30,7 +30,7 @@ This repository contains all `node_modules` and `.env` files in order to make th
 
 First, you will need to open up your terminal and setup a couple things:
 
-### (1) - install git
+### (1) - install git:
 
 You need git first. Make sure you have it.
 
@@ -46,7 +46,7 @@ or
 sudo apt install git
 ```
 
-### (2) - install node.js
+### (2) - install node.js:
 
 Now you need to make sure you have node.js
 
@@ -72,7 +72,7 @@ If you are having trouble installing node.js, try visiting their website and dow
 [node.js install downloads](https://nodejs.org/en/download/) to find the installation package right for your machine.
 
 
-### (3) - clone this repository
+### (3) - clone this repository:
 
 Finally, clone this repository to your computer and navigate to to the `demonstration` directory within.
 
@@ -87,7 +87,7 @@ Now we can run the demonstration application!
 
 We need to spin up one server, and one client application.
 
-### (1) - RESTRICTED ACCESS SERVER
+### (1) - RESTRICTED ACCESS SERVER:
 
 Create a new terminal instance in a new tab, making sure it is in the `universal-access-nft` directory. Start up the restricted access area server. This server is responsible for receiving access credentials over https connection and verifying that their hashes match the hashes stored on the blockchain during the NFT credential registration process. This restricted access area server serves content that only verified universal access NFT holders have access to. In practice, this server could serve the entire experience, or it may simply issue an authentication token for proffer elsewhere. In this case, the server recieves a login request, it checks credentials, then grants or denies access to the restricted area. Run:
 
@@ -96,7 +96,7 @@ cd demonstration/restrictedAccessServer;
 node --expose-gc accessArea.js
 ```
 
-### (3) - CLIENT APPLICATION
+### (3) - CLIENT APPLICATION:
 
 Finally we can start up the client application. Create a new terminal instance in this same `universal-access-nft` directory. You could detach the terminal and place it side-by-side with the server terminal if you want to soak in all the play-by-play action at once. Run:
 
@@ -126,7 +126,7 @@ Navigate the menu options to explore the minting, credential registration, and l
 
 This series of flowcharts is for the case where a UANFT manages usernames and passwords.
 
-#### This flowchart outlines the credential registration process
+#### This flowchart outlines the credential registration process:
 
 ```mermaid
 
@@ -164,7 +164,7 @@ style ownerready fill:#490ec7,stroke:#490ec7,stroke-width:4px,color:#fff
 
 ```
 
-#### This flowchart outlines the login process
+#### This flowchart outlines the login process:
 
 ```mermaid
 
