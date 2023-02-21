@@ -59,19 +59,24 @@ var magenta = color.magenta;
 // utility functions
 var utils_1 = require("./utils");
 var OWNER_MNEMONIC = process.env.OWNER_MNEMONIC;
-// setup socket connection with autheticateWallet script
+// setup secure connection with accessArea server,
+// allowing self-signed certificate for demoapp purposes
+//
+// in production, one should use a certificate authority
 var socket = (0, socket_io_client_1.io)('https://localhost:8443', {
     rejectUnauthorized: false
 });
+// every time a client connects to login
 socket.on('connect', function () { return __awaiter(void 0, void 0, void 0, function () {
     return __generator(this, function (_a) {
+        // https connect success notification
         console.log(blue("\nUA-NFT") + color.bold("|CLIENT-APP: ") +
             color.bold("demoApp, SID" + cyan(" ".concat(socket.id)) + " connected"));
         console.log(blue("UA-NFT") + color.bold("|CLIENT-APP: ") +
             color.bold("to secure restricted access area server via https.\n"));
         // begin prompt tree
         //
-        // first prompt: login username
+        // prompt: login username
         (function () { return __awaiter(void 0, void 0, void 0, function () {
             var responseUsername, username;
             return __generator(this, function (_a) {
@@ -87,7 +92,7 @@ socket.on('connect', function () { return __awaiter(void 0, void 0, void 0, func
                         responseUsername = _a.sent();
                         username = responseUsername.username;
                         console.log('');
-                        // second prompt: password
+                        // prompt: password
                         (function () { return __awaiter(void 0, void 0, void 0, function () {
                             var responsePassword, password;
                             return __generator(this, function (_a) {
@@ -103,6 +108,8 @@ socket.on('connect', function () { return __awaiter(void 0, void 0, void 0, func
                                         responsePassword = _a.sent();
                                         password = responsePassword.password;
                                         console.log('');
+                                        // if not onCancel, notify credentials are begin sent to accessArea server to be
+                                        // hashed and checked against blockchain records
                                         if (password != undefined) {
                                             console.log(green("UA-NFT") + color.bold("|CLIENT-APP: ") +
                                                 color.bold("submitting login information over secure"));
@@ -110,7 +117,9 @@ socket.on('connect', function () { return __awaiter(void 0, void 0, void 0, func
                                                 color.bold("https connection for SHA256 hash verification"));
                                             console.log(green("UA-NFT") + color.bold("|CLIENT-APP: ") +
                                                 color.bold("against blockchain credential hash record.\n"));
+                                            // letting accessArea server know we want to access restricated access area
                                             socket.emit('request-access', username, password);
+                                            // wating for response from accessArea getCredential check
                                             socket.onAny(function (message) {
                                                 var args = [];
                                                 for (var _i = 1; _i < arguments.length; _i++) {
@@ -118,130 +127,114 @@ socket.on('connect', function () { return __awaiter(void 0, void 0, void 0, func
                                                 }
                                                 return __awaiter(void 0, void 0, void 0, function () {
                                                     return __generator(this, function (_a) {
-                                                        switch (_a.label) {
-                                                            case 0:
-                                                                if (!(message == 'bad-username')) return [3 /*break*/, 1];
-                                                                console.log(red("UA-NFT") + color.bold("|CLIENT-APP: ") +
-                                                                    color.bold("username is incorrect or does not exist..."));
-                                                                console.log(red("UA-NFT") + color.bold("|CLIENT-APP: ") +
-                                                                    color.bold("...please try again\n"));
-                                                                setTimeout(function () {
-                                                                    process.send('fail');
-                                                                    process.exit();
-                                                                }, 3000);
-                                                                return [3 /*break*/, 5];
-                                                            case 1:
-                                                                if (!(message == 'bad-password')) return [3 /*break*/, 2];
-                                                                console.log(red("UA-NFT") + color.bold("|CLIENT-APP: ") +
-                                                                    color.bold("password is incorrect..."));
-                                                                console.log(red("UA-NFT") + color.bold("|CLIENT-APP: ") +
-                                                                    color.bold("...please try again\n"));
-                                                                setTimeout(function () {
-                                                                    process.send('fail');
-                                                                    process.exit();
-                                                                }, 3000);
-                                                                return [3 /*break*/, 5];
-                                                            case 2:
-                                                                if (!(message == 'not-authenticated')) return [3 /*break*/, 4];
-                                                                console.log(red("UA-NFT") + color.bold("|CLIENT-APP: ") +
-                                                                    color.bold("NFT is not authenticated..."));
-                                                                console.log(red("UA-NFT") + color.bold("|CLIENT-APP: ") +
-                                                                    color.bold("This means the NFT was either transfered"));
-                                                                console.log(red("UA-NFT") + color.bold("|CLIENT-APP: ") +
-                                                                    color.bold("to new owner, or is was reset by you and"));
-                                                                console.log(red("UA-NFT") + color.bold("|CLIENT-APP: ") +
-                                                                    color.bold("needs reauthenticaion for new credentials.\n"));
-                                                                return [4 /*yield*/, (0, utils_1.returnToMain)('If you own NFT, goto main to authenticate')];
-                                                            case 3:
-                                                                _a.sent();
-                                                                return [3 /*break*/, 5];
-                                                            case 4:
-                                                                if (message == 'access-granted') {
-                                                                    console.clear();
-                                                                    console.log(green("\n LOGIN SUCCESS!!!\n\n"));
-                                                                    socket.emit('fetch-art');
-                                                                    socket.on('ascii-art', function (art) {
-                                                                        console.log(red("".concat(art)));
-                                                                        console.log("\n\n\n\n\n\n\n");
-                                                                        // prompt
-                                                                        //
-                                                                        // do something useful?
-                                                                        (function () { return __awaiter(void 0, void 0, void 0, function () {
-                                                                            var responseSomething, something;
-                                                                            return __generator(this, function (_a) {
-                                                                                switch (_a.label) {
-                                                                                    case 0: return [4 /*yield*/, prompts({
-                                                                                            type: 'confirm',
-                                                                                            name: 'something',
-                                                                                            message: 'do something useful?'
-                                                                                        })];
-                                                                                    case 1:
-                                                                                        responseSomething = _a.sent();
-                                                                                        something = responseSomething.something;
-                                                                                        console.log('');
-                                                                                        if (something) {
-                                                                                            socket.emit('do-something-useful');
-                                                                                        }
-                                                                                        else {
-                                                                                            socket.emit('do-something-useless');
-                                                                                        }
-                                                                                        return [2 /*return*/];
-                                                                                }
-                                                                            });
-                                                                        }); })();
-                                                                    });
-                                                                    socket.on('did-something-useful', function (result) {
-                                                                        console.log(color.bold(" You just did something useful by setting"));
-                                                                        console.log(blue(" somethingUseful = ") + green("".concat(result)));
-                                                                        console.log(color.bold(" in the restricted area!!!\n"));
-                                                                        (function () { return __awaiter(void 0, void 0, void 0, function () {
-                                                                            var choice;
-                                                                            return __generator(this, function (_a) {
-                                                                                switch (_a.label) {
-                                                                                    case 0: return [4 /*yield*/, prompts({
-                                                                                            type: 'select',
-                                                                                            name: 'logout',
-                                                                                            message: 'Next options:',
-                                                                                            choices: [{ title: 'logout', value: 'logout' }]
-                                                                                        })];
-                                                                                    case 1:
-                                                                                        choice = _a.sent();
-                                                                                        socket.emit('logout');
-                                                                                        process.send('done');
-                                                                                        process.exit();
-                                                                                        return [2 /*return*/];
-                                                                                }
-                                                                            });
-                                                                        }); })();
-                                                                    });
-                                                                    socket.on('did-something-useless', function (result) {
-                                                                        console.log(color.bold(" You just did something useless by setting"));
-                                                                        console.log(blue(" somethingUseful = ") + red("".concat(result)));
-                                                                        console.log(color.bold(" in the restricted area!!!\n"));
-                                                                        (function () { return __awaiter(void 0, void 0, void 0, function () {
-                                                                            var choice;
-                                                                            return __generator(this, function (_a) {
-                                                                                switch (_a.label) {
-                                                                                    case 0: return [4 /*yield*/, prompts({
-                                                                                            type: 'select',
-                                                                                            name: 'logout',
-                                                                                            message: 'Next options:',
-                                                                                            choices: [{ title: 'logout', value: 'logout' }]
-                                                                                        })];
-                                                                                    case 1:
-                                                                                        choice = _a.sent();
-                                                                                        socket.emit('logout');
-                                                                                        process.send('done');
-                                                                                        process.exit();
-                                                                                        return [2 /*return*/];
-                                                                                }
-                                                                            });
-                                                                        }); })();
-                                                                    });
-                                                                }
-                                                                _a.label = 5;
-                                                            case 5: return [2 /*return*/];
+                                                        // no userhash exists on blockchain
+                                                        if (message == 'bad-username') {
+                                                            // notify and kick back to main menu
+                                                            console.log(red("UA-NFT") + color.bold("|CLIENT-APP: ") +
+                                                                color.bold("username is incorrect or does not exist..."));
+                                                            console.log(red("UA-NFT") + color.bold("|CLIENT-APP: ") +
+                                                                color.bold("...please try again\n"));
+                                                            setTimeout(function () {
+                                                                process.send('fail');
+                                                                process.exit();
+                                                            }, 3000);
+                                                            // userhash exists but passhash missmatch
                                                         }
+                                                        else if (message == 'bad-password') {
+                                                            // notify and kick back to main menu
+                                                            console.log(red("UA-NFT") + color.bold("|CLIENT-APP: ") +
+                                                                color.bold("password is incorrect..."));
+                                                            console.log(red("UA-NFT") + color.bold("|CLIENT-APP: ") +
+                                                                color.bold("...please try again\n"));
+                                                            setTimeout(function () {
+                                                                process.send('fail');
+                                                                process.exit();
+                                                            }, 3000);
+                                                        }
+                                                        else if (message == 'access-granted') {
+                                                            console.clear();
+                                                            console.log(green("\n LOGIN SUCCESS!!!\n\n"));
+                                                            socket.emit('fetch-art');
+                                                            socket.on('ascii-art', function (art) {
+                                                                console.log(red("".concat(art)));
+                                                                console.log("\n\n\n\n\n\n\n");
+                                                                // prompt
+                                                                //
+                                                                // do something useful?
+                                                                (function () { return __awaiter(void 0, void 0, void 0, function () {
+                                                                    var responseSomething, something;
+                                                                    return __generator(this, function (_a) {
+                                                                        switch (_a.label) {
+                                                                            case 0: return [4 /*yield*/, prompts({
+                                                                                    type: 'confirm',
+                                                                                    name: 'something',
+                                                                                    message: 'do something useful?'
+                                                                                })];
+                                                                            case 1:
+                                                                                responseSomething = _a.sent();
+                                                                                something = responseSomething.something;
+                                                                                console.log('');
+                                                                                if (something) {
+                                                                                    socket.emit('do-something-useful');
+                                                                                }
+                                                                                else {
+                                                                                    socket.emit('do-something-useless');
+                                                                                }
+                                                                                return [2 /*return*/];
+                                                                        }
+                                                                    });
+                                                                }); })();
+                                                            });
+                                                            socket.on('did-something-useful', function (result) {
+                                                                console.log(color.bold(" You just did something useful by setting"));
+                                                                console.log(blue(" somethingUseful = ") + green("".concat(result)));
+                                                                console.log(color.bold(" in the restricted area!!!\n"));
+                                                                (function () { return __awaiter(void 0, void 0, void 0, function () {
+                                                                    var choice;
+                                                                    return __generator(this, function (_a) {
+                                                                        switch (_a.label) {
+                                                                            case 0: return [4 /*yield*/, prompts({
+                                                                                    type: 'select',
+                                                                                    name: 'logout',
+                                                                                    message: 'Next options:',
+                                                                                    choices: [{ title: 'logout', value: 'logout' }]
+                                                                                })];
+                                                                            case 1:
+                                                                                choice = _a.sent();
+                                                                                socket.emit('logout');
+                                                                                process.send('done');
+                                                                                process.exit();
+                                                                                return [2 /*return*/];
+                                                                        }
+                                                                    });
+                                                                }); })();
+                                                            });
+                                                            socket.on('did-something-useless', function (result) {
+                                                                console.log(color.bold(" You just did something useless by setting"));
+                                                                console.log(blue(" somethingUseful = ") + red("".concat(result)));
+                                                                console.log(color.bold(" in the restricted area!!!\n"));
+                                                                (function () { return __awaiter(void 0, void 0, void 0, function () {
+                                                                    var choice;
+                                                                    return __generator(this, function (_a) {
+                                                                        switch (_a.label) {
+                                                                            case 0: return [4 /*yield*/, prompts({
+                                                                                    type: 'select',
+                                                                                    name: 'logout',
+                                                                                    message: 'Next options:',
+                                                                                    choices: [{ title: 'logout', value: 'logout' }]
+                                                                                })];
+                                                                            case 1:
+                                                                                choice = _a.sent();
+                                                                                socket.emit('logout');
+                                                                                process.send('done');
+                                                                                process.exit();
+                                                                                return [2 /*return*/];
+                                                                        }
+                                                                    });
+                                                                }); })();
+                                                            });
+                                                        }
+                                                        return [2 /*return*/];
                                                     });
                                                 });
                                             });

@@ -27,17 +27,24 @@ const magenta = color.magenta;
 import {
   setupSession,
   returnToMain,
-  onCancel
+  onCancel,
+  isValidUsername
 } from "./utils";
 
 const OWNER_MNEMONIC = process.env.OWNER_MNEMONIC;
 
-// setup socket connection with autheticateWallet script
+// setup secure connection with accessArea server,
+// allowing self-signed certificate for demoapp purposes
+//
+// in production, one should use a certificate authority
 var socket = io('https://localhost:8443', {
     rejectUnauthorized: false
 });
+
+// every time a client connects to login
 socket.on('connect', async () => {
 
+  // https connect success notification
   console.log(blue(`\nUA-NFT`) + color.bold(`|CLIENT-APP: `) +
     color.bold(`demoApp, SID` + cyan(` ${socket.id}`) + ` connected`));
   console.log(blue(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
@@ -45,7 +52,7 @@ socket.on('connect', async () => {
 
   // begin prompt tree
   //
-  // first prompt: login username
+  // prompt: login username
   (async () => {
 
     // get username
@@ -59,7 +66,7 @@ socket.on('connect', async () => {
     const username = responseUsername.username;
     console.log('');
     
-    // second prompt: password
+    // prompt: password
     (async () => {
 
       // get password
@@ -73,6 +80,8 @@ socket.on('connect', async () => {
       const password = responsePassword.password;
       console.log('');
       
+      // if not onCancel, notify credentials are begin sent to accessArea server to be
+      // hashed and checked against blockchain records
       if (password != undefined) {
         console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
           color.bold(`submitting login information over secure`));
@@ -81,13 +90,16 @@ socket.on('connect', async () => {
         console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
           color.bold(`against blockchain credential hash record.\n`));
 
-
+        // letting accessArea server know we want to access restricated access area
         socket.emit('request-access', username, password);
 
+        // wating for response from accessArea getCredential check
         socket.onAny( async (message, ...args) => {
 
+          // no userhash exists on blockchain
           if (message == 'bad-username') {
 
+            // notify and kick back to main menu
             console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
               color.bold(`username is incorrect or does not exist...`));
             console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
@@ -98,9 +110,11 @@ socket.on('connect', async () => {
               process.send('fail');
               process.exit();
             }, 3000);
-  
+
+          // userhash exists but passhash missmatch
           } else if (message == 'bad-password') {
 
+            // notify and kick back to main menu
             console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
               color.bold(`password is incorrect...`));
             console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
@@ -112,27 +126,18 @@ socket.on('connect', async () => {
               process.exit();
             }, 3000);
 
-          } else if (message == 'not-authenticated') {
-
-            console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-              color.bold(`NFT is not authenticated...`));
-            console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-              color.bold(`This means the NFT was either transfered`));
-            console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-              color.bold(`to new owner, or is was reset by you and`));
-            console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
-              color.bold(`needs reauthenticaion for new credentials.\n`));
-
-            await returnToMain('If you own NFT, goto main to authenticate');
-
+          // userhash exists and passhash matches
           } else if (message == 'access-granted') {
 
+            // enter restricted access area and fetch art
             console.clear();
             console.log(green(`\n LOGIN SUCCESS!!!\n\n`));
             socket.emit('fetch-art');
 
+            // when art is received, display
             socket.on('ascii-art', (art) => {
 
+              // big ol welcome banner
               console.log(red(`${art}`));
               console.log(`\n\n\n\n\n\n\n`);
 
@@ -150,6 +155,7 @@ socket.on('connect', async () => {
                 const something = responseSomething.something;
                 console.log('');
 
+                // notify accessArea depending on choice
                 if (something) {
                   socket.emit('do-something-useful');
                 } else {
@@ -158,12 +164,14 @@ socket.on('connect', async () => {
               })();
             });
 
+            // confirmation that the priviledged user did something useful
             socket.on('did-something-useful', (result) => {
 
               console.log(color.bold(` You just did something useful by setting`));
               console.log(blue(` somethingUseful = `) + green(`${result}`));
               console.log(color.bold(` in the restricted area!!!\n`));
 
+              // kick user back to main menu
               (async () => {
 
                 var choice = await prompts({
@@ -179,12 +187,14 @@ socket.on('connect', async () => {
               })();
             });
 
+            // confirmation that the priviledged user did something useless
             socket.on('did-something-useless', (result) => {
 
               console.log(color.bold(` You just did something useless by setting`));
               console.log(blue(` somethingUseful = `) + red(`${result}`));
               console.log(color.bold(` in the restricted area!!!\n`));
 
+              // kick user back to main menu
               (async () => {
 
                 var choice = await prompts({
@@ -205,30 +215,4 @@ socket.on('connect', async () => {
     })();
   })();
 });
-
-// Check if valid username.
-const isValidUsername = (username) => {
-  try {
-
-    // search for any whitespace
-    if (/\s/.test(username)) {
-
-      // username not valid
-      return false
-
-    // make sure not too short
-    } else if (username.length < 5) {
-
-      // username not valid
-      return false
-    }
-
-    // username valid
-    return true
-
-  } catch (error) {
-    return false
-  }
-}
-
 
