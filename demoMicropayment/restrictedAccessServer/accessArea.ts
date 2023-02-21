@@ -1,6 +1,6 @@
 //
 // INTERLOCK NETWORK & ALEPH ZERO
-// PSP34 UNIVERSAL ACCESS NFT - RESTRICTED AREA
+// PSP34 UNIVERSAL ACCESS NFT - RESTRICTED ACCESS AREA
 //
 
 // imports
@@ -10,19 +10,11 @@ import { readFileSync } from "fs";
 import { Server } from "socket.io";
 import * as express from 'express';
 import * as figlet from 'figlet';
+import * as crypto from 'crypto';
 
 // child process paths
 import * as path from 'path';
-const restrictedCredentialCheck = path.resolve('restrictedCredentialCheck.js');
-
-// utility functions
-import {
-  contractGetter,
-  setupSession,
-  terminateProcess,
-  contractDoer,
-  getHash
-} from "./utils";
+const restrictedCredentialCheck = path.resolve('credentialCheck.js');
 
 // specify color formatting
 import * as color from 'cli-color';
@@ -40,8 +32,8 @@ var somethingUseful;
 // setup server
 const app = express();
 const options = {  
-  key: readFileSync('./server-creds/key.pem'),
-  cert: readFileSync('./server-creds/cert.pem')
+  key: readFileSync('./server-credentials/key.pem'),
+  cert: readFileSync('./server-credentials/cert.pem')
 };
 const httpsServer = createServer(options, app);
 const io = new Server(httpsServer);
@@ -200,3 +192,17 @@ httpsServer.listen(SERVERPORT, () => {
   console.log(blue(`UA-NFT`) + color.bold(`|RESTRICTED-AREA: `) +
     color.bold(`area, ready for connecting applications\n`));  
 });
+
+//
+// calculate SHA256 hash
+//
+function getHash(input) {
+
+  const digest = crypto
+    .createHash('sha256')
+    .update(input ?? '')
+    .digest('hex');
+
+  return digest
+}
+
