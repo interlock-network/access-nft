@@ -30,70 +30,73 @@ async function credentialCheck(message) {
 
   try {
   
-  // establish connection with blockchain
-  const [ api, contract ] = await setupSession('getCredential');
+    // establish connection with blockchain
+    const [ api, contract ] = await setupSession('getCredential');
 
-  // create keypair for owner
-  const keyring = new Keyring({type: 'sr25519'});
-  const OWNER_PAIR = keyring.addFromUri(OWNER_MNEMONIC);
+    // create keypair for owner
+    const keyring = new Keyring({type: 'sr25519'});
+    const OWNER_PAIR = keyring.addFromUri(OWNER_MNEMONIC);
 
-  // define special type for gas weights
-  type WeightV2 = InstanceType<typeof WeightV2>;
-  const gasLimit = api.registry.createType('WeightV2', {
-    refTime: 2**53 - 1,
-    proofSize: 2**53 - 1,
-  }) as WeightV2;
+    // define special type for gas weights
+    type WeightV2 = InstanceType<typeof WeightV2>;
+    const gasLimit = api.registry.createType('WeightV2', {
+      refTime: 2**53 - 1,
+      proofSize: 2**53 - 1,
+    }) as WeightV2;
 
-  // get getter output
-  var { gasRequired, storageDeposit, result, output } =
-    await contract.query['getCredential'](
-      OWNER_PAIR.address, {gasLimit}, '0x' + message.userhash);
+    // get getter output
+    var { gasRequired, storageDeposit, result, output } =
+      await contract.query['getCredential'](
+        OWNER_PAIR.address, {gasLimit}, '0x' + message.userhash);
 
-  // convert to JSON format for convenience
-  var OUTPUT = JSON.parse(JSON.stringify(output));
-  var RESULT = JSON.parse(JSON.stringify(result));
+    // convert to JSON format for convenience
+    var OUTPUT = JSON.parse(JSON.stringify(output));
+    var RESULT = JSON.parse(JSON.stringify(result));
 
-  // check if the call was successful
-  if (result.isOk) {
+    // check if the call was successful
+    if (result.isOk) {
       
-    // check if OK result is reverted contract that returned error
-    if (RESULT.ok.flags == 'Revert') {
+      // check if OK result is reverted contract that returned error
+      if (RESULT.ok.flags == 'Revert') {
 
-      // is this error a custom error?      
-      if (OUTPUT.ok.err.hasOwnProperty('custom')) {
+        // is this error a custom error?      
+        if (OUTPUT.ok.err.hasOwnProperty('custom')) {
 
-        // logging custom error
-        let error = OUTPUT.ok.err.custom.toString().replace(/0x/, '')
-        console.log(red(`UA-NFT`) + color.bold(`|RESTRICTED-AREA: `) +
-          `${hexToString(error)}`);
-        process.send('bad-username');
-        process.exit();
+          // logging custom error
+          let error = OUTPUT.ok.err.custom.toString().replace(/0x/, '')
+          console.log(red(`UA-NFT`) + color.bold(`|RESTRICTED-AREA: `) +
+            `${hexToString(error)}`);
+          process.send('bad-username');
+          process.exit();
 
-      } else {
+        } else {
           
-        // if not custom then print Error enum type
-        console.log(red(`UA-NFT:`) +
-          ` ${OUTPUT.ok.err}`);
+          // if not custom then print Error enum type
+          console.log(red(`UA-NFT:`) +
+            ` ${OUTPUT.ok.err}`);
+        }
       }
+    } else {
+
+      // loggin calling error and terminate
+      console.log(red(`UA-NFT`) + color.bold(`|RESTRICTED-AREA: `) +
+        `${result.asErr.toHuman()}`);
     }
-  } else {
 
-    // loggin calling error and terminate
-    console.log(red(`UA-NFT`) + color.bold(`|RESTRICTED-AREA: `) +
-      `${result.asErr.toHuman()}`);
-  }
+    // extract passhash and nft id from output object
+    const onchainPasshash = OUTPUT.ok.ok[0];
+    const nftId = OUTPUT.ok.ok[1];
 
-  const onchainPasshash = OUTPUT.ok.ok[0];
-  const nftId = OUTPUT.ok.ok[1];
+    // check for bad password credential
+    if (onchainPasshash != '0x' + message.passhash) {
 
-  if (onchainPasshash != '0x' + message.passhash) {
+      process.send('bad-password');
+      process.exit();
+    }
 
-    process.send('bad-password');
+    // if checks pass, access grantes
+    process.send('access-granted');
     process.exit();
-  }
-
-  process.send('access-granted');
-  process.exit();
       
   } catch(error) {
 
@@ -101,6 +104,7 @@ async function credentialCheck(message) {
   }
 }
 
+// wait for message with hash data from parent process
 process.on('message', message => {
 
   credentialCheck(message).catch((error) => {
