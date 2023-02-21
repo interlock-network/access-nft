@@ -22,7 +22,7 @@ You will find the following:
 
 As this is a _general_ framework, it will be up to you to create your own UI frontend. To experience a minimal application of a universal access NFT, get started with the demonstration below:
 
-## Getting started with demonstration:
+# Getting started with demonstration:
 
 This is a demonstration of how the universal access NFT can manage username and password credentials for restricting access to a server that will only serve content to users who have demonstrated that they own a universal access NFT.
 
