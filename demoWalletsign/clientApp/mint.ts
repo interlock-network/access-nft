@@ -42,6 +42,15 @@ const CLIENT_ADDRESS = WALLET.CLIENT_ADDRESS;
 const OWNER_MNEMONIC = process.env.OWNER_MNEMONIC
 const OWNER_ADDRESS = process.env.OWNER_ADDRESS;
 
+console.log(magenta(`This mint transaction is signed using the contract owner's`));
+console.log(magenta(`keypair for convenience in this demo app. In production,`));
+console.log(magenta(`the restricted access server would serve as transaction relay`));
+console.log(magenta(`for UANFT mint in exchange for client transfering token to`));
+console.log(magenta(`contract owner's address. Or, transfer will occur within`));
+console.log(magenta(`an NFT exchange. Or, client app may be configured to`));
+console.log(magenta(`self-mint using ILOCK token held in client wallet. See docs`));
+console.log(magenta(`for more information about self-mint feature of UANFT contract.\n`));
+
 async function mint() {
 
   try {
