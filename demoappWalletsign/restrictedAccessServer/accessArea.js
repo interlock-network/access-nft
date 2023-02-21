@@ -73,14 +73,6 @@ io.on('connect', function (socket) {
                     socket.emit('bad-password');
                     socket.disconnect();
                 }
-                else if (results == 'not-authenticated') {
-                    console.log(red("UA-NFT") + color.bold("|RESTRICTED-AREA: ") +
-                        "login fail NFT not authenticated for client");
-                    console.log(red("UA-NFT") + color.bold("|RESTRICTED-AREA: ") +
-                        "on socket " + cyan("ID ".concat(socket.id, "\n")));
-                    socket.emit('not-authenticated');
-                    socket.disconnect();
-                }
                 else if (results == 'access-granted') {
                     console.log(green("UA-NFT") + color.bold("|RESTRICTED-AREA: ") +
                         "login success for client");
