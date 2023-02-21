@@ -20,7 +20,7 @@ dotenv.config();
 
 // child process paths
 import * as path from 'path';
-const menu = path.resolve('client.js');
+const menu = path.resolve('main.js');
 
 // specify color formatting
 import * as color from 'cli-color';
@@ -77,8 +77,9 @@ socket.on('connect', async () => {
   // second prompt: username
   await (async () => {
 
+    console.clear();
 
-    console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
+    console.log(red(`\n\nUA-NFT`) + color.bold(`|CLIENT-APP: `) +
       color.bold(`!!! WARNING !!!\n`));
 
     console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
@@ -330,8 +331,10 @@ socket.onAny(async (message, ...args) => {
     const nftId = args[0][0];
     const userhash = args[0][1];
     const passhash = args[0][2];
-    
-    console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
+
+    console.clear();
+
+    console.log(green(`\n\nUA-NFT`) + color.bold(`|CLIENT-APP: `) +
       color.bold(`Your anonymized NFT access credentials have`));
     console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
       color.bold(`been stored on the blockchain.\n\n\n\n\n`));
@@ -373,7 +376,15 @@ socket.onAny(async (message, ...args) => {
     console.log(color.yellow(`0x${userhash}`));
     console.log(color.bold.magenta(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
       color.bold(`PASSWORD STORED ON BLOCKCHAIN AS SHA256 HASH `));
-    console.log(color.yellow(`0x${passhash}\n\n`));
+    console.log(color.yellow(`0x${passhash}`));
+    console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
+      color.bold(`You do not need to record these hash numbers.`));
+    console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
+      color.bold(`They are provided in case you wish to verify`));
+    console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
+      color.bold(`their presence on-chain via contract explorer, or`));
+    console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
+      color.bold(`if you would like to verify SHA256 hashes yourself.\n\n`));
 
     console.log(color.bold.magenta(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
       color.bold(`USERNAME/PASSWORD IMPOSSIBLE TO DERIVE FROM HASH. `));
