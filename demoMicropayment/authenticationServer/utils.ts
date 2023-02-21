@@ -11,8 +11,6 @@ const WeightV2 = require('@polkadot/types/interfaces');
 
 // environment constants
 import * as dotenv from 'dotenv';
-import * as crypto from 'crypto';
-import * as prompts from 'prompts';
 dotenv.config();
 
 // specify color formatting
@@ -25,7 +23,7 @@ const yellow = color.yellow.bold;
 const magenta = color.magenta;
 
 // constants
-const ACCESS_METADATA = require('../access/target/ink/metadata.json');
+const ACCESS_METADATA = require('../metadata.json');
 const ACCESS_CONTRACT = process.env.ACCESS_CONTRACT;
 const OWNER_MNEMONIC = process.env.OWNER_MNEMONIC;
 const APP_PROCESS = process.env.APP_PROCESS;
@@ -33,7 +31,6 @@ const WEB_SOCKET = process.env.WEB_SOCKET;
 const TRUE = '0x74727565';
 const FALSE = '0x66616c7365';
 const ISAUTHENTICATED = '0x697361757468656e74696361746564';
-const ISWAITING = '0x697377616974696e67';
 const AMOUNT = 1;
 
 //
@@ -265,38 +262,6 @@ export async function sendMicropayment(
 }
 
 //
-// emit message, disconnect socket, and exit process
-//
-export function terminateProcess(
-  socket: any,
-  origin: string,
-  message: string,
-  values: any[],
-) {
-     
-  // emit message to parent process and relay then exit after printing to log
-  process.send(message);
-  socket.emit(message, values);
-  console.log(blue(`UA-NFT`) + color.bold(`|SOCKET: `) +
-    `${origin} disconnecting, SID ` + cyan(`${socket.id}\n`));
-  socket.disconnect();
-  process.exit();
-}
-
-//
-// calculate SHA256 hash
-//
-export function getHash(input) {
-
-  const digest = crypto
-    .createHash('sha256')
-    .update(input ?? '')
-    .digest('hex');
-
-  return digest
-}
-
-//
 // convert hex string to ASCII string
 //
 export function hexToString(hex: String) {
@@ -308,40 +273,6 @@ export function hexToString(hex: String) {
   }
 
   return str;
-}
-
-//
-// prompt to return to main menu
-//
-export async function returnToMain(message: String) {
-
-  const choice = await prompts({
-    type: 'select',
-    name: 'return',
-    message: 'Options:',
-    choices: [{ title: color.bold(message), value: 'return' }]
-  });
-
-  process.send('done');
-  process.exit();
-}
-
-//
-// checks address to make sure valid substrate address
-//
-export function isValidSubstrateAddress(wallet: string) {
-  try {
-
-    encodeAddress(decodeAddress(wallet))
-
-    // address encodes/decodes wo error => valid address
-    return true
-
-  } catch (error) {
-
-    // encode/decode failure => invalid address
-    return false
-  }
 }
 
 //
@@ -396,35 +327,22 @@ export function discoSocket(socket, origin) {
       socket.disconnect();
 }
 
-// 
-// check if valid mnemonic
+
 //
-export function isValidMnemonic(mnemonic) {
+// emit message, disconnect socket, and exit process
+//
+export function terminateProcess(
+  socket: any,
+  origin: string,
+  message: string,
+  values: any[],
+) {
 
-  var wordCount = mnemonic.trim().split(' ').length;
-
-  if (wordCount != 12) return false;
-
-  return true
+  // emit message to parent process and relay then exit after printing to log
+  process.send(message);
+  socket.emit(message, values);
+  console.log(blue(`UA-NFT`) + color.bold(`|SOCKET: `) +
+    `${origin} disconnecting, SID ` + cyan(`${socket.id}\n`));
+  socket.disconnect();
+  process.exit();
 }
-
-//
-// prompt cancel action
-//
-export const onCancel = prompt => {
-
-  setTimeout( () => {
-
-    console.clear();
-    console.log(red(`\n YOU ABORTED PROMPT ... RETURNING TO MAIN MENU`));
-
-    setTimeout( () => {
-
-      process.send('abort');
-      process.exit();
-
-    }, 2000);
-  }, 250);
-}
-
-

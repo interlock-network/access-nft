@@ -1,7 +1,6 @@
 # ignore stuff
 
 build
-node_modules
 .idea
 .arcconfig
 *.iml
@@ -10,13 +9,10 @@ bin
 *.abi
 /mutagen.sh
 venv
-.env
 .mnemonic*
 bigtable-admin.json
 bigtable-writer.json
 *.db
-package-lock*
-*.js
 
 
 

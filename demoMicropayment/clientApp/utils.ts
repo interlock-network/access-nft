@@ -25,7 +25,7 @@ const yellow = color.yellow.bold;
 const magenta = color.magenta;
 
 // constants
-const ACCESS_METADATA = require('../access/target/ink/metadata.json');
+const ACCESS_METADATA = require('../metadata.json');
 const ACCESS_CONTRACT = process.env.ACCESS_CONTRACT;
 const OWNER_MNEMONIC = process.env.OWNER_MNEMONIC;
 const APP_PROCESS = process.env.APP_PROCESS;
