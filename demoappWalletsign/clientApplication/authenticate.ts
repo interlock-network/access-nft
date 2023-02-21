@@ -42,6 +42,7 @@ import {
   onCancel
 } from "./utils";
 
+// environment constants
 const WALLET = JSON.parse(readFileSync('.wallet.json').toString());
 const CLIENT_MNEMONIC = WALLET.CLIENT_MNEMONIC
 const CLIENT_ADDRESS = WALLET.CLIENT_ADDRESS;
@@ -108,18 +109,23 @@ async function authenticate() {
         );
       let authenticated = JSON.parse(JSON.stringify(OUTPUT_authenticated));
 
-      // record nft id of one that is waiting and ready to authenticate
+      // list all uanfts
       if (authenticated.ok.ok == true) {
 
+        // red means credentials already associated with uanft
         console.log(red(`\t${nft.u64}\n`));
 
       } else {
 
+        // green means uanft is waiting for credentials
         console.log(green(`\t${nft.u64}\n`));
       }
+
+      // push ID integers onto array for upcoming prompt
       ids.push(nft.u64);
     }
-
+    
+    // notification to inform user what colors mean on listed uanfts
     console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
       color.bold(`NFT IDs in red already have access credentials`));
     console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
@@ -143,6 +149,7 @@ async function authenticate() {
       const id = responseId.id;
       console.log('');
 
+      // if not onCancel
       if (id != undefined) {
 
         // prompt: username
@@ -150,6 +157,7 @@ async function authenticate() {
 
           console.clear();
 
+          // warning notification that if credentials are forgotten they cannot be retrieved
           console.log(red(`\n\nUA-NFT`) + color.bold(`|CLIENT-APP: `) +
             color.bold(`!!! WARNING !!!\n`));
 
@@ -175,6 +183,7 @@ async function authenticate() {
           console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
             color.bold(`Maybe WRITE THEM DOWN somewhere...?\n`));
 
+          // notification that credentials are never actually stored anywhere permanently
           console.log(color.bold.magenta(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
             color.bold(`CREDENTIALS ARE NEVER STORED IN A DATABASE.`));
           console.log(color.bold.magenta(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
@@ -198,11 +207,12 @@ async function authenticate() {
             // if valid, check if username is available
             if (await isAvailableUsername(api, contract, getHash(username))) {
 
-              // break the prompt loop
+              // break the prompt loop if username is not taken
               isAvailable = true;
 
             } else {
 
+              // username taken repeat prompt
               console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
                 color.bold(`Username taken. Choose different username.\n`));
             }
@@ -223,22 +233,28 @@ async function authenticate() {
                   validate: password => (password.length < 8) ?
                     red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) + color.bold(`Password too short.\n`) : true
                 },
+                // get confirmation password
                 {
                   type: 'password',
                   name: 'passwordVerify',
                   message: 'Please verify your password.\n',
                 }
               ], { onCancel });
+
+              // if either password entries are undefined, force to values that will mismatch
               passwordVerify = responsePassword.passwordVerify ?? 'passwordVerify';
               password = responsePassword.password ?? 'password';
               console.log('');
 
+              // check for password match
               if (password != passwordVerify) {
                 console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) + color.bold(`Password mismatch.\n`));
               }
             }
+            // keep going until passwords match, or user aborts prompt
             while (password != passwordVerify);
         
+            // notification that entries are good and it's time to set credentials on chain
             console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
               color.bold(`You successfully entered new credentials.\n`));
 
@@ -256,10 +272,12 @@ async function authenticate() {
             // listen for results of registration tx
             registerChild.on('message', async (message) => {
 
+              // it's done. no blockchain errors
               if (message == 'register-complete') {
 
                 console.clear();
 
+                // success notification
                 console.log(green(`\n\nUA-NFT`) + color.bold(`|CLIENT-APP: `) +
                   color.bold(`Your anonymized NFT access credentials have`));
                 console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
@@ -270,6 +288,8 @@ async function authenticate() {
                 console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
                   color.bold(`You may now login to the restricted access area!!!\n\n`));
 
+
+                // warning notification that if credentials are forgotten they cannot be retrieved
                 console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
                   color.bold(`!!! REMINDER WARNING !!!\n`));
 
@@ -297,6 +317,9 @@ async function authenticate() {
                 console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
                   color.bold(`Maybe WRITE THEM DOWN somewhere...?\n\n`));
 
+                // confirmation notification providing SHA256 hashes stored on blockchain
+                // for the event that user would like to confirm for themselves that their
+                // credentials are verifiably stored on-chain
                 console.log(color.bold.magenta(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
                     color.bold(`USERNAME STORED ON BLOCKCHAIN AS SHA256 HASH`));
                 console.log(color.yellow(`0x${getHash(username)}`));
@@ -312,7 +335,10 @@ async function authenticate() {
                 console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
                   color.bold(`if you would like to verify SHA256 hashes yourself.\n\n`));
 
-
+                // affirmation notification that it is impossible (in practice of course) to
+                // derive the cleartext username or password from the hashes stored on blockchain
+                // (appealing of course to the collision resistance of the digest image and the
+                // largeness of 2^256-1 as the image size
                 console.log(color.bold.magenta(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
                   color.bold(`USERNAME/PASSWORD IMPOSSIBLE TO DERIVE FROM HASH. `));
                 console.log(color.bold.magenta(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
@@ -324,6 +350,8 @@ async function authenticate() {
                 console.log(color.bold.magenta(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
                   color.bold(`AND STORED ON THE BLOCKCHAIN.\n`));
 
+                // affirmation nitification that credentials are never stored in a traditional
+                // database (knowing of course, that technically a blockchain is too, a database...*sigh*)
                 console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
                   color.bold(`YOUR CREDENTIALS ARE NEVER STORED IN A DATABASE.`));
                 console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
@@ -333,6 +361,7 @@ async function authenticate() {
 
               } else {
 
+                // lazy catchall conditional block for all of possible register tx fails
                 console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
                   color.bold(`Whoops...something went wrong registering your UANFT!\n`));
 
