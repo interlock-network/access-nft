@@ -26,9 +26,11 @@ As this is a _general_ framework, it will be up to you to create your own UI fro
 
 This is a demonstration of how the universal access NFT can manage username and password credentials for restricting access to a server that will only serve content to users who have demonstrated that they own a universal access NFT.
 
+This repository contains all `node_modules` and `.env` files in order to make the demonstration experience as seamless as possible.
+
 First, you will need to open up your terminal and setup a couple things:
 
-### (1)
+### (1) - install git
 
 You need git first. Make sure you have it.
 
@@ -44,7 +46,7 @@ or
 sudo apt install git
 ```
 
-### (2)
+### (2) - install node.js
 
 Now you need to make sure you have node.js
 
@@ -70,7 +72,7 @@ If you are having trouble installing node.js, try visiting their website and dow
 [node.js install downloads](https://nodejs.org/en/download/) to find the installation package right for your machine.
 
 
-### (3)
+### (3) - clone this repository
 
 Finally, clone this repository to your computer and navigate to to the `demonstration` directory within.
 
@@ -81,7 +83,7 @@ cd universal-access-nft
 Now we can run the demonstration application!
 
 
-## Run the demonstration:
+# Run the demonstration:
 
 We need to spin up one server, and one client application.
 
@@ -105,7 +107,7 @@ node main.js
 Navigate the menu options to explore the minting, credential registration, and login process for the universal access NFT framework.
 
 
-## How this framework works:
+# How this framework works:
 
 In short:
 
@@ -138,7 +140,7 @@ In the event that a UANFT owner wishes to transfer or sell their UANFT to a diff
 
 The ultimate goal is to eliminate the need to send secrets to the restricted access server that checks access-request hashes to those stored on chain. This will ultimately be accomplished by some sort of zero-knowledge proof scheme.
 
-### A visual representation:
+## A visual representation:
 
 This series of flowcharts is for the case where a UANFT manages usernames and passwords.
 
