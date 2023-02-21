@@ -51,6 +51,7 @@ async function mainMenu() {
       }
     ]);
 
+    // process menu choice
     switch (response.choice) {
 
       case 'add':
@@ -58,6 +59,7 @@ async function mainMenu() {
         // initiate minting process for wallet
         const addWalletChild = fork(addWallet);
 
+        // respawn this menu when child process ends
         addWalletChild.on('message', () => {
           
           const menuChild = fork(menu);
@@ -69,6 +71,7 @@ async function mainMenu() {
         // initiate minting process for wallet
         const mintChild = fork(mint);
 
+        // respawn this menu when child process ends
         mintChild.on('message', () => {
           
           const menuChild = fork(menu);
@@ -80,6 +83,7 @@ async function mainMenu() {
         // initiate authentication process for wallet
         const authenticateChild = fork(authenticate);
 
+        // respawn this menu when child process ends
         authenticateChild.on('message', () => {
           
           const menuChild = fork(menu);
@@ -91,6 +95,7 @@ async function mainMenu() {
         // display wallet's available NFTs
         const displayChild = fork(display);
 
+        // respawn this menu when child process ends
         displayChild.on('message', () => {
           
           const menuChild = fork(menu);
@@ -102,6 +107,7 @@ async function mainMenu() {
         // login to secure restricted access area
         const loginChild = fork(login);
 
+        // respawn this menu when child process ends
         loginChild.on('message', () => {
           
           const menuChild = fork(menu);
@@ -113,6 +119,7 @@ async function mainMenu() {
         // reset username and password
         const deleteWalletChild = fork(deleteWallet);
 
+        // respawn this menu when child process ends
         deleteWalletChild.on('message', () => {
           
           const menuChild = fork(menu);
@@ -134,6 +141,7 @@ async function mainMenu() {
   }
 }
 
+// welcome text and system overview
 console.clear();
 console.log(blue(`\n Welcome to the Universal Access NFT demo app!\n`));
 
@@ -151,4 +159,5 @@ console.log(bold.magenta(` This is a proof of concept containing all the key pie
 console.log(bold.magenta(` Production implementations will vary. Implementation may be`));
 console.log(bold.magenta(` configured for basic username/password, or 2FA token issue.\n`));
 
+// entrypoint for client application
 mainMenu();
