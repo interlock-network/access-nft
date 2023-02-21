@@ -43,6 +43,7 @@ async function verifyAddress(address, socket) {
     let notAuthenticated = false;
     let notAuthenticatedId;
 
+    // log that checking if available uanft exists or uanft owes micropayment already
     console.log(yellow(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
       magenta(`${address}`));
     console.log(yellow(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
@@ -99,6 +100,7 @@ async function verifyAddress(address, socket) {
     // or send micropayment to unauthenticated nft
     } else if (notAuthenticated == true) {
 
+      // send micropayment and terminate this child process
       const hash = await sendMicropayment(
         api,
         address,
