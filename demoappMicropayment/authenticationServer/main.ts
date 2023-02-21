@@ -60,12 +60,13 @@ var waitingQueue = new Map();
 // mapping is address -> [socketId, NFTPRICE]
 var mintQueue = new Map();
 
+// this runs persistently, listening for events on the blockchain
 async function transferListener(socket) {
 
   // establish connection with blockchain
   const [ api, contract ] = await setupSession('transferListener');
   
-  // successful transferListener initialization
+  // successful transferListener initialization logging
   console.log(green(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
     color.bold(`authentication/registration server running`));
   console.log('');
@@ -85,17 +86,18 @@ async function transferListener(socket) {
       // listen for Transfer events
       if (event.method == 'Transfer') {
 
+        // extract info from event object
         const sendingAddress = event.data[0];
         const receivingAddress = event.data[1];
         const transferAmount = event.data[2];
 
-        //console.log(event)
         // check for verification transfers
         //
         // from Interlock
         if ( sendingAddress == OWNER_ADDRESS &&
           transferAmount == AMOUNT) {
 
+          // successful auth transfer log entry
           console.log(green(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
             color.bold(`auth transfer complete  `));
           console.log(yellow(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
@@ -107,12 +109,14 @@ async function transferListener(socket) {
         } else if (receivingAddress == OWNER_ADDRESS &&
           transferAmount == AMOUNT) {
                 
+          // extract info from transfer event object
           const clientAddress = sendingAddress.toHuman();
           const clientSocketId = waitingQueue.get(clientAddress)[0];
           const userhash = waitingQueue.get(clientAddress)[1];
           const passhash = waitingQueue.get(clientAddress)[2];
           const nftId = waitingQueue.get(clientAddress)[3];
 
+          // log that client made auth transfer successfully
           console.log(green(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
             color.bold(`received transfer from `));
           console.log(green(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
@@ -137,25 +141,30 @@ async function transferListener(socket) {
             const setCredentialsChild = fork(setCredentials);
             setCredentialsChild.send({
               id: nftId,
-	      address: clientAddress,
+              address: clientAddress,
               userhash: userhash,
               passhash: passhash
             });
             
-            // listen for results of 
+            // listen for results of setCredetial
             setCredentialsChild.on('message', () => {
 
               io.to(clientSocketId).emit('credential-set', [nftId, userhash, passhash]);
               waitingQueue.delete(clientAddress);
             });
           });
+
+        // if sending address is paying exaclty the uanft price, then they are returning a 
+        // mint payment request
         } else if (receivingAddress == OWNER_ADDRESS &&
           mintQueue.has(sendingAddress.toHuman()) &&
           transferAmount.toNumber() == mintQueue.get(sendingAddress.toHuman())[1]) {
 
+          // extract info from transfer event
           const recipient = sendingAddress.toHuman();
           const clientSocketId = mintQueue.get(recipient)[0];
 
+          // log payment receipt
           console.log(green(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
             color.bold(`got NFT payment from `));
           console.log(green(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
@@ -206,8 +215,10 @@ io.on('connection', (socket) => {
   // relay all script events to application
   socket.onAny( async (message, ...args) => {
 
+    // connected client application wishes to register credentials for uanft
     if (message == 'authenticate-nft') {
 
+      // extract info from args re requesdt
       const address = args[0][0];
       const userhash = args[0][1];
       const passhash = args[0][2];
@@ -221,13 +232,17 @@ io.on('connection', (socket) => {
         const verifyAddressChild = fork(verifyAddress);
         verifyAddressChild.send(address);
 
+        // wait for response from initiated authentication process
         verifyAddressChild.on('message', (contents) => {
 
+          // this means there are no free aunfts to authenticate and register creds for
           if (contents == 'all-nfts-authenticated') {
 
+            // let the client know and delete address from waiting queue
             io.to(socket.id).emit('all-nfts-authenticated');
             waitingQueue.delete(address);
 
+            // log address needs new uanft
             console.log(red(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
               magenta(`${address}`));
             console.log(red(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
@@ -235,6 +250,7 @@ io.on('connection', (socket) => {
 
           } else {
 
+            // server just relays attempt result to client application
             io.to(socket.id).emit(`${contents}`);
           }
           return
@@ -242,21 +258,28 @@ io.on('connection', (socket) => {
 
       } else {
 
+        // extract info from args re request
         let waitingAddressInfo = waitingQueue.get(address);
         const waitingNftId = waitingAddressInfo[3];
 
+        // set new entry in waiting queue to reflect new socket id
         waitingAddressInfo = [socket.id, userhash, passhash, waitingNftId];
         waitingQueue.set(address, waitingAddressInfo);
 
+         // notify client still needs to return payment
         io.to(socket.id).emit('already-waiting', [waitingNftId]);
 
+        // log micropayment is still owed
         console.log(red(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
           magenta(`${address}`));
         console.log(red(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
           `owes micropayment\n`);
       }
+
+    // connected client application wants to mint a uanft
     } else if (message == 'mint-nft') {
 
+      // extract info from args re request
       const recipient = args[0][0];
       
       // log that we are expecting payment of NFTPRICE from recipient in immediate future
@@ -264,8 +287,10 @@ io.on('connection', (socket) => {
       // payments to OWNER account that have not requested an nft mint will not be honored
       mintQueue.set(recipient, [socket.id, NFTPRICE]);
 
+      // let client know they need to make nft payment transfer
       io.to(socket.id).emit('pay-to-mint', [NFTPRICE]);
 
+      // log waiting on payment transfer
       console.log(green(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
         `waiting on payment from`);
       console.log(green(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) +
@@ -276,8 +301,10 @@ io.on('connection', (socket) => {
       // this is to avoid ddos type scenario where someone crashes server by flooding with mint requests
       await setTimeout( () => {
 
+        // if the min queue contains recipeint
         if (mintQueue.has(recipient)) {
         
+          // the remove from queue because entry is timed out
           mintQueue.delete(recipient);
           console.log(red(`UA-NFT`) + color.bold(`|AUTH-SERVER: `) + 
             `NFT payment timeout for`);
@@ -288,17 +315,21 @@ io.on('connection', (socket) => {
         }
       }, 60000); // one minute delay
 
+    // still waiting on payment
     } else if (message == 'waiting') {
 
+      // extract info from args
       const hash = args[0][0];
       const nftId = args[0][1];
       const address = args[0][2];
       let waitingAddressInfo = waitingQueue.get(address);
       const clientSocketId = waitingAddressInfo[0];
       
+      // enter payment and payer info into queue
       waitingAddressInfo[3] = nftId;
       waitingQueue.set(address, waitingAddressInfo);
 
+      // notify client that expecting return micropayment transfer
       io.to(clientSocketId).emit('return-transfer-waiting', [nftId, hash]);
             
     }  else  {
