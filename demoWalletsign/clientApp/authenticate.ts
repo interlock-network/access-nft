@@ -302,7 +302,16 @@ async function authenticate() {
                 console.log(color.yellow(`0x${getHash(username)}`));
                 console.log(color.bold.magenta(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
                   color.bold(`PASSWORD STORED ON BLOCKCHAIN AS SHA256 HASH `));
-                console.log(color.yellow(`0x${getHash(password)}\n\n`));
+                console.log(color.yellow(`0x${getHash(password)}`));
+                console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
+                  color.bold(`You do not need to record these hash numbers.`));
+                console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
+                  color.bold(`They are provided in case you wish to verify`));
+                console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
+                  color.bold(`their presence on-chain via contract explorer, or`));
+                console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
+                  color.bold(`if you would like to verify SHA256 hashes yourself.\n\n`));
+
 
                 console.log(color.bold.magenta(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
                   color.bold(`USERNAME/PASSWORD IMPOSSIBLE TO DERIVE FROM HASH. `));
