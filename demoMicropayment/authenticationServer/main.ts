@@ -16,10 +16,10 @@ import { fork } from 'child_process';
 
 // child process paths
 import * as path from 'path';
-const verifyAddress = path.resolve('serverVerifyAddress.js');
-const setCredentials = path.resolve('serverSetCredential.js');
-const setAuthenticated = path.resolve('serverSetAuthenticated.js');
-const mint = path.resolve('serverMint.js');
+const verifyAddress = path.resolve('verifyAddress.js');
+const setCredentials = path.resolve('setCredential.js');
+const setAuthenticated = path.resolve('setAuthenticated.js');
+const mint = path.resolve('mint.js');
 
 // environment constants
 import * as dotenv from 'dotenv';

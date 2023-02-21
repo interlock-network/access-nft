@@ -5,7 +5,6 @@
 
 // imports
 import { io } from 'socket.io-client';
-import { fork } from 'child_process';
 
 // utility functions
 import {
@@ -25,10 +24,8 @@ const yellow = color.yellow.bold;
 const magenta = color.magenta;
 
 // constants
-const TRUE = '0x74727565';
 const FALSE = '0x66616c7365';
 const ISAUTHENTICATED = '0x697361757468656e74696361746564';
-const ISWAITING = '0x697377616974696e67';
 
 async function verifyAddress(address, socket) {
 

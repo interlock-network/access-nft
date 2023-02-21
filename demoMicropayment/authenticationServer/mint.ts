@@ -23,9 +23,6 @@ const yellow = color.yellow.bold;
 const magenta = color.magenta;
 
 // constants
-const MAXRETRY = 3;
-
-// constants
 //
 // null === no limit
 // refTime and proofSize determined by contracts-ui estimation plus fudge-factor
