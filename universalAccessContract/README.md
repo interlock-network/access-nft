@@ -1,3 +1,5 @@
+# WIP README
+
 
 ### About the smart contract: 
 
