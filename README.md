@@ -1,144 +1,228 @@
-# The Interlock Access NFT
+# The Interlock Universal Access NFT
 
 <img style="top: -10px" align="right" width="150" height="150" src="https://user-images.githubusercontent.com/69293813/211382026-cf3fc80c-4489-4017-b10e-c1cb27c89ae0.png">
 <img align="right" width="100" height="100" src="https://user-images.githubusercontent.com/69293813/211380333-f29cd213-f1f5-46c6-8c02-5ba0e15588f0.png">
 
-The Interlock Access NFT is a scheme for licensing and managing access permissions via ownership of a novel NFT. This project is sponsored by the [Aleph Zero](https://alephzero.org) Grant Program and is intended to provide this licensing/access scheme as a general framework to the Aleph Zero community at large. The NFT used in this project is compatible with the [Art Zero](https://artzero.io) marketplace.
+The Interlock Universal Access NFT is a scheme for licensing and managing access permissions via ownership of a novel PSP34 NFT. This project is sponsored by the [Aleph Zero](https://alephzero.org) Grant Program and is intended to provide this licensing/access scheme as a general framework to the Aleph Zero community at large. The NFT used in this project is compatible with the [Art Zero](https://artzero.io) marketplace.
 
-This project presumes knowledge of the following:
+Implementing this system in production presumes knowledge of the following:
  - [PSP43 NFT standard (ERC721)](https://github.com/w3f/PSPs/blob/master/PSPs/psp-34.md)
- - [ink! 4](https://use.ink/4.0.0-alpha.1/)
+ - [ink! 4](https://use.ink/4.0.0/)
  - [openbrush 3](https://docs.openbrush.io)
  - [Polkadot{.js}](https://polkadot.js.org/docs/)
- - [SQLite](https://www.sqlite.org/index.html)
+
+But you can follow along with the demonstration application anyways.
 
 ## In this repository:
 
 You will find the following:
 1) modified ink!4 openbrush3 PSP34 access NFT contract
-2) suite of node.js authentication scripts
-3) basic script integration into a SQLite database
+2) suite of node.js application and server scripts
+3) archived demo application version that relies on micropayements to authenticate
 
-As this is a _general_ framework, it will be up to you to create your own UI frontend. To see a bare bones implmentation, visit the [CLIdemo](./CLIdemo) directory. Interlock Network will add additional UI implementations as we go on implmenting various forms of this Interlock Access NFT in our own work.
+As this is a _general_ framework, it will be up to you to create your own UI frontend. To experience a minimal application of a universal access NFT, get started with the demonstration below:
 
-## Getting started:
+## Getting started with demonstration:
 
-Visit the [CLIdemo](./CLIdemo) directory to jump straight to tinkering with the barebones access NFT scheme implementation.
+This is a demonstration of how the universal access NFT can manage username and password credentials for restricting access to a server that will only serve content to users who have demonstrated that they own a universal access NFT.
+
+First, you will need to open up your terminal and setup a couple things:
+
+### (1)
+
+You need git first. Make sure you have it.
+
+##### mac
+
+```
+brew install git
+```
+or
+##### most linux
+
+```
+sudo apt install git
+```
+
+### (2)
+
+Now you need to make sure you have node.js
+
+##### mac
+
+```
+brew install node
+```
+or
+##### most linux
+
+```
+sudo apt install nodejs
+```
+Now please verify that you are using a suitable version of node.js. Run:
+
+```
+node --version
+```
+The demonstration application will work on version `v14.` and higher.
+
+If you are having trouble installing node.js, try visiting their website and downloading installer from there. Go to
+[node.js install downloads](https://nodejs.org/en/download/) to find the installation package right for your machine.
+
+
+### (3)
+
+Finally, clone this repository to your computer and navigate to to the `demonstration` directory within.
+
+```
+git clone https://github.com/interlock-network/universal-access-nft;
+cd universal-access-nft
+```
+Now we can run the demonstration application!
+
+
+## Run the demonstration:
+
+We need to spin up one server, and one client application.
+
+### (1) - RESTRICTED ACCESS SERVER
+
+Create a new terminal instance in a new tab, making sure it is in the `universal-access-nft` directory. Start up the restricted access area server. This server is responsible for receiving access credentials over https connection and verifying that their hashes match the hashes stored on the blockchain during the NFT credential registration process. This restricted access area server serves content that only verified universal access NFT holders have access to. In practice, this server could serve the entire experience, or it may simply issue an authentication token for proffer elsewhere. In this case, the server recieves a login request, it checks credentials, then grants or denies access to the restricted area. Run:
+
+```
+cd demonstration/restrictedAccessServer;
+node --expose-gc accessArea.js
+```
+
+### (3) - CLIENT APPLICATION
+
+Finally we can start up the client application. Create a new terminal instance in this same `universal-access-nft` directory. You could detach the terminal and place it side-by-side with the server terminal if you want to soak in all the play-by-play action at once. Run:
+
+```
+cd demonstration/clientApplication;
+node main.js
+```
+Navigate the menu options to explore the minting, credential registration, and login process for the universal access NFT framework.
+
 
 ## How this framework works:
 
-A standard PSP34 NFT smart contract is repurposed by reimplementing the `transfer` method, adding the `set_authorized` and `set_not_authorized` methods, and creating a new storage space and method for tracking the _collection_ held by a particular wallet holder (`access_collection`)
+In short:
 
-When the contract owner mints an access token to a wallet holder (or if the wallet holder mints or buys a token from the Art Zero marketplace), the token is set by default to `isauthenticated=FALSE`.
+1) purchase/receive Universal Access NFT (UANFT)
+2) register on blockchain the credentials SHA256-hashed by client application, proving UANFT ownership with signature
+3) UANFT owner makes login/access attempt to restricted area hosted by contract owner's secure server
+4) UANFT owner submits credentials over secure https connection to restricted access area server
+5) server takes SHA256 hash of credentials and discards unhashed credentials
+6) server fetches original credential hashes that were stored on blockchain during registration transaction
+7) server compares fetched credential hashes against login attempt credential hashes
+8) if hashes match, server serves restricted access area content
+9) if owner transfers UANFT, then credential hashes are removed from blockchain storage
+10) if old owner tries to login to secure restricted area again, attempt will fail
 
-Now take for example the use-case where we use the access NFT as a software license. When the NFT is in the state `isauthenticated=FALSE`, then this is equivalent to the software license not yet being registered. The NFT holder must authenticate their identity to register their access NFT software license. The reason they must authenticate their identity should be apparent: it is to prevent someone from monitoring NFT sale/mint transactions on the blockchain, then using somebody else's wallet (containing an access NFT) to claim rights to a software license that isn't rightfully theirs.
+In long:
 
-So, to authenticate their new access NFT, the holder must visit an interface (UI) where they partake in the authetication process via the backend authentication scripts.
+Access permission credentials are earned by purchasing or otherwise holding a PSP34 Universal Access NFT (UANFT). Each instance of the UANFT contract handles its own type of application access permissions. For example, I may with to manage access to a VIP online chatroom, so I will instantiate one UANFT to manage usernames and passwords for granting UANFT holders access on login. Or, I may wish to issue 2FA tokens that UANFT holders can store in their browser to enable some sort of browser extension functionality. There are numerous possible applications, hence the _universal_ quality.
 
-#### From their perspective, will look like this:
-1) provide wallet address
-2) transfer some small specified amount of $AZERO to the contract owner (refunded)
-3) submit identification information to associate with their newly authenticated license (optional)
+Once somebody acquires a UANFT for a particular access type, they may then register the appropriate credentials for their access type. Again, this may be username/password, or an API key, software license, etc. The registration operation happens exclusively on the blockchain with no need for a transaction relay server.
 
-#### Behind the scenes, will look like this:
-1) check the wallet's NFT collection to make sure wallet contains at least one non authenticated access NFT
-2) if so, check SQLite database to make sure wallet isn't already pending authentication transfer for that NFT
-3) if not, transfer some small amount of $AZERO to the NFT holder
-4) log this wallet in SQLite database as _pending authetication transfer_ plus the value of the small amount transfered
-5) await transfer of specified amount from wallet holder
-6) when transfer succeeds, run `set_authenticated` method to turn attribute `isauthenticated=TRUE`
-7) enter authenticated wallet in database for future use (ie, to enable software access via some other backend)
+When a UANFT owner wishes to register, they simply connect their wallet containing the UANFT to a client registration application (which may be a website, a browser extension, etc). At this point, they choose username that has not been taken, and a password. Within the client application, these credentials are hashed via SHA256 then discarded. The UANFT owner then signs and submits the registration transaction, thus sending the anonymized credentials to the blockchain.
 
-#### And that's it; after authentication, the NFT holder has proven right to access whatever privilege that NFT mediates.
+On the blockchain, the `register()` message verifies that the signer owns the UANFT ID being registered, then checks that the username hash has not already been taken. If it has been taken by a diffent UANFT ID, then this is somebody elses username and the transaction fails. If the username has been taken by the same UANFT ID, then the signer is simply registering a new password hash. If username hash is free, then the pair of SHA256 credential hashes are stored on-chain and associated with that particular UANFT ID.
 
-If at any point an NFT holder wishes to sell or transfer their access NFT to a different wallet, the reimplemented `transfer` method will reset the NFT to `isauthenticated=FALSE`.
+Now, whenever the UANFT owner wishes to access or login to the restricted area, they will contract the server that manages authentication for that are (perhaps serving a chatroom), and they will send their username and password over a secure https connection to the server for authentication. When the server recieves the login request with the username and password, it then calculates the SHA256 hash of each. Next -- it fetches the username/password hashpair that was stored on the blockchain during the registration process. If the login attempt username hash cannot be found on the blockchain, then the access credentials do not exist or are incorrect. If the login attempt username hash exists and the password hash matches the record on-chain, then the access credentials are valid and the server begins serving the restricted access area content to the privileged UANFT owner.
 
-Because the access NFT uses attributes to track authentication status, the `set_authenticated` and `set_not_authenticated` methods may seem redundant. However, these are deliberately included for logic injection points for access management that may otherwise be inappropriate for the `set_attribute` method. The contract--and logic within `set_authenticated` and `set_not_authenticated` is fully upgradable via the `set_code_hash` ink! method.
+It is important to note that credential information (either identifying or secret) is never stored in a database. The only information that is stored are the anonymized credential SHA256 hashes on the blockchain.
 
-Finally, the NFT contract `access_collection` feature is added as a convenience to make bringing up a wallet holder's collection and iterating over those NFTs easier.
+In the event that a UANFT owner wishes to transfer or sell their UANFT to a different owner, the transfer message reimplementation on-chain removes the prior owner's credentials from storage thus revoking access to the privileged restricted access area. If there is a concern that a malicious actor may purchase a UANFT with an identified username, then the smart contract may be configured to retain old username hashes in record.
 
-## Authentication process flowchart:
+The ultimate goal is to eliminate the need to send secrets to the restricted access server that checks access-request hashes to those stored on chain. This will ultimately be accomplished by some sort of zero-knowledge proof scheme.
+
+### A visual representation:
+
+This series of flowcharts is for the case where a UANFT manages usernames and passwords.
+
+#### This flowchart outlines the credential registration process
+
 ```mermaid
 
 flowchart TD
 
-isauthenticating --> query1
-authforotherwallet --> query2
-revokeaccess --> set1
-sendholdermicropayment --> set2
-clearauthenticatingstatus --> set3
-grantaccess --> set4
 
-style SQLite_Database fill:#dabded,stroke:#dabded,stroke-width:4px,color:#000
-style Authenticate_Interlock_Access_NFT fill:#dabded,stroke:#dabded,stroke-width:4px,color:#000
+style Interlock_Universal_Access_NFT_____Credential_Registration fill:#dabded,stroke:#dabded,stroke-width:4px,color:#000
 
+subgraph Interlock_Universal_Access_NFT_____Credential_Registration
 
-subgraph SQLite_Database
+profferwallet(proffer wallet at UI) --> checknft(is universal access<br>NFT present?)
+checknft --> |yes|ispresent(prompt to choose credentials<br>eg, username and password)
+checknft --> |no|isnotpresent(prompt to mint or purchase<br>new universal access NFT)
+ispresent --> takehash(take SHA256 hashes<br>of credentials)
+takehash --> checkusername(check blockchain for hash of username...<br>is it available?)
+checkusername --> |no|notavailable(username not available...<br>choose different)
+checkusername --> |yes|yesavailable(register credential<br>hashes on blockchain)
+yesavailable --> ownerready(universal access NFT now<br>ready to login to<br>restricted access area)
 
-query1(QUERY)
-query1 -....- query2(QUERY)
-query2 -.- set1(SET)
-set1 -.- set2(SET)
-set2 -.....- set3(SET)
-set3 -.- set4(SET)
+transfernft(on NFT transfer or sale) --> deletecreds(delete username/password hash<br>associated with particular UANFT ID)
 
 end
 
-subgraph Authenticate_Interlock_Access_NFT
-
-profferwallet(proffer wallet at UI) --> isauthenticating(is wallet currently<br>authenticating NFT?)
-isauthenticating --> |yes|stillneedsxfr(notify holder still needs<br>to transfer micropayment)
-isauthenticating --> |no|checknft(check for non authenticated<br>NFT in holder's collection)
-checknft --> ispresent(is non authenticated<br>NFT present?)
-ispresent --> |yes| sendholdermicropayment(send micropayment<br>to holder's wallet and enter<br>micropayment amount indatabase)
-ispresent --> |no|nonft(nft not present or<br>already authenticated)
-nonft --> authforotherwallet(is NFT authenticated<br>for different wallet?)
-authforotherwallet --> |yes|revokeaccess(revoke access<br>of previous owner)
-authforotherwallet --> |no|needtobuy(wallet holder needs to<br>purchase an access NFT)
-revokeaccess --> sendholdermicropayment
-stillneedsxfr --> awaitxfr(await micropayment return<br>transfer from wallet holder)
-sendholdermicropayment --> awaitxfr
-awaitxfr --> receivedmicropayment(received micropayment<br>transfer?)
-receivedmicropayment --> |no| timedout(timedout waiting for<br>micropayment transfer)
-timedout -.-> databasekeepstrackofwallet(database keeps<br>track of wallet)
-receivedmicropayment --> |yes| micropaymentauthenticationcomplete(micropayment authentication<br>complete)
-micropaymentauthenticationcomplete --> setauthenticated(execute set_authenticated<br>isauthenticated=TRUE)
-setauthenticated --> clearauthenticatingstatus(wallet is not longer<br>authenticating)
-clearauthenticatingstatus --> grantaccess(grant access designated<br>by the access NFT)
-
-transfernft(on NFT transfer or sale) --> setnotauthenticated(isauthenticated=FALSE)
-setnotauthenticated --> reauthenticate(repeat authentication<br>process)
-reauthenticate -...-> accessexpiration(on transfer, access expires<br>when NFT is reauthenticated)
-end
-
-style profferwallet fill:#490ec7,stroke:#490ec7,stroke-width:4px,color:#fff
-style needtobuy fill:#490ec7,stroke:#490ec7,stroke-width:4px,color:#fff
-style isauthenticating fill:#490ec7,stroke:#490ec7,stroke-width:4px,color:#fff
 style checknft fill:#490ec7,stroke:#490ec7,stroke-width:4px,color:#fff
-style databasekeepstrackofwallet fill:#490ec7,stroke:#490ec7,stroke-width:4px,color:#fff
 style ispresent fill:#490ec7,stroke:#490ec7,stroke-width:4px,color:#fff
-style nonft fill:#490ec7,stroke:#490ec7,stroke-width:4px,color:#fff
-style authforotherwallet fill:#490ec7,stroke:#490ec7,stroke-width:4px,color:#fff
-style grantaccess fill:#490ec7,stroke:#490ec7,stroke-width:4px,color:#fff
-style revokeaccess fill:#490ec7,stroke:#490ec7,stroke-width:4px,color:#fff
-style stillneedsxfr fill:#490ec7,stroke:#490ec7,stroke-width:4px,color:#fff
-style sendholdermicropayment fill:#490ec7,stroke:#490ec7,stroke-width:4px,color:#fff
-style awaitxfr fill:#490ec7,stroke:#490ec7,stroke-width:4px,color:#fff
-style receivedmicropayment fill:#490ec7,stroke:#490ec7,stroke-width:4px,color:#fff
-style timedout fill:#490ec7,stroke:#490ec7,stroke-width:4px,color:#fff
-style accessexpiration fill:#490ec7,stroke:#490ec7,stroke-width:4px,color:#fff
-style micropaymentauthenticationcomplete fill:#490ec7,stroke:#490ec7,stroke-width:4px,color:#fff
-style setauthenticated fill:#490ec7,stroke:#490ec7,stroke-width:4px,color:#fff
-style clearauthenticatingstatus fill:#490ec7,stroke:#490ec7,stroke-width:4px,color:#fff
-
+style checkusername fill:#490ec7,stroke:#490ec7,stroke-width:4px,color:#fff
+style takehash fill:#490ec7,stroke:#490ec7,stroke-width:4px,color:#fff
+style notavailable fill:#490ec7,stroke:#490ec7,stroke-width:4px,color:#fff
+style yesavailable fill:#490ec7,stroke:#490ec7,stroke-width:4px,color:#fff
+style isnotpresent fill:#490ec7,stroke:#490ec7,stroke-width:4px,color:#fff
+style profferwallet fill:#490ec7,stroke:#490ec7,stroke-width:4px,color:#fff
 style transfernft fill:#490ec7,stroke:#490ec7,stroke-width:4px,color:#fff
-style setnotauthenticated fill:#490ec7,stroke:#490ec7,stroke-width:4px,color:#fff
-style reauthenticate fill:#490ec7,stroke:#490ec7,stroke-width:4px,color:#fff
-style query1 fill:#490ec7,stroke:#490ec7,stroke-width:4px,color:#fff
-style query1 fill:#490ec7,stroke:#490ec7,stroke-width:4px,color:#fff
-style query2 fill:#490ec7,stroke:#490ec7,stroke-width:4px,color:#fff
-style set1 fill:#490ec7,stroke:#490ec7,stroke-width:4px,color:#fff
-style set2 fill:#490ec7,stroke:#490ec7,stroke-width:4px,color:#fff
-style set3 fill:#490ec7,stroke:#490ec7,stroke-width:4px,color:#fff
-style set4 fill:#490ec7,stroke:#490ec7,stroke-width:4px,color:#fff
+style deletecreds fill:#490ec7,stroke:#490ec7,stroke-width:4px,color:#fff
+style ownerready fill:#490ec7,stroke:#490ec7,stroke-width:4px,color:#fff
+
 ```
+
+#### This flowchart outlines the login process
+
+```mermaid
+
+flowchart TD
+
+
+style Interlock_Universal_Access_NFT_____Login fill:#dabded,stroke:#dabded,stroke-width:4px,color:#000
+
+subgraph Interlock_Universal_Access_NFT_____Login
+
+loginui(NFT owner visits login UI) --> uiprompt(login UI prompts owner for<br>username and password)
+uiprompt --> secureconnect(login UI establishes secure connection<br>to restricted access area server)
+secureconnect --> sendcred(login UI sends credentials to<br>secure restricted access area server)
+sendcred --> serverhash(server takes SHA256 hashes<br>of username and password)
+serverhash --> credget(server gets password hash associated<br>with username hash stored on blockchain)
+credget --> userhashpresent(is the username hash present<br>on the blockchain?)
+userhashpresent --> |no|notpresent(credentials wrong or nonexistent)
+userhashpresent --> |yes|yespresent(credentials exist and password<br>hash successfully fetched)
+yespresent --> passmatch(do password hashes match?)
+passmatch --> |no|wrongpass(password incorrect)
+passmatch --> |yes|rightpass(password correct)
+rightpass --> accessgranted(restricted access area server<br>grants access to universal<br>access NFT owner)
+accessgranted --> serve(begin serving privileged content)
+
+end
+
+
+style loginui fill:#490ec7,stroke:#490ec7,stroke-width:4px,color:#fff
+style uiprompt fill:#490ec7,stroke:#490ec7,stroke-width:4px,color:#fff
+style secureconnect fill:#490ec7,stroke:#490ec7,stroke-width:4px,color:#fff
+style sendcred fill:#490ec7,stroke:#490ec7,stroke-width:4px,color:#fff
+style serverhash fill:#490ec7,stroke:#490ec7,stroke-width:4px,color:#fff
+style credget fill:#490ec7,stroke:#490ec7,stroke-width:4px,color:#fff
+style userhashpresent fill:#490ec7,stroke:#490ec7,stroke-width:4px,color:#fff
+style notpresent fill:#490ec7,stroke:#490ec7,stroke-width:4px,color:#fff
+style yespresent fill:#490ec7,stroke:#490ec7,stroke-width:4px,color:#fff
+style passmatch fill:#490ec7,stroke:#490ec7,stroke-width:4px,color:#fff
+style wrongpass fill:#490ec7,stroke:#490ec7,stroke-width:4px,color:#fff
+style rightpass fill:#490ec7,stroke:#490ec7,stroke-width:4px,color:#fff
+style accessgranted fill:#490ec7,stroke:#490ec7,stroke-width:4px,color:#fff
+style serve fill:#490ec7,stroke:#490ec7,stroke-width:4px,color:#fff
+
+```
+
+
