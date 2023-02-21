@@ -56,6 +56,7 @@ var _b = require('@polkadot/api-contract'), ContractPromise = _b.ContractPromise
 var _c = require('@polkadot/keyring'), decodeAddress = _c.decodeAddress, encodeAddress = _c.encodeAddress;
 var WeightV2 = require('@polkadot/types/interfaces');
 // environment constants
+var fs_1 = require("fs");
 var dotenv = require("dotenv");
 dotenv.config();
 // specify color formatting
@@ -67,7 +68,7 @@ var cyan = color.cyan;
 var yellow = color.yellow.bold;
 var magenta = color.magenta;
 // constants
-var ACCESS_METADATA = require('../metadata.json');
+var ACCESS_METADATA = JSON.parse((0, fs_1.readFileSync)(process.env.ACCESS_METADATA).toString());
 var ACCESS_CONTRACT = process.env.ACCESS_CONTRACT;
 var OWNER_MNEMONIC = process.env.OWNER_MNEMONIC;
 var APP_PROCESS = process.env.APP_PROCESS;

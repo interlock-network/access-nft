@@ -10,6 +10,7 @@ const { decodeAddress, encodeAddress } = require('@polkadot/keyring')
 const WeightV2 = require('@polkadot/types/interfaces');
 
 // environment constants
+import { readFileSync } from "fs";
 import * as dotenv from 'dotenv';
 dotenv.config();
 
@@ -23,7 +24,7 @@ const yellow = color.yellow.bold;
 const magenta = color.magenta;
 
 // constants
-const ACCESS_METADATA = require('../metadata.json');
+const ACCESS_METADATA = JSON.parse(readFileSync(process.env.ACCESS_METADATA).toString());
 const ACCESS_CONTRACT = process.env.ACCESS_CONTRACT;
 const OWNER_MNEMONIC = process.env.OWNER_MNEMONIC;
 const APP_PROCESS = process.env.APP_PROCESS;
