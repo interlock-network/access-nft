@@ -23,7 +23,7 @@ import {
   returnToMain,
 } from "./utils";
 
-
+// environement constants
 const WALLET = JSON.parse(fs.readFileSync('.wallet.json').toString());
 const CLIENT_ADDRESS = WALLET.CLIENT_ADDRESS;
 
@@ -31,6 +31,7 @@ async function deleteWallet() {
 
   try {
 
+		// warning notification of impending deletion
     console.log(red(`\nUA-NFT`) + color.bold(`|CLIENT-APP: `) +
       color.bold(`Do you really wish to delete the wallet you`));
     console.log(red(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
@@ -52,14 +53,17 @@ async function deleteWallet() {
       const choice = responseChoice.choice
       console.log('');
 
+			// nah, kick back to main menu
       if (choice == false) {
 
         process.send('done');
         process.exit();
       }
   
+			// overwrite .wallet.json with emptiness
       fs.writeFileSync('.wallet.json', '');
 
+			// confirmation notification that overwrite was successful
       console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
         color.bold(`You deleted your wallet.\n`));
       console.log(green(`UA-NFT`) + color.bold(`|CLIENT-APP: `) +
