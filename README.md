@@ -5,7 +5,7 @@
 
 The Interlock Universal Access NFT is a scheme for licensing and managing access permissions via ownership of a novel PSP34 NFT. This project is sponsored by the [Aleph Zero](https://alephzero.org) Grant Program and is intended to provide this licensing/access scheme as a general framework to the Aleph Zero community at large. The NFT used in this project is compatible with the [Art Zero](https://artzero.io) marketplace.
 
-Implementing this system in production presumes knowledge of the following:
+#### Implementing this system in production presumes knowledge of the following:
  - [PSP43 NFT standard (ERC721)](https://github.com/w3f/PSPs/blob/master/PSPs/psp-34.md)
  - [ink! 4](https://use.ink/4.0.0/)
  - [openbrush 3](https://docs.openbrush.io)
@@ -13,7 +13,7 @@ Implementing this system in production presumes knowledge of the following:
 
 But you can follow along with the demonstration application anyways.
 
-## In this repository:
+#### In this repository:
 
 You will find the following:
 1) modified ink!4 openbrush3 PSP34 access NFT contract
@@ -109,7 +109,7 @@ Navigate the menu options to explore the minting, credential registration, and l
 
 # How this framework works:
 
-In short:
+### In short form:
 
 1) purchase/receive Universal Access NFT (UANFT)
 2) register on blockchain the credentials SHA256-hashed by client application, proving UANFT ownership with signature
@@ -122,25 +122,7 @@ In short:
 9) if owner transfers UANFT, then credential hashes are removed from blockchain storage
 10) if old owner tries to login to secure restricted area again, attempt will fail
 
-In long:
-
-Access permission credentials are earned by purchasing or otherwise holding a PSP34 Universal Access NFT (UANFT). Each instance of the UANFT contract handles its own type of application access permissions. For example, I may with to manage access to a VIP online chatroom, so I will instantiate one UANFT to manage usernames and passwords for granting UANFT holders access on login. Or, I may wish to issue 2FA tokens that UANFT holders can store in their browser to enable some sort of browser extension functionality. There are numerous possible applications, hence the _universal_ quality.
-
-Once somebody acquires a UANFT for a particular access type, they may then register the appropriate credentials for their access type. Again, this may be username/password, or an API key, software license, etc. The registration operation happens exclusively on the blockchain with no need for a transaction relay server.
-
-When a UANFT owner wishes to register, they simply connect their wallet containing the UANFT to a client registration application (which may be a website, a browser extension, etc). At this point, they choose username that has not been taken, and a password. Within the client application, these credentials are hashed via SHA256 then discarded. The UANFT owner then signs and submits the registration transaction, thus sending the anonymized credentials to the blockchain.
-
-On the blockchain, the `register()` message verifies that the signer owns the UANFT ID being registered, then checks that the username hash has not already been taken. If it has been taken by a diffent UANFT ID, then this is somebody elses username and the transaction fails. If the username has been taken by the same UANFT ID, then the signer is simply registering a new password hash. If username hash is free, then the pair of SHA256 credential hashes are stored on-chain and associated with that particular UANFT ID.
-
-Now, whenever the UANFT owner wishes to access or login to the restricted area, they will contract the server that manages authentication for that are (perhaps serving a chatroom), and they will send their username and password over a secure https connection to the server for authentication. When the server recieves the login request with the username and password, it then calculates the SHA256 hash of each. Next -- it fetches the username/password hashpair that was stored on the blockchain during the registration process. If the login attempt username hash cannot be found on the blockchain, then the access credentials do not exist or are incorrect. If the login attempt username hash exists and the password hash matches the record on-chain, then the access credentials are valid and the server begins serving the restricted access area content to the privileged UANFT owner.
-
-It is important to note that credential information (either identifying or secret) is never stored in a database. The only information that is stored are the anonymized credential SHA256 hashes on the blockchain.
-
-In the event that a UANFT owner wishes to transfer or sell their UANFT to a different owner, the transfer message reimplementation on-chain removes the prior owner's credentials from storage thus revoking access to the privileged restricted access area. If there is a concern that a malicious actor may purchase a UANFT with an identified username, then the smart contract may be configured to retain old username hashes in record.
-
-The ultimate goal is to eliminate the need to send secrets to the restricted access server that checks access-request hashes to those stored on chain. This will ultimately be accomplished by some sort of zero-knowledge proof scheme.
-
-## A visual representation:
+### In visual form:
 
 This series of flowcharts is for the case where a UANFT manages usernames and passwords.
 
@@ -227,4 +209,20 @@ style serve fill:#490ec7,stroke:#490ec7,stroke-width:4px,color:#fff
 
 ```
 
+### In long form:
 
+Access permission credentials are earned by purchasing or otherwise holding a PSP34 Universal Access NFT (UANFT). Each instance of the UANFT contract handles its own type of application access permissions. For example, I may with to manage access to a VIP online chatroom, so I will instantiate one UANFT to manage usernames and passwords for granting UANFT holders access on login. Or, I may wish to issue 2FA tokens that UANFT holders can store in their browser to enable some sort of browser extension functionality. There are numerous possible applications, hence the _universal_ quality.
+
+Once somebody acquires a UANFT for a particular access type, they may then register the appropriate credentials for their access type. Again, this may be username/password, or an API key, software license, etc. The registration operation happens exclusively on the blockchain with no need for a transaction relay server.
+
+When a UANFT owner wishes to register, they simply connect their wallet containing the UANFT to a client registration application (which may be a website, a browser extension, etc). At this point, they choose username that has not been taken, and a password. Within the client application, these credentials are hashed via SHA256 then discarded. The UANFT owner then signs and submits the registration transaction, thus sending the anonymized credentials to the blockchain.
+
+On the blockchain, the `register()` message verifies that the signer owns the UANFT ID being registered, then checks that the username hash has not already been taken. If it has been taken by a diffent UANFT ID, then this is somebody elses username and the transaction fails. If the username has been taken by the same UANFT ID, then the signer is simply registering a new password hash. If username hash is free, then the pair of SHA256 credential hashes are stored on-chain and associated with that particular UANFT ID.
+
+Now, whenever the UANFT owner wishes to access or login to the restricted area, they will contract the server that manages authentication for that are (perhaps serving a chatroom), and they will send their username and password over a secure https connection to the server for authentication. When the server recieves the login request with the username and password, it then calculates the SHA256 hash of each. Next -- it fetches the username/password hashpair that was stored on the blockchain during the registration process. If the login attempt username hash cannot be found on the blockchain, then the access credentials do not exist or are incorrect. If the login attempt username hash exists and the password hash matches the record on-chain, then the access credentials are valid and the server begins serving the restricted access area content to the privileged UANFT owner.
+
+It is important to note that credential information (either identifying or secret) is never stored in a database. The only information that is stored are the anonymized credential SHA256 hashes on the blockchain.
+
+In the event that a UANFT owner wishes to transfer or sell their UANFT to a different owner, the transfer message reimplementation on-chain removes the prior owner's credentials from storage thus revoking access to the privileged restricted access area. If there is a concern that a malicious actor may purchase a UANFT with an identified username, then the smart contract may be configured to retain old username hashes in record.
+
+The ultimate goal is to eliminate the need to send secrets to the restricted access server that checks access-request hashes to those stored on chain. This will ultimately be accomplished by some sort of zero-knowledge proof scheme.
