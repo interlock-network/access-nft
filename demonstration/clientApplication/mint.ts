@@ -94,7 +94,7 @@ async function mint() {
         mintTxChild.on('message', async (message) => {
 
           // when mint succeeds child process will declare so
-          if (message == 'mint-complete') {
+          if (message == 'mintTo-complete') {
 
             // get the resulting new array of nfts
             //

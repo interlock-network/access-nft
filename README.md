@@ -1,9 +1,13 @@
-# The Interlock Universal Access NFT
+# The Interlock Network Universal Access NFT
 
 <img style="top: -10px" align="right" width="150" height="150" src="https://user-images.githubusercontent.com/69293813/211382026-cf3fc80c-4489-4017-b10e-c1cb27c89ae0.png">
 <img align="right" width="100" height="100" src="https://user-images.githubusercontent.com/69293813/211380333-f29cd213-f1f5-46c6-8c02-5ba0e15588f0.png">
 
 The Interlock Universal Access NFT is a scheme for licensing and managing access permissions via ownership of a novel PSP34 NFT. This project is sponsored by the [Aleph Zero](https://alephzero.org) Grant Program and is intended to provide this licensing/access scheme as a general framework to the Aleph Zero community at large. The NFT used in this project is compatible with the [Art Zero](https://artzero.io) marketplace.
+
+## [View the Universal Access NFT contract here](https://github.com/interlock-network/interlock-smartcontracts/tree/master/contract_uanft)
+
+## [View the Universal Access NFT contact docs here](https://interlock-network.github.io/interlock-smartcontracts/contract_uanft/docs/uanft/)
 
 #### Implementing this system in production presumes knowledge of the following:
  - [PSP43 NFT standard (ERC721)](https://github.com/w3f/PSPs/blob/master/PSPs/psp-34.md)
@@ -13,10 +17,18 @@ The Interlock Universal Access NFT is a scheme for licensing and managing access
 
 But you can follow along with the demonstration application anyways.
 
+#### Possible Universal Access NFT applications:
+- ##### username/password management
+- ##### api key management
+- ##### two factor authentication
+- ##### software licensing
+- ##### general secret management
+
+This is all possible without use of a traditional database (alas the blockchain is, technically a database).
+
 #### In this repository:
 
 You will find the following:
-1) modified ink!4 openbrush3 PSP34 access NFT contract
 2) suite of node.js application and server scripts
 3) archived demo application version that relies on micropayements to authenticate
 

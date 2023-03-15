@@ -119,7 +119,7 @@ function mint() {
                                                 return __generator(this, function (_b) {
                                                     switch (_b.label) {
                                                         case 0:
-                                                            if (!(message == 'mint-complete')) return [3 /*break*/, 3];
+                                                            if (!(message == 'mintTo-complete')) return [3 /*break*/, 3];
                                                             return [4 /*yield*/, (0, utils_1.contractGetter)(api_1, contract_1, OWNER_PAIR_1, 'mint', 'getCollection', CLIENT_ADDRESS)];
                                                         case 1:
                                                             _a = _b.sent(), gasRequired = _a[0], storageDeposit = _a[1], RESULT_collection = _a[2], OUTPUT_collection = _a[3];

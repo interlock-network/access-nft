@@ -63,7 +63,7 @@ async function mint(recipient) {
       refTimeLimit,
       proofSizeLimit,
       'mintTx',
-      'mint',
+      'mintTo',
       recipient,
     );
   } catch(error) {

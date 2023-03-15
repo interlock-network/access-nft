@@ -83,7 +83,7 @@ function mint(recipient) {
                     console.log(green("UA-NFT") + color.bold("|CLIENT-APP: ") +
                         magenta("".concat(recipient, "\n")));
                     // call mint tx using contract owner's keypair
-                    return [4 /*yield*/, (0, utils_1.contractDoer)(api, contract, OWNER_PAIR, storageDepositLimit, refTimeLimit, proofSizeLimit, 'mintTx', 'mint', recipient)];
+                    return [4 /*yield*/, (0, utils_1.contractDoer)(api, contract, OWNER_PAIR, storageDepositLimit, refTimeLimit, proofSizeLimit, 'mintTx', 'mintTo', recipient)];
                 case 2:
                     // call mint tx using contract owner's keypair
                     _b.sent();
