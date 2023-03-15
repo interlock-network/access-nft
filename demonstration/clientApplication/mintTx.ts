@@ -35,7 +35,7 @@ const OWNER_MNEMONIC = process.env.OWNER_MNEMONIC;
 // null === no limit
 // refTime and proofSize determined by contracts-ui estimation plus fudge-factor
 const refTimeLimit = 8000000000;
-const proofSizeLimit = 180000;
+const proofSizeLimit = 150000;
 const storageDepositLimit = null;
 
 async function mint(recipient) {

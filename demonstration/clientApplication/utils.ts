@@ -133,7 +133,7 @@ export async function contractDoer(
   }) as WeightV2;
 
   // too much gas required?
-  if (gasRequired > gasLimit) {
+  if (Number(gasRequired.refTime.toString()) > Number(gasLimit.refTime.toString())) {
   
     // emit error message with signature values to server
     console.log(red(`UA-NFT`) + color.bold(`|BLOCKCHAIN: `) +

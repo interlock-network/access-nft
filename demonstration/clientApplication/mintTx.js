@@ -64,7 +64,7 @@ var OWNER_MNEMONIC = process.env.OWNER_MNEMONIC;
 // null === no limit
 // refTime and proofSize determined by contracts-ui estimation plus fudge-factor
 var refTimeLimit = 8000000000;
-var proofSizeLimit = 180000;
+var proofSizeLimit = 150000;
 var storageDepositLimit = null;
 function mint(recipient) {
     return __awaiter(this, void 0, void 0, function () {
