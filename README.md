@@ -7,7 +7,7 @@ The Interlock Universal Access NFT is a scheme for licensing and managing access
 
 ## [View the Universal Access NFT contract here](https://github.com/interlock-network/interlock-smartcontracts/tree/master/contract_uanft)
 
-## [View the Universal Access NFT contact docs here](https://interlock-network.github.io/interlock-smartcontracts/contract_uanft/docs/uanft/)
+## [View the Universal Access NFT contract docs here](https://interlock-network.github.io/interlock-smartcontracts/contract_uanft/docs/uanft/)
 
 #### Implementing this system in production presumes knowledge of the following:
  - [PSP43 NFT standard (ERC721)](https://github.com/w3f/PSPs/blob/master/PSPs/psp-34.md)
@@ -29,8 +29,9 @@ This is all possible without use of a traditional database (alas the blockchain 
 #### In this repository:
 
 You will find the following:
-2) suite of node.js application and server scripts
-3) archived demo application version that relies on micropayements to authenticate
+
+1) suite of node.js application and server scripts
+2) archived demo application version that relies on micropayements to authenticate
 
 As this is a _general_ framework, it will be up to you to create your own UI frontend. To experience a minimal application of a Universal Access NFT, get started with the demonstration CLI app below:
 
