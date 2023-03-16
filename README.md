@@ -89,8 +89,8 @@ If you are having trouble installing node.js, try visiting the website and downl
 Finally, clone this repository to your computer and navigate to it:
 
 ```
-git clone https://github.com/interlock-network/universal-access-nft;
-cd universal-access-nft
+git clone https://github.com/interlock-network/universal-access-nft-demo;
+cd universal-access-nft-demo
 ```
 Now we can run the demonstration application!
 
@@ -101,23 +101,27 @@ We need to spin up one server, and one client application.
 
 ### (1) - RESTRICTED ACCESS SERVER:
 
-Create a new terminal instance in a new tab, making sure it is in the `universal-access-nft` directory. Start up the restricted access area server. This server is responsible for receiving access credentials over https connection and verifying that their hashes match the hashes that were stored on the blockchain during the NFT credential registration process. This restricted access area server serves content that only verified Universal Access NFT holders have access to. In practice, this server could serve the entire experience, or it may simply issue an authentication token for proffer elsewhere. In this case, the server recieves a login request, it checks credentials, then grants or denies access to the restricted area. Run:
+From this directory (`username/universal-access-nft-demo`), run:
 
 ```
 cd demonstration/restrictedAccessServer;
 node --expose-gc accessArea.js
 ```
 
+Create a new terminal instance in a new tab, making sure it is in the `universal-access-nft` directory. Start up the restricted access area server. This server is responsible for receiving access credentials over https connection and verifying that their hashes match the hashes that were stored on the blockchain during the NFT credential registration process. This restricted access area server serves content that only verified Universal Access NFT holders have access to. In practice, this server could serve the entire experience, or it may simply issue an authentication token for proffer elsewhere. In this case, the server recieves a login request, it checks credentials, then grants or denies access to the restricted area. Run:
+
 ### (3) - CLIENT APPLICATION:
 
-Finally we can start up the client application. Create a new terminal instance in this same `universal-access-nft` directory. You could detach the terminal and place it side-by-side with the server terminal if you want to soak in all the play-by-play action at once. Run:
+From this directory (`username/universal-access-nft-demo`), run:
 
 ```
 cd demonstration/clientApplication;
 node main.js
 ```
-Navigate the menu options to explore the minting, credential registration, and login process for the Universal Access NFT framework.
 
+Finally we can start up the client application. Create a new terminal instance in this same `universal-access-nft` directory. You could detach the terminal and place it side-by-side with the server terminal if you want to soak in all the play-by-play action at once.
+
+Navigate the menu options to explore the minting, credential registration, and login process for the Universal Access NFT framework.:
 
 # How this framework works:
 
