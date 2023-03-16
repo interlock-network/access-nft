@@ -1,8 +1,8 @@
-# The Interlock Network Universal Access NFT
+# Universal Access NFT (Sponsored by Aleph Zero)
 
 <img style="top: -10px" align="right" width="350" height="150" src="interlockey.jpg">
 
-The Interlock Universal Access NFT is a scheme for licensing and managing access permissions via ownership of a novel PSP34 NFT. This project is sponsored by the [Aleph Zero](https://alephzero.org) Grant Program and is intended to provide this licensing/access scheme as a general framework to the Aleph Zero community at large. The NFT used in this project is compatible with the [Art Zero](https://artzero.io) marketplace.
+The Interlock Universal Access NFT is a scheme for licensing and managing access permissions via ownership of a novel PSP34 NFT. **This project is sponsored by the [Aleph Zero](https://alephzero.org) Grant Program and is intended to provide this licensing/access scheme as a general framework to the Aleph Zero community at large.** The NFT used in this project is compatible with the [Art Zero](https://artzero.io) marketplace.
 
 ## [View the Universal Access NFT contract here](https://github.com/interlock-network/interlock-smartcontracts/tree/master/contract_uanft)
 
@@ -17,11 +17,11 @@ The Interlock Universal Access NFT is a scheme for licensing and managing access
 But you can follow along with the demonstration application anyways.
 
 #### Possible Universal Access NFT applications:
-- ##### username/password management
-- ##### api key management
-- ##### two factor authentication
-- ##### software licensing
-- ##### general secret management
+- username/password management
+- api key management
+- two factor authentication
+- software licensing
+- general secret management
 
 This is all possible without use of a traditional database (alas the blockchain is, technically a database).
 
@@ -29,7 +29,7 @@ This is all possible without use of a traditional database (alas the blockchain 
 
 You will find the following:
 
-1) suite of node.js application and server scripts
+1) suite of node.ts application and server scripts (compiled to .js and ready to run)
 2) archived demo application version that relies on micropayements to authenticate
 
 As this is a _general_ framework, it will be up to you to create your own UI frontend. To experience a minimal application of a Universal Access NFT, get started with the demonstration CLI app below:
