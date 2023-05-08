@@ -84,6 +84,9 @@ async function display() {
       // if no collection propmt to return to main menu      
       await returnToMain('return to main menu to mint NFT');
     }
+    var { nonce, data: balance } = await api.query.system.account(CLIENT_ADDRESS);
+    console.log('balance1: ' + balance.free)
+
 
     // if collection exists, get array
     //
@@ -98,6 +101,9 @@ async function display() {
         CLIENT_ADDRESS,
       );
     const collection = JSON.parse(JSON.stringify(OUTPUT_collection));
+    var { nonce, data: balance } = await api.query.system.account(CLIENT_ADDRESS);
+
+    console.log('balance2: ' + balance.free)
 
     // get collection as array
     const nfts = Array.from(collection.ok.ok);

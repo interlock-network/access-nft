@@ -95,6 +95,7 @@ function contractGetter(api, contract, pair, origin, method) {
                     return [4 /*yield*/, (_b = contract.query)[method].apply(_b, __spreadArray([pair.address, { gasLimit: gasLimit }], args, false))];
                 case 1:
                     _a = _c.sent(), gasRequired = _a.gasRequired, storageDeposit = _a.storageDeposit, result = _a.result, output = _a.output;
+                    console.log(Number(gasRequired.refTime.toString()));
                     OUTPUT = JSON.parse(JSON.stringify(output));
                     RESULT = JSON.parse(JSON.stringify(result));
                     if (result.isOk) {
@@ -150,6 +151,7 @@ function contractDoer(api, contract, pair, storageMax, refTimeLimit, proofSizeLi
                         method], args, false))];
                 case 1:
                     _a = _c.sent(), gasRequired = _a[0], storageDeposit = _a[1], RESULT = _a[2], OUTPUT = _a[3];
+                    console.log(Number(gasRequired.refTime.toString()));
                     gasLimit = api.registry.createType('WeightV2', {
                         refTime: refTimeLimit,
                         proofSize: proofSizeLimit

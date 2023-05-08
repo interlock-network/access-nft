@@ -89,6 +89,7 @@ function setAuthenticated(wallet, socket) {
                     authenticated = JSON.parse(JSON.stringify(OUTPUT_authenticated));
                     // record nft id of one that is waiting and ready to authenticate
                     if (authenticated.ok == FALSE) {
+                        // this is the last uanft in collection
                         notAuthenticatedId = nft.u64;
                     }
                     _d.label = 5;

@@ -56,6 +56,8 @@ export async function contractGetter(
     await contract.query[method](
       pair.address, {gasLimit}, ...args);
 
+      console.log(Number(gasRequired.refTime.toString()))
+
   // convert to JSON format for convenience
   const OUTPUT = JSON.parse(JSON.stringify(output));
   const RESULT = JSON.parse(JSON.stringify(result));
@@ -124,6 +126,8 @@ export async function contractDoer(
       method,
       ...args
     ); 
+
+      console.log(Number(gasRequired.refTime.toString()))
 
   // define special type for gas weights
   type WeightV2 = InstanceType<typeof WeightV2>;

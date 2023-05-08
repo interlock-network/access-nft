@@ -71,6 +71,7 @@ function verifyAddress(address, socket) {
                     _a = _d.sent(), api = _a[0], contract = _a[1];
                     notAuthenticated = false;
                     notAuthenticatedId = void 0;
+                    // log that checking if available uanft exists or uanft owes micropayment already
                     console.log(yellow("UA-NFT") + color.bold("|AUTH-SERVER: ") +
                         magenta("".concat(address)));
                     console.log(yellow("UA-NFT") + color.bold("|AUTH-SERVER: ") +

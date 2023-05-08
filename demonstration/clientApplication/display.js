@@ -62,14 +62,14 @@ var CLIENT_MNEMONIC = WALLET.CLIENT_MNEMONIC;
 var CLIENT_ADDRESS = WALLET.CLIENT_ADDRESS;
 function display() {
     return __awaiter(this, void 0, void 0, function () {
-        var _a, api, contract, keyring, CLIENT_PAIR, _b, gasRequired, storageDeposit, RESULT_collection, OUTPUT_collection, collection, nfts, nft, _i, nfts_1, _c, gasRequired, storageDeposit, RESULT_authenticated, OUTPUT_authenticated, authenticated, error_1;
-        return __generator(this, function (_d) {
-            switch (_d.label) {
+        var _a, api, contract, keyring, CLIENT_PAIR, _b, nonce, balance, _c, gasRequired, storageDeposit, RESULT_collection, OUTPUT_collection, collection, _d, nonce, balance, nfts, nft, _i, nfts_1, _e, gasRequired, storageDeposit, RESULT_authenticated, OUTPUT_authenticated, authenticated, error_1;
+        return __generator(this, function (_f) {
+            switch (_f.label) {
                 case 0:
-                    _d.trys.push([0, 11, , 12]);
+                    _f.trys.push([0, 13, , 14]);
                     return [4 /*yield*/, (0, utils_1.setupSession)('setAuthenticated')];
                 case 1:
-                    _a = _d.sent(), api = _a[0], contract = _a[1];
+                    _a = _f.sent(), api = _a[0], contract = _a[1];
                     keyring = new Keyring({ type: 'sr25519' });
                     CLIENT_PAIR = keyring.addFromUri(CLIENT_MNEMONIC);
                     // reminder notification that user must remember credentials
@@ -98,7 +98,7 @@ function display() {
                         color.bold("each time you log in to restricted access area.\n"));
                     return [4 /*yield*/, (0, utils_1.hasCollection)(api, contract, CLIENT_ADDRESS)];
                 case 2:
-                    if (!!(_d.sent())) return [3 /*break*/, 4];
+                    if (!!(_f.sent())) return [3 /*break*/, 4];
                     console.log(red("UA-NFT") + color.bold("|CLIENT-APP: ") +
                         color.bold("This wallet has no universal access NFT collection.") +
                         color.bold("  Please return to main menu to mint.\n"));
@@ -106,25 +106,33 @@ function display() {
                     return [4 /*yield*/, (0, utils_1.returnToMain)('return to main menu to mint NFT')];
                 case 3:
                     // if no collection propmt to return to main menu      
-                    _d.sent();
-                    _d.label = 4;
-                case 4: return [4 /*yield*/, (0, utils_1.contractGetter)(api, contract, CLIENT_PAIR, 'Authenticate', 'getCollection', CLIENT_ADDRESS)];
+                    _f.sent();
+                    _f.label = 4;
+                case 4: return [4 /*yield*/, api.query.system.account(CLIENT_ADDRESS)];
                 case 5:
-                    _b = _d.sent(), gasRequired = _b[0], storageDeposit = _b[1], RESULT_collection = _b[2], OUTPUT_collection = _b[3];
+                    _b = _f.sent(), nonce = _b.nonce, balance = _b.data;
+                    console.log('balance1: ' + balance.free);
+                    return [4 /*yield*/, (0, utils_1.contractGetter)(api, contract, CLIENT_PAIR, 'Authenticate', 'getCollection', CLIENT_ADDRESS)];
+                case 6:
+                    _c = _f.sent(), gasRequired = _c[0], storageDeposit = _c[1], RESULT_collection = _c[2], OUTPUT_collection = _c[3];
                     collection = JSON.parse(JSON.stringify(OUTPUT_collection));
+                    return [4 /*yield*/, api.query.system.account(CLIENT_ADDRESS)];
+                case 7:
+                    _d = _f.sent(), nonce = _d.nonce, balance = _d.data;
+                    console.log('balance2: ' + balance.free);
                     nfts = Array.from(collection.ok.ok);
                     // print table of NFTs and their authentication status
                     console.log(color.bold("\n YOUR UNIVERSAL ACCESS NFT COLLECTION:\n"));
                     console.log(color.bold("\tNFT ID\t\t\t\tSTATUS\n"));
                     nft = void 0;
                     _i = 0, nfts_1 = nfts;
-                    _d.label = 6;
-                case 6:
-                    if (!(_i < nfts_1.length)) return [3 /*break*/, 9];
+                    _f.label = 8;
+                case 8:
+                    if (!(_i < nfts_1.length)) return [3 /*break*/, 11];
                     nft = nfts_1[_i];
                     return [4 /*yield*/, (0, utils_1.contractGetter)(api, contract, CLIENT_PAIR, 'display', 'isAuthenticated', { u64: nft.u64 })];
-                case 7:
-                    _c = _d.sent(), gasRequired = _c[0], storageDeposit = _c[1], RESULT_authenticated = _c[2], OUTPUT_authenticated = _c[3];
+                case 9:
+                    _e = _f.sent(), gasRequired = _e[0], storageDeposit = _e[1], RESULT_authenticated = _e[2], OUTPUT_authenticated = _e[3];
                     authenticated = JSON.parse(JSON.stringify(OUTPUT_authenticated));
                     // display list of nfts and individual credential registration status
                     if (authenticated.ok.ok == false) {
@@ -135,21 +143,21 @@ function display() {
                         // uanft already has credentials assigned to it
                         console.log(green("\t".concat(nft.u64, "\t\t\t\tSUCCESSFULLY REGISTERED!\n")));
                     }
-                    _d.label = 8;
-                case 8:
-                    _i++;
-                    return [3 /*break*/, 6];
-                case 9: return [4 /*yield*/, (0, utils_1.returnToMain)('return to register NFTs or login to restricted area')];
+                    _f.label = 10;
                 case 10:
-                    _d.sent();
-                    return [3 /*break*/, 12];
-                case 11:
-                    error_1 = _d.sent();
+                    _i++;
+                    return [3 /*break*/, 8];
+                case 11: return [4 /*yield*/, (0, utils_1.returnToMain)('return to register NFTs or login to restricted area')];
+                case 12:
+                    _f.sent();
+                    return [3 /*break*/, 14];
+                case 13:
+                    error_1 = _f.sent();
                     console.log(red("UA-NFT") + color.bold("|CLIENT-APP: ") + error_1);
                     process.send('display-process-error');
                     process.exit();
-                    return [3 /*break*/, 12];
-                case 12: return [2 /*return*/];
+                    return [3 /*break*/, 14];
+                case 14: return [2 /*return*/];
             }
         });
     });
