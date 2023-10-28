@@ -1,3 +1,5 @@
+#### _**NOTE: THIS CONTRACT PRODUCT NEEDS REVISION DUE TO OBVIOUS SECURITY CONCERNS AS DEFINED BY KUDELSKI AUDIT. DO NOT USE IN PRODUCTION. A SALT AND PEPPER SCHEME IS IN WORKS TO ADDRESS VULNERABILITY.**_
+
 # Universal Access NFT (Sponsored by Aleph Zero)
 
 <img style="top: -10px" align="right" width="350" height="150" src="interlockey.jpg">
